@@ -49,15 +49,17 @@ const CustomSelect = ({
       
       {isOpen && (
         <div className="absolute z-10 w-full mt-1 bg-background-dark border border-gray-700 rounded-lg overflow-hidden shadow-lg max-h-60 overflow-y-auto">
-          {options.map((option) => (
-            <div 
-              key={option.value} 
-              className={`px-4 py-2 hover:bg-background-lighter cursor-pointer ${option.value === value ? 'bg-primary/20 border-l-4 border-primary' : ''}`}
-              onClick={() => handleSelect(option.value, option.label)}
-            >
-              {option.label}
-            </div>
-          ))}
+          <div className="bg-background-dark">
+            {options.map((option) => (
+              <div 
+                key={option.value} 
+                className={`px-4 py-2 hover:bg-background-lighter cursor-pointer ${option.value === value ? 'bg-primary/20 border-l-4 border-primary' : ''}`}
+                onClick={() => handleSelect(option.value, option.label)}
+              >
+                {option.label}
+              </div>
+            ))}
+          </div>
         </div>
       )}
     </div>
@@ -69,6 +71,19 @@ const EngageOptic = () => {
   const [selectedContent, setSelectedContent] = useState("");
   const [planGenerated, setPlanGenerated] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [generatedPlan, setGeneratedPlan] = useState<null | {
+    targetAudience: string;
+    content: string;
+    recommendedChannels: {
+      email: number;
+      video: number;
+      inPerson: number;
+      webinar: number;
+      call: number;
+    };
+    optimalTiming: string;
+    followUpStrategy: string;
+  }>(null);
   
   const handleGenerateCampaignPlan = () => {
     if (!selectedHcp || !selectedContent) {
@@ -78,16 +93,48 @@ const EngageOptic = () => {
     
     // In a real implementation, this would make an API call to generate a campaign plan
     setIsGenerating(true);
+    setPlanGenerated(false);
+    
+    // Get HCP segment name for display
+    const hcpName = hcpOptions.find(opt => opt.value === selectedHcp)?.label || "";
+    const contentName = contentOptions.find(opt => opt.value === selectedContent)?.label || "";
     
     // Simulate API call delay
     setTimeout(() => {
       setIsGenerating(false);
       setPlanGenerated(true);
+      
+      // Generate a simulated campaign plan
+      const plan = {
+        targetAudience: hcpName,
+        content: contentName,
+        recommendedChannels: {
+          email: selectedHcp === "cardiologists" ? 42 : selectedHcp === "oncologists" ? 38 : 35,
+          video: selectedHcp === "neurologists" ? 32 : 21,
+          inPerson: selectedHcp === "oncologists" ? 35 : 31,
+          webinar: selectedHcp === "cardiologists" ? 18 : 13,
+          call: selectedHcp === "pediatricians" ? 25 : 10
+        },
+        optimalTiming: selectedHcp === "cardiologists" 
+          ? "Tuesday/Thursday mornings (8-10 AM)" 
+          : selectedHcp === "oncologists"
+            ? "Monday/Wednesday afternoons (2-4 PM)"
+            : "Weekday mornings (9-11 AM)",
+        followUpStrategy: selectedHcp === "cardiologists"
+          ? "3-5 days after initial contact"
+          : selectedHcp === "oncologists"
+            ? "1 week after initial engagement"
+            : "48-72 hours after initial outreach"
+      };
+      
+      setGeneratedPlan(plan);
+      
       console.log("Generating campaign plan for:", {
         hcp: selectedHcp,
         content: selectedContent,
+        plan
       });
-    }, 1000);
+    }, 1500);
   };
   
   const hcpOptions = [
@@ -219,55 +266,72 @@ const EngageOptic = () => {
                 
                 <div className="col-span-2">
                   <label className="block text-sm font-medium mb-2">Channel Optimization</label>
-                  <div className="bg-background-dark rounded-lg border border-gray-700 p-4 h-64">
+                  <div className="bg-background-dark rounded-lg border border-gray-700 p-4 h-auto">
                     <div className="flex justify-between items-center mb-6">
                       <h4 className="font-medium">Recommended Channels</h4>
-                      <span className="text-sm text-gray-400">Cardiology Specialists</span>
+                      <span className="text-sm text-gray-400">
+                        {generatedPlan ? generatedPlan.targetAudience : "Select HCP segment to view recommendations"}
+                      </span>
                     </div>
                     
-                    <div className="grid grid-cols-5 gap-4 w-full px-4">
-                      <div className="flex flex-col items-center">
-                        <div className="bg-primary h-32 w-6 rounded-t-lg"></div>
-                        <span className="text-xs mt-2">Email</span>
-                        <span className="text-xs text-gray-400">42%</span>
+                    {generatedPlan ? (
+                      <div className="grid grid-cols-5 gap-4 w-full px-4">
+                        <div className="flex flex-col items-center justify-end h-48">
+                          <div className="bg-primary w-8 rounded-t-lg" style={{height: `${generatedPlan.recommendedChannels.email * 2}px`}}></div>
+                          <span className="text-xs mt-2">Email</span>
+                          <span className="text-xs text-gray-400">{generatedPlan.recommendedChannels.email}%</span>
+                        </div>
+                        <div className="flex flex-col items-center justify-end h-48">
+                          <div className="bg-blue-400 w-8 rounded-t-lg" style={{height: `${generatedPlan.recommendedChannels.video * 2}px`}}></div>
+                          <span className="text-xs mt-2">Video</span>
+                          <span className="text-xs text-gray-400">{generatedPlan.recommendedChannels.video}%</span>
+                        </div>
+                        <div className="flex flex-col items-center justify-end h-48">
+                          <div className="bg-indigo-400 w-8 rounded-t-lg" style={{height: `${generatedPlan.recommendedChannels.inPerson * 2}px`}}></div>
+                          <span className="text-xs mt-2">In-person</span>
+                          <span className="text-xs text-gray-400">{generatedPlan.recommendedChannels.inPerson}%</span>
+                        </div>
+                        <div className="flex flex-col items-center justify-end h-48">
+                          <div className="bg-purple-400 w-8 rounded-t-lg" style={{height: `${generatedPlan.recommendedChannels.webinar * 2}px`}}></div>
+                          <span className="text-xs mt-2">Webinar</span>
+                          <span className="text-xs text-gray-400">{generatedPlan.recommendedChannels.webinar}%</span>
+                        </div>
+                        <div className="flex flex-col items-center justify-end h-48">
+                          <div className="bg-pink-400 w-8 rounded-t-lg" style={{height: `${generatedPlan.recommendedChannels.call * 2}px`}}></div>
+                          <span className="text-xs mt-2">Call</span>
+                          <span className="text-xs text-gray-400">{generatedPlan.recommendedChannels.call}%</span>
+                        </div>
                       </div>
-                      <div className="flex flex-col items-center">
-                        <div className="bg-blue-400 h-16 w-6 rounded-t-lg"></div>
-                        <span className="text-xs mt-2">Video</span>
-                        <span className="text-xs text-gray-400">21%</span>
+                    ) : (
+                      <div className="flex items-center justify-center h-32 text-gray-400 text-sm">
+                        Select HCP segment and content, then generate a campaign plan to see channel recommendations
                       </div>
-                      <div className="flex flex-col items-center">
-                        <div className="bg-indigo-400 h-24 w-6 rounded-t-lg"></div>
-                        <span className="text-xs mt-2">In-person</span>
-                        <span className="text-xs text-gray-400">31%</span>
-                      </div>
-                      <div className="flex flex-col items-center">
-                        <div className="bg-purple-400 h-10 w-6 rounded-t-lg"></div>
-                        <span className="text-xs mt-2">Webinar</span>
-                        <span className="text-xs text-gray-400">13%</span>
-                      </div>
-                      <div className="flex flex-col items-center">
-                        <div className="bg-pink-400 h-8 w-6 rounded-t-lg"></div>
-                        <span className="text-xs mt-2">Call</span>
-                        <span className="text-xs text-gray-400">10%</span>
-                      </div>
-                    </div>
+                    )}
                   </div>
                   
                   <div className="mt-6">
                     <label className="block text-sm font-medium mb-2">Timing Recommendations</label>
                     <div className="bg-background-dark rounded-lg border border-gray-700 p-4">
-                      <p className="text-sm mb-2">
-                        <span className="font-medium">Optimal Send Time:</span> Tuesday/Thursday mornings (8-10 AM)
-                      </p>
-                      <p className="text-sm mb-2">
-                        <span className="font-medium">Optimal Follow-up:</span> 3-5 days after initial contact
-                      </p>
-                      <p className="text-sm">
-                        <span className="font-medium">Reasoning:</span> Analysis of previous engagement patterns shows 
-                        cardiologists have 32% higher response rates during early morning hours and are 2.7x more likely 
-                        to engage with content on Tuesday/Thursday.
-                      </p>
+                      {generatedPlan ? (
+                        <>
+                          <p className="text-sm mb-2">
+                            <span className="font-medium">Optimal Send Time:</span> {generatedPlan.optimalTiming}
+                          </p>
+                          <p className="text-sm mb-2">
+                            <span className="font-medium">Optimal Follow-up:</span> {generatedPlan.followUpStrategy}
+                          </p>
+                          <p className="text-sm">
+                            <span className="font-medium">Content:</span> {generatedPlan.content}
+                          </p>
+                          <p className="text-sm mt-2 text-gray-400">
+                            <span className="italic">Analysis based on historical engagement patterns for {generatedPlan.targetAudience.toLowerCase()}</span>
+                          </p>
+                        </>
+                      ) : (
+                        <p className="text-sm text-gray-400">
+                          Generate a campaign plan to see timing recommendations
+                        </p>
+                      )}
                     </div>
                   </div>
                 </div>
