@@ -13,9 +13,20 @@ export async function generatePersonalizedContent(
   },
   contentType: string,
   productInfo: string,
-): Promise<string> {
+  keyMessage?: string
+): Promise<{
+  subject: string;
+  content: string;
+  compliance: {
+    medical: { status: string; notes: string };
+    legal: { status: string; notes: string };
+    regulatory: { status: string; notes: string };
+  };
+  complianceNotes: { type: 'warning' | 'success'; text: string }[];
+  hcp?: string;
+}> {
   try {
-    const prompt = `
+    let prompt = `
     Generate personalized ${contentType} content for a healthcare professional with the following profile:
     - Name: ${hcpData.name}
     - Specialty: ${hcpData.specialty}
@@ -25,18 +36,69 @@ export async function generatePersonalizedContent(
     
     The content should be about the following product:
     ${productInfo}
-    
+    `;
+
+    // Add key message to the prompt if provided
+    if (keyMessage && keyMessage.trim()) {
+      prompt += `
+    The following key message must be naturally incorporated into the content:
+    "${keyMessage}"
+      `;
+    }
+
+    prompt += `
     Make the content professional, compliant with pharmaceutical regulations, and personalized based on the HCP's profile.
     Focus especially on aspects relevant to their specialty and prescribing pattern.
+    
+    Output should be in JSON format with the following structure:
+    {
+      "subject": "Email subject or brief title",
+      "content": "The full content body",
+      "compliance": {
+        "medical": {
+          "status": "approved/warning/rejected",
+          "notes": "Notes about medical compliance"
+        },
+        "legal": {
+          "status": "approved/warning/rejected",
+          "notes": "Notes about legal compliance"
+        },
+        "regulatory": {
+          "status": "approved/warning/rejected",
+          "notes": "Notes about regulatory compliance"
+        }
+      },
+      "complianceNotes": [
+        {
+          "type": "success/warning",
+          "text": "Compliance note text"
+        }
+      ]
+    }
     `;
 
     const response = await openai.chat.completions.create({
       model: "gpt-4o",
       messages: [{ role: "user", content: prompt }],
-      max_tokens: 1000,
+      response_format: { type: "json_object" },
+      max_tokens: 1500,
     });
 
-    return response.choices[0].message.content || "Unable to generate content.";
+    const result = JSON.parse(response.choices[0].message.content || "{}");
+    
+    return {
+      subject: result.subject || `${productInfo} Information for ${hcpData.name}`,
+      content: result.content || "Unable to generate content.",
+      compliance: {
+        medical: result.compliance?.medical || { status: "warning", notes: "Not evaluated" },
+        legal: result.compliance?.legal || { status: "warning", notes: "Not evaluated" },
+        regulatory: result.compliance?.regulatory || { status: "warning", notes: "Not evaluated" },
+      },
+      complianceNotes: result.complianceNotes || [
+        { type: "success", text: "Content generated using approved language" },
+        { type: "warning", text: "Please review content for regulatory compliance" }
+      ]
+    };
   } catch (error) {
     console.error("Error generating content with OpenAI:", error);
     throw new Error("Failed to generate content. Please try again later.");

@@ -44,53 +44,35 @@ const ContentCraft = () => {
     setLoading(true);
     
     try {
-      // For demo purposes, we'll create mock content without making API calls
-      // This ensures it works even if the API is not fully connected
-      
-      // Create mock response that simulates the AI-generated content
-      const mockResponse: GeneratedContent = {
-        subject: `${productFocus} Information for ${selectedHcp}`,
-        content: `Dear ${selectedHcp},\n\nI hope this ${contentType.toLowerCase()} finds you well. Given your expertise and approach to patient care, I wanted to share some important information about ${productFocus}.\n\n${keyMessage ? `As you mentioned in our previous conversations: "${keyMessage}"\n\n` : ''}Our latest clinical trials have shown remarkable efficacy in treating patients with similar profiles to those in your practice. The data indicates a 27% improvement in outcomes compared to standard treatments.\n\nKey benefits include:\n- Reduced side effects profile\n- Once-daily dosing improving compliance\n- Compatible with most common co-medications\n- Available in multiple formulations\n\nI would welcome an opportunity to discuss these findings in more detail. Would you be available for a brief conversation next week?\n\nBest regards,\nJohn Doe\nMedical Science Liaison`,
-        hcp: selectedHcp,
-        compliance: {
-          medical: { 
-            status: "approved", 
-            notes: "All claims supported by clinical data" 
-          },
-          legal: { 
-            status: "approved", 
-            notes: "Legal review completed" 
-          },
-          regulatory: { 
-            status: "warning", 
-            notes: "Include full safety information in final version" 
-          }
-        },
-        complianceNotes: [
-          { type: "success", text: "Claims about efficacy are supported by clinical data" },
-          { type: "success", text: "Safety information is accurately represented" },
-          { type: "warning", text: "Recommend including specific contraindication statement in final version" }
-        ]
+      // Get the HCP ID from the name - in a real app, we'd have the IDs available in the dropdown
+      const hcpIdMap: { [key: string]: string } = {
+        "Dr. Sarah Chen": "1",
+        "Dr. James Wilson": "2",
+        "Dr. Maria Rodriguez": "3",
+        "Dr. Robert Johnson": "4", 
+        "Dr. Emily Chang": "5"
       };
       
-      // In a production environment, we would use the API call below:
-      /*
+      const hcpId = hcpIdMap[selectedHcp] || "1";
+      
+      // Make the API call to generate content
       const response = await apiRequest(
         "POST", 
         "/api/content/generate", 
         {
-          hcpId: "1", // For demo purposes we'd use a fixed ID
+          hcpId,
           contentType,
           productInfo: productFocus,
-          keyMessage
+          keyMessage: keyMessage.trim() ? keyMessage : undefined
         }
       );
       
-      const data = await response.json();
-      */
+      if (!response.ok) {
+        throw new Error("Failed to generate content");
+      }
       
-      // Use our mock data for now to ensure it works
-      setGeneratedContent(mockResponse);
+      const data = await response.json();
+      setGeneratedContent(data);
       
       toast({
         title: "Content generated",

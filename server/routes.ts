@@ -229,8 +229,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Generate personalized content using OpenAI
-      const productDescription = `${productInfo} ${keyMessage || ""}`.trim();
-      const content = await generatePersonalizedContent(
+      const generatedContent = await generatePersonalizedContent(
         {
           name: hcp.name || "",
           specialty: hcp.specialty || "",
@@ -239,31 +238,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
           tag: hcp.tag || ""
         },
         contentType,
-        productDescription
+        productInfo,
+        keyMessage
       );
       
-      // Analyze compliance
-      const complianceResult = await analyzeMedicalCompliance(content);
-      
-      const generatedContent = {
-        subject: `${productInfo} Information for ${hcp.name}`,
-        content,
-        compliance: {
-          medical: { 
-            status: complianceResult.isCompliant ? "approved" : "warning", 
-            notes: complianceResult.isCompliant ? "All claims supported by clinical data" : complianceResult.issues.join("; ")
-          },
-          legal: { 
-            status: complianceResult.isCompliant ? "approved" : "review", 
-            notes: "Legal review recommended" 
-          },
-          regulatory: { 
-            status: "warning", 
-            notes: complianceResult.suggestions.join("; ") || "Include full safety information in final version" 
-          }
-        },
-        hcp: hcp.name
-      };
+      // Add HCP name to the response
+      generatedContent.hcp = hcp.name;
 
       res.json(generatedContent);
     } catch (error) {
