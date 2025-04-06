@@ -26,7 +26,7 @@ const NavItem = ({
       onClick();
     }
     
-    // Navigate to the new location directly
+    // Navigate to the path
     setLocation(path);
   };
 

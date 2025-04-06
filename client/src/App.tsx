@@ -17,7 +17,7 @@ import Sidebar from "./components/sidebar";
 import { useEffect } from "react";
 
 function AppRoutes() {
-  const { isLoggedIn, isMobileMenuOpen, closeMobileMenu, toggleMobileMenu } = useAppContext();
+  const { isLoggedIn, isMobileMenuOpen, closeMobileMenu } = useAppContext();
   
   // Close mobile menu on navigation
   useEffect(() => {
@@ -73,7 +73,7 @@ function AppRoutes() {
           <Route path="/asset-management" component={AssetManagement} />
           <Route path="/admin" component={AdminConnectionsPage} />
           <Route path="/slack-integration" component={SlackIntegrationPage} />
-          <Route path="*" component={NotFound} />
+          <Route path="/:anything*" component={NotFound} />
         </Switch>
       </div>
     </div>
