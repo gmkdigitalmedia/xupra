@@ -59,12 +59,44 @@ export const hcps = pgTable("hcps", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
   specialty: text("specialty").notNull(),
+  subSpecialty: text("sub_specialty"),
   prescribingPattern: text("prescribing_pattern"),
   engagementScore: integer("engagement_score"),
   tag: text("tag"),
   email: text("email"),
   organization: text("organization"),
   notes: text("notes"),
+  
+  // Geographic Data
+  location: text("location"), // City, state, or specific region
+  region: text("region"), // Broader region (e.g., Northeast, Southwest)
+  urbanRural: text("urban_rural"), // Urban, Suburban, Rural classification
+  
+  // Affiliation Data
+  hospitalAffiliation: text("hospital_affiliation"), // Primary hospital affiliation
+  academicAffiliation: text("academic_affiliation"), // Academic institution affiliations
+  professionalAssociations: text("professional_associations").array(), // Professional association memberships
+  
+  // Influence Data
+  influenceScore: integer("influence_score"), // Score measuring overall influence
+  isKol: boolean("is_kol").default(false), // Key Opinion Leader flag
+  publicationCount: integer("publication_count"), // Number of research publications
+  speakingEngagements: integer("speaking_engagements"), // Number of speaking events per year
+  
+  // Patient Demographics
+  patientAgeGroup: text("patient_age_group").array(), // Age groups of patients (pediatric, adult, geriatric)
+  patientConditions: text("patient_conditions").array(), // Common conditions treated
+  patientInsuranceTypes: text("patient_insurance_types").array(), // Types of insurance accepted
+  
+  // Engagement Preferences
+  preferredContactMethod: text("preferred_contact_method"), // Email, phone, in-person, etc.
+  preferredContactTime: text("preferred_contact_time"), // Morning, afternoon, etc.
+  digitalEngagementLevel: text("digital_engagement_level"), // High, medium, low
+  
+  // Compliance
+  hasOptOut: boolean("has_opt_out").default(false), // Whether the HCP has opted out of communications
+  privacyRestrictions: jsonb("privacy_restrictions"), // Specific privacy restrictions
+  
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -72,12 +104,43 @@ export const hcps = pgTable("hcps", {
 export const insertHcpSchema = createInsertSchema(hcps).pick({
   name: true,
   specialty: true,
+  subSpecialty: true,
   prescribingPattern: true,
   engagementScore: true,
   tag: true,
   email: true,
   organization: true,
   notes: true,
+  
+  // Geographic Data
+  location: true,
+  region: true, 
+  urbanRural: true,
+  
+  // Affiliation Data
+  hospitalAffiliation: true,
+  academicAffiliation: true,
+  professionalAssociations: true,
+  
+  // Influence Data
+  influenceScore: true,
+  isKol: true,
+  publicationCount: true,
+  speakingEngagements: true,
+  
+  // Patient Demographics
+  patientAgeGroup: true,
+  patientConditions: true,
+  patientInsuranceTypes: true,
+  
+  // Engagement Preferences
+  preferredContactMethod: true,
+  preferredContactTime: true,
+  digitalEngagementLevel: true,
+  
+  // Compliance
+  hasOptOut: true,
+  privacyRestrictions: true,
 });
 
 // Content schema

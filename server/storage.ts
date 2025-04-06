@@ -168,52 +168,207 @@ export class MemStorage implements IStorage {
       {
         name: "Dr. Sarah Chen",
         specialty: "Cardiology",
+        subSpecialty: "Interventional Cardiology",
         prescribingPattern: "High Volume",
         engagementScore: 87,
         tag: "Early Adopter",
         email: "sarah.chen@example.com",
         organization: "Metropolis Medical Center",
-        notes: "Interested in new cardiovascular treatments"
+        notes: "Interested in new cardiovascular treatments",
+        
+        // Geographic Data
+        location: "Boston, MA",
+        region: "Northeast",
+        urbanRural: "Urban",
+        
+        // Affiliation Data
+        hospitalAffiliation: "Massachusetts General Hospital",
+        academicAffiliation: "Harvard Medical School",
+        professionalAssociations: ["American College of Cardiology", "American Heart Association"],
+        
+        // Influence Data
+        influenceScore: 92,
+        isKol: true,
+        publicationCount: 47,
+        speakingEngagements: 12,
+        
+        // Patient Demographics
+        patientAgeGroup: ["Adult", "Geriatric"],
+        patientConditions: ["Coronary Artery Disease", "Hypertension", "Heart Failure"],
+        patientInsuranceTypes: ["Medicare", "Private Insurance", "Medicaid"],
+        
+        // Engagement Preferences
+        preferredContactMethod: "Email",
+        preferredContactTime: "Morning",
+        digitalEngagementLevel: "High",
+        
+        // Compliance
+        hasOptOut: false,
+        privacyRestrictions: { dataSharing: false, marketingRestrictions: false }
       },
       {
         name: "Dr. James Wilson",
         specialty: "Oncology",
+        subSpecialty: "Hematology-Oncology",
         prescribingPattern: "Medium Volume",
         engagementScore: 76,
         tag: "Evidence Driven",
         email: "james.wilson@example.com",
         organization: "City Cancer Institute",
-        notes: "Requires strong clinical data before adoption"
+        notes: "Requires strong clinical data before adoption",
+        
+        // Geographic Data
+        location: "Chicago, IL",
+        region: "Midwest",
+        urbanRural: "Urban",
+        
+        // Affiliation Data
+        hospitalAffiliation: "Northwestern Memorial Hospital",
+        academicAffiliation: "Northwestern University",
+        professionalAssociations: ["American Society of Clinical Oncology", "American Society of Hematology"],
+        
+        // Influence Data
+        influenceScore: 85,
+        isKol: true,
+        publicationCount: 32,
+        speakingEngagements: 8,
+        
+        // Patient Demographics
+        patientAgeGroup: ["Adult", "Geriatric"],
+        patientConditions: ["Breast Cancer", "Lung Cancer", "Leukemia"],
+        patientInsuranceTypes: ["Medicare", "Private Insurance"],
+        
+        // Engagement Preferences
+        preferredContactMethod: "In-person",
+        preferredContactTime: "Afternoon",
+        digitalEngagementLevel: "Medium",
+        
+        // Compliance
+        hasOptOut: false,
+        privacyRestrictions: { dataSharing: true, marketingRestrictions: false }
       },
       {
         name: "Dr. Maria Rodriguez",
         specialty: "Neurology",
+        subSpecialty: "Movement Disorders",
         prescribingPattern: "Low Volume",
         engagementScore: 62,
         tag: "Patient Focused",
         email: "maria.rodriguez@example.com",
         organization: "Westside Neuro Center",
-        notes: "Emphasizes patient quality of life in treatment decisions"
+        notes: "Emphasizes patient quality of life in treatment decisions",
+        
+        // Geographic Data
+        location: "Miami, FL",
+        region: "Southeast",
+        urbanRural: "Urban",
+        
+        // Affiliation Data
+        hospitalAffiliation: "Jackson Memorial Hospital",
+        academicAffiliation: "University of Miami",
+        professionalAssociations: ["American Academy of Neurology"],
+        
+        // Influence Data
+        influenceScore: 65,
+        isKol: false,
+        publicationCount: 12,
+        speakingEngagements: 3,
+        
+        // Patient Demographics
+        patientAgeGroup: ["Adult", "Geriatric"],
+        patientConditions: ["Parkinson's Disease", "Essential Tremor", "Dystonia"],
+        patientInsuranceTypes: ["Medicare", "Medicaid", "Private Insurance"],
+        
+        // Engagement Preferences
+        preferredContactMethod: "Phone",
+        preferredContactTime: "Morning",
+        digitalEngagementLevel: "Low",
+        
+        // Compliance
+        hasOptOut: false,
+        privacyRestrictions: { dataSharing: false, marketingRestrictions: false }
       },
       {
         name: "Dr. Robert Johnson",
         specialty: "General Practice",
+        subSpecialty: "Family Medicine",
         prescribingPattern: "High Volume",
         engagementScore: 81,
         tag: "Balanced",
         email: "robert.johnson@example.com",
         organization: "Community Family Practice",
-        notes: "Considers multiple factors in prescribing decisions"
+        notes: "Considers multiple factors in prescribing decisions",
+        
+        // Geographic Data
+        location: "Denver, CO",
+        region: "West",
+        urbanRural: "Suburban",
+        
+        // Affiliation Data
+        hospitalAffiliation: "Denver Health Medical Center",
+        academicAffiliation: "",
+        professionalAssociations: ["American Academy of Family Physicians"],
+        
+        // Influence Data
+        influenceScore: 58,
+        isKol: false,
+        publicationCount: 5,
+        speakingEngagements: 2,
+        
+        // Patient Demographics
+        patientAgeGroup: ["Pediatric", "Adult", "Geriatric"],
+        patientConditions: ["Hypertension", "Diabetes", "Asthma", "Common Cold"],
+        patientInsuranceTypes: ["Medicare", "Medicaid", "Private Insurance"],
+        
+        // Engagement Preferences
+        preferredContactMethod: "Email",
+        preferredContactTime: "Afternoon",
+        digitalEngagementLevel: "Medium",
+        
+        // Compliance
+        hasOptOut: false,
+        privacyRestrictions: { dataSharing: false, marketingRestrictions: true }
       },
       {
         name: "Dr. Emily Chang",
         specialty: "Pediatrics",
+        subSpecialty: "Pediatric Pulmonology",
         prescribingPattern: "Medium Volume",
         engagementScore: 74,
         tag: "Patient Focused",
         email: "emily.chang@example.com",
         organization: "Children's Medical Group",
-        notes: "Focused on minimizing side effects in pediatric patients"
+        notes: "Focused on minimizing side effects in pediatric patients",
+        
+        // Geographic Data
+        location: "Seattle, WA",
+        region: "Northwest",
+        urbanRural: "Urban",
+        
+        // Affiliation Data
+        hospitalAffiliation: "Seattle Children's Hospital",
+        academicAffiliation: "University of Washington",
+        professionalAssociations: ["American Academy of Pediatrics", "American Thoracic Society"],
+        
+        // Influence Data
+        influenceScore: 76,
+        isKol: false,
+        publicationCount: 18,
+        speakingEngagements: 4,
+        
+        // Patient Demographics
+        patientAgeGroup: ["Pediatric"],
+        patientConditions: ["Asthma", "Cystic Fibrosis", "Bronchopulmonary Dysplasia"],
+        patientInsuranceTypes: ["Private Insurance", "Medicaid", "CHIP"],
+        
+        // Engagement Preferences
+        preferredContactMethod: "Virtual Meeting",
+        preferredContactTime: "Late Afternoon",
+        digitalEngagementLevel: "High",
+        
+        // Compliance
+        hasOptOut: false,
+        privacyRestrictions: { dataSharing: true, marketingRestrictions: false }
       }
     ];
     
