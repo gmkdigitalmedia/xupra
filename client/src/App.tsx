@@ -37,8 +37,8 @@ function AppRoutes() {
     <div className="flex flex-col md:flex-row min-h-screen bg-background">
       {/* Mobile menu overlay */}
       {isMobileMenuOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-20 md:hidden">
-          <div className="w-4/5 max-w-xs h-full">
+        <div className="fixed inset-0 bg-black bg-opacity-70 z-20 md:hidden">
+          <div className="w-4/5 max-w-xs h-full bg-background">
             <Sidebar closeMobileMenu={closeMobileMenu} />
           </div>
         </div>
