@@ -2,21 +2,80 @@ import { useState } from "react";
 import Sidebar from "@/components/sidebar";
 import DashboardHeader from "@/components/dashboard-header";
 import ComplianceBadge from "@/components/compliance-badge";
+import { apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
+
+interface ComplianceNote {
+  type: 'warning' | 'success';
+  text: string;
+}
+
+interface GeneratedContent {
+  subject?: string;
+  content: string;
+  hcp: string;
+  compliance: {
+    medical: { status: string; notes: string };
+    legal: { status: string; notes: string };
+    regulatory: { status: string; notes: string };
+  };
+  complianceNotes?: ComplianceNote[];
+}
 
 const ContentCraft = () => {
   const [selectedHcp, setSelectedHcp] = useState("");
   const [contentType, setContentType] = useState("");
   const [productFocus, setProductFocus] = useState("");
   const [keyMessage, setKeyMessage] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [generatedContent, setGeneratedContent] = useState<GeneratedContent | null>(null);
+  const { toast } = useToast();
   
-  const handleGenerateContent = () => {
-    // In a real implementation, this would make an API call to generate content
-    console.log("Generating content for:", {
-      hcp: selectedHcp,
-      contentType,
-      productFocus,
-      keyMessage
-    });
+  const handleGenerateContent = async () => {
+    if (!selectedHcp || !contentType || !productFocus) {
+      toast({
+        title: "Missing information",
+        description: "Please select an HCP, content type, and product focus.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    setLoading(true);
+    
+    try {
+      // Get HCP ID from the value string (we're using the index as the ID)
+      // In a real app, this would be the actual HCP ID
+      const hcpId = "1"; // For demo purposes we'll use a fixed ID
+      
+      const response = await apiRequest(
+        "POST", 
+        "/api/content/generate", 
+        {
+          hcpId,
+          contentType,
+          productInfo: productFocus,
+          keyMessage
+        }
+      );
+      
+      const data = await response.json();
+      setGeneratedContent(data);
+      
+      toast({
+        title: "Content generated",
+        description: "AI-powered content has been created successfully",
+      });
+    } catch (error) {
+      console.error("Error generating content:", error);
+      toast({
+        title: "Generation failed",
+        description: "There was an error generating the content. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const savedContent = [
@@ -132,66 +191,107 @@ const ContentCraft = () => {
                 <div className="col-span-2">
                   <label className="block text-sm font-medium mb-2">Generated Content Preview</label>
                   <div className="bg-background-dark rounded-lg border border-gray-700 p-4 h-[28rem] overflow-y-auto">
-                    <div className="flex justify-between mb-4">
-                      <h4 className="font-medium">Email for Dr. Sarah Chen</h4>
-                      <div className="flex space-x-2">
-                        <ComplianceBadge status="approved" label="Medical" />
-                        <ComplianceBadge status="approved" label="Legal" />
-                        <ComplianceBadge status="warning" label="Regulatory" />
+                    {loading ? (
+                      <div className="flex items-center justify-center h-full">
+                        <div className="flex flex-col items-center">
+                          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary mb-4"></div>
+                          <p>Generating personalized content...</p>
+                        </div>
                       </div>
-                    </div>
-                    
-                    <div className="mb-3">
-                      <p className="text-sm text-gray-400 mb-1">Subject:</p>
-                      <p>New Clinical Data: CardioX Shows Promising Results in Reducing CVD Risk</p>
-                    </div>
-                    
-                    <div>
-                      <p className="text-sm text-gray-400 mb-1">Body:</p>
-                      <div className="prose prose-sm text-white max-w-none">
-                        <p>Dear Dr. Chen,</p>
-                        <p>I hope this email finds you well. Given your pioneering approach to cardiovascular treatments, I wanted to share some recent clinical findings regarding CardioX that align with your evidence-based practice.</p>
-                        <p>Our latest phase III trial (CARDIO-PREVENT) demonstrated a 27% reduction in major adverse cardiovascular events (MACE) in high-risk patients, with a safety profile consistent with previous studies. Notably, the results showed particular efficacy in patients with comorbid hypertension and hyperlipidemia – a patient group I know comprises a significant portion of your practice.</p>
-                        <p>Key findings include:</p>
-                        <ul className="list-disc pl-5 space-y-1">
-                          <li>27% reduction in MACE compared to standard of care</li>
-                          <li>Significant improvements in secondary endpoints including blood pressure control</li>
-                          <li>Minimal drug-drug interactions with common co-medications</li>
-                          <li>Favorable safety profile with minimal need for dosage adjustments</li>
-                        </ul>
-                        <p>As someone who has been an early adopter of innovative cardiovascular therapies, I'd welcome the opportunity to discuss these findings in more detail. Would you be available for a brief 15-minute call next week?</p>
-                        <p>I've attached the summary of clinical data for your review.</p>
-                        <p>Best regards,<br/>John Doe<br/>Medical Science Liaison</p>
+                    ) : generatedContent ? (
+                      <>
+                        <div className="flex justify-between mb-4">
+                          <h4 className="font-medium">{contentType} for {selectedHcp}</h4>
+                          <div className="flex space-x-2">
+                            <ComplianceBadge 
+                              status={(generatedContent.compliance?.medical?.status === "approved" ? "approved" : 
+                                     generatedContent.compliance?.medical?.status === "warning" ? "warning" : 
+                                     "rejected") as "approved" | "warning" | "rejected"} 
+                              label="Medical" 
+                            />
+                            <ComplianceBadge 
+                              status={(generatedContent.compliance?.legal?.status === "approved" ? "approved" : 
+                                     generatedContent.compliance?.legal?.status === "warning" ? "warning" : 
+                                     "rejected") as "approved" | "warning" | "rejected"} 
+                              label="Legal" 
+                            />
+                            <ComplianceBadge 
+                              status={(generatedContent.compliance?.regulatory?.status === "approved" ? "approved" : 
+                                     generatedContent.compliance?.regulatory?.status === "warning" ? "warning" : 
+                                     "rejected") as "approved" | "warning" | "rejected"} 
+                              label="Regulatory" 
+                            />
+                          </div>
+                        </div>
+                        
+                        {generatedContent.subject && (
+                          <div className="mb-3">
+                            <p className="text-sm text-gray-400 mb-1">Subject:</p>
+                            <p>{generatedContent.subject}</p>
+                          </div>
+                        )}
+                        
+                        <div>
+                          <p className="text-sm text-gray-400 mb-1">Body:</p>
+                          <div className="prose prose-sm text-white max-w-none">
+                            <div dangerouslySetInnerHTML={{ __html: generatedContent.content?.replace(/\n/g, '<br>') || '' }}></div>
+                          </div>
+                        </div>
+                        
+                        <div className="border-t border-gray-700 mt-4 pt-4">
+                          <label className="block text-sm font-medium mb-2">Compliance Notes</label>
+                          <ul className="text-sm space-y-2">
+                            {generatedContent.complianceNotes ? (
+                              generatedContent.complianceNotes.map((note: ComplianceNote, i: number) => (
+                                <li key={i} className="flex items-start">
+                                  <span className={`material-icons ${note.type === 'warning' ? 'text-yellow-400' : 'text-green-400'} mr-2 text-sm`}>
+                                    {note.type === 'warning' ? 'warning' : 'check_circle'}
+                                  </span>
+                                  <span>{note.text}</span>
+                                </li>
+                              ))
+                            ) : (
+                              <>
+                                <li className="flex items-start">
+                                  <span className="material-icons text-green-400 mr-2 text-sm">check_circle</span>
+                                  <span>Content generated using approved language and claims</span>
+                                </li>
+                                <li className="flex items-start">
+                                  <span className="material-icons text-yellow-400 mr-2 text-sm">warning</span>
+                                  <span>Please review content for any required regulatory statements</span>
+                                </li>
+                              </>
+                            )}
+                          </ul>
+                        </div>
+                      </>
+                    ) : (
+                      <div className="flex flex-col items-center justify-center h-full text-gray-500">
+                        <span className="material-icons text-6xl mb-4">description</span>
+                        <p className="text-lg mb-2">No content generated yet</p>
+                        <p className="text-sm text-center">Fill out the form on the left and click "Generate Content" to create AI-powered content</p>
                       </div>
-                    </div>
-                    
-                    <div className="border-t border-gray-700 mt-4 pt-4">
-                      <label className="block text-sm font-medium mb-2">Compliance Notes</label>
-                      <ul className="text-sm space-y-2">
-                        <li className="flex items-start">
-                          <span className="material-icons text-green-400 mr-2 text-sm">check_circle</span>
-                          <span>Claims about efficacy are supported by phase III trial data</span>
-                        </li>
-                        <li className="flex items-start">
-                          <span className="material-icons text-green-400 mr-2 text-sm">check_circle</span>
-                          <span>Safety information is accurately represented</span>
-                        </li>
-                        <li className="flex items-start">
-                          <span className="material-icons text-yellow-400 mr-2 text-sm">warning</span>
-                          <span>Recommend including specific contraindication statement in final version</span>
-                        </li>
-                      </ul>
-                    </div>
+                    )}
                   </div>
                   
                   <div className="flex justify-end mt-4 space-x-3">
-                    <button className="border border-gray-600 hover:bg-white/5 text-white px-4 py-2 rounded-lg transition">
+                    <button 
+                      className="border border-gray-600 hover:bg-white/5 text-white px-4 py-2 rounded-lg transition"
+                      onClick={handleGenerateContent}
+                      disabled={loading || !selectedHcp || !contentType || !productFocus}
+                    >
                       Regenerate
                     </button>
-                    <button className="border border-gray-600 hover:bg-white/5 text-white px-4 py-2 rounded-lg transition">
+                    <button 
+                      className="border border-gray-600 hover:bg-white/5 text-white px-4 py-2 rounded-lg transition"
+                      disabled={!generatedContent || loading}
+                    >
                       Edit
                     </button>
-                    <button className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition">
+                    <button 
+                      className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition"
+                      disabled={!generatedContent || loading}
+                    >
                       Save
                     </button>
                   </div>
