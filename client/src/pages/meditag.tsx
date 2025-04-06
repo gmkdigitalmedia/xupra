@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import Sidebar from "@/components/sidebar";
 import DashboardHeader from "@/components/dashboard-header";
+import { useAppContext } from "@/contexts/app-context";
 import TagBadge from "@/components/tag-badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
@@ -62,6 +62,7 @@ const MediTag = () => {
   const [viewMode, setViewMode] = useState<ViewMode>('basic');
   const [activeTab, setActiveTab] = useState('database');
   const { toast } = useToast();
+  const { toggleMobileMenu, isMobileMenuOpen } = useAppContext();
   
   // Fetch HCP data
   const { data: hcpData, isLoading, error } = useQuery({
@@ -111,11 +112,13 @@ const MediTag = () => {
   };
 
   return (
-    <div className="h-screen flex flex-col md:flex-row bg-background">
-      <Sidebar />
-      
+    <div className="h-screen flex flex-col bg-background">
       <main className="flex-1 overflow-y-auto bg-background-dark">
-        <DashboardHeader title="MediTag Engine" />
+        <DashboardHeader 
+          title="MediTag Engine" 
+          onMobileMenuToggle={toggleMobileMenu}
+          showMobileMenu={isMobileMenuOpen}
+        />
         
         <div className="p-6">
           <div className="mb-8">

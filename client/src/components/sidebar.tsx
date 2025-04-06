@@ -1,28 +1,34 @@
 import { useLocation } from "wouter";
 import Logo from "./logo";
 import { useAppContext } from "@/contexts/app-context";
+import { useState, useEffect, MouseEvent } from "react";
 
 const NavItem = ({ 
   icon, 
   label, 
   path, 
-  isActive 
+  isActive,
+  onClick
 }: { 
   icon: string; 
   label: string; 
   path: string; 
-  isActive: boolean 
+  isActive: boolean;
+  onClick?: () => void;
 }) => {
   const [, setLocation] = useLocation();
+
+  const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault();
+    setLocation(path);
+    if (onClick) onClick();
+  };
 
   return (
     <li>
       <a 
         href="#"
-        onClick={(e) => {
-          e.preventDefault();
-          setLocation(path);
-        }} 
+        onClick={handleClick} 
         className={`flex items-center space-x-3 p-3 rounded-lg transition ${
           isActive 
             ? "bg-primary/10 text-primary" 
@@ -36,9 +42,25 @@ const NavItem = ({
   );
 };
 
-const Sidebar = () => {
+const Sidebar = ({ closeMobileMenu = () => {} }) => {
   const [location] = useLocation();
   const { logout } = useAppContext();
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkIsMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    // Check initially
+    checkIsMobile();
+    
+    // Add resize listener
+    window.addEventListener('resize', checkIsMobile);
+    
+    // Cleanup
+    return () => window.removeEventListener('resize', checkIsMobile);
+  }, []);
 
   const navItems = [
     { icon: "dashboard", label: "Dashboard", path: "/dashboard" },
@@ -53,8 +75,16 @@ const Sidebar = () => {
 
   return (
     <aside className="w-full md:w-64 bg-background-lighter h-auto md:h-screen overflow-y-auto flex-shrink-0">
-      <div className="p-4 flex items-center space-x-2 border-b border-gray-800">
+      <div className="p-4 flex items-center justify-between border-b border-gray-800">
         <Logo />
+        {isMobile && (
+          <button 
+            onClick={closeMobileMenu}
+            className="md:hidden text-gray-400 hover:text-white"
+          >
+            <span className="material-icons">close</span>
+          </button>
+        )}
       </div>
       
       <nav className="p-4">
@@ -65,7 +95,8 @@ const Sidebar = () => {
               icon={item.icon} 
               label={item.label} 
               path={item.path} 
-              isActive={location === item.path} 
+              isActive={location === item.path}
+              onClick={isMobile ? closeMobileMenu : undefined} 
             />
           ))}
         </ul>
