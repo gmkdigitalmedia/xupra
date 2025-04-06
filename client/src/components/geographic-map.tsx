@@ -266,11 +266,6 @@ export function GeographicMap() {
                   fill="#334155" 
                   stroke="#ffffff"
                   strokeWidth={1.5}
-                  style={{
-                    default: { fill: "#334155", stroke: "#ffffff", strokeWidth: 1.5 },
-                    hover: { fill: "#475569", stroke: "#ffffff", strokeWidth: 1.5 },
-                    pressed: { fill: "#475569", stroke: "#ffffff", strokeWidth: 1.5 }
-                  }}
                 />
               ))
             }

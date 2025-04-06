@@ -14,22 +14,24 @@ import { InfluenceNetwork } from "@/components/influence-network";
 
 // Mock data for visualization examples (to be replaced by real data later)
 const regionDistribution = [
-  { region: "Northeast", count: 358 },
-  { region: "Southeast", count: 284 },
-  { region: "Midwest", count: 321 },
-  { region: "Southwest", count: 170 },
-  { region: "West", count: 244 },
-  { region: "Northwest", count: 98 }
+  { region: "関東 (Kanto)", count: 358 },
+  { region: "関西 (Kansai)", count: 284 },
+  { region: "中部 (Chubu)", count: 231 },
+  { region: "九州 (Kyushu)", count: 170 },
+  { region: "東北 (Tohoku)", count: 144 },
+  { region: "北海道 (Hokkaido)", count: 98 },
+  { region: "四国 (Shikoku)", count: 76 },
+  { region: "中国 (Chugoku)", count: 116 }
 ];
 
 const specialtyDistribution = [
-  { specialty: "Cardiology", count: 156 },
-  { specialty: "Oncology", count: 142 },
-  { specialty: "Neurology", count: 98 },
-  { specialty: "General Practice", count: 287 },
-  { specialty: "Pediatrics", count: 112 },
-  { specialty: "Orthopedics", count: 78 },
-  { specialty: "Other Specialties", count: 385 }
+  { specialty: "内科 (Internal Medicine)", count: 287 },
+  { specialty: "循環器科 (Cardiology)", count: 156 },
+  { specialty: "腫瘍科 (Oncology)", count: 142 },
+  { specialty: "神経科 (Neurology)", count: 98 },
+  { specialty: "小児科 (Pediatrics)", count: 112 },
+  { specialty: "整形外科 (Orthopedics)", count: 78 },
+  { specialty: "その他の専門 (Other Specialties)", count: 205 }
 ];
 
 // HCP View mode
@@ -146,6 +148,14 @@ const MediTag = () => {
       'Early Adopter': 'green',
       'Evidence Driven': 'blue',
       'Patient Focused': 'purple',
+      'Research Focus': 'violet',
+      'Digital Savvy': 'indigo',
+      'High Priority': 'blue',
+      'Key Decision Maker': 'emerald',
+      'High Prescriber': 'amber',
+      'Potential KOL': 'orange',
+      'Academic': 'purple',
+      'Private Practice': 'teal',
       'Balanced': 'indigo',
       'Cost Conscious': 'amber',
       'Conservative': 'red'
@@ -554,6 +564,65 @@ const MediTag = () => {
             </TabsContent>
             
             <TabsContent value="analytics">
+              {/* Japanese Hospital Table */}
+              <Card className="bg-background-card border-gray-800 mb-6">
+                <CardHeader>
+                  <div className="flex items-center">
+                    <MapPin className="h-5 w-5 mr-2" />
+                    <CardTitle>Top Japanese Hospitals</CardTitle>
+                  </div>
+                  <CardDescription>
+                    Key hospitals with KOL presence and HCP engagement metrics
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="overflow-x-auto">
+                    <table className="min-w-full">
+                      <thead>
+                        <tr className="border-b border-gray-800">
+                          <th className="py-3 px-4 text-left text-sm text-gray-400 font-medium">Hospital Name</th>
+                          <th className="py-3 px-4 text-left text-sm text-gray-400 font-medium">Location</th>
+                          <th className="py-3 px-4 text-left text-sm text-gray-400 font-medium">Affiliated HCPs</th>
+                          <th className="py-3 px-4 text-left text-sm text-gray-400 font-medium">KOL %</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr className="border-b border-gray-800">
+                          <td className="py-3 px-4">東京大学医学部附属病院</td>
+                          <td className="py-3 px-4">東京都 (Tokyo)</td>
+                          <td className="py-3 px-4">47</td>
+                          <td className="py-3 px-4">42%</td>
+                        </tr>
+                        <tr className="border-b border-gray-800">
+                          <td className="py-3 px-4">大阪大学医学部附属病院</td>
+                          <td className="py-3 px-4">大阪市 (Osaka)</td>
+                          <td className="py-3 px-4">42</td>
+                          <td className="py-3 px-4">38%</td>
+                        </tr>
+                        <tr className="border-b border-gray-800">
+                          <td className="py-3 px-4">名古屋大学医学部附属病院</td>
+                          <td className="py-3 px-4">名古屋市 (Nagoya)</td>
+                          <td className="py-3 px-4">38</td>
+                          <td className="py-3 px-4">35%</td>
+                        </tr>
+                        <tr className="border-b border-gray-800">
+                          <td className="py-3 px-4">北海道大学病院</td>
+                          <td className="py-3 px-4">札幌市 (Sapporo)</td>
+                          <td className="py-3 px-4">35</td>
+                          <td className="py-3 px-4">31%</td>
+                        </tr>
+                        <tr>
+                          <td className="py-3 px-4">九州大学病院</td>
+                          <td className="py-3 px-4">福岡市 (Fukuoka)</td>
+                          <td className="py-3 px-4">30</td>
+                          <td className="py-3 px-4">29%</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </CardContent>
+              </Card>
+              
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                 <Card className="bg-background-card border-gray-800">
                   <CardHeader>
