@@ -17,6 +17,7 @@ interface HcpLocation {
   isKol: boolean;
   engagementScore: number;
   prescribingPattern: string;
+  hospital?: string;
 }
 
 // Sample data for Japanese hospitals and HCPs
@@ -30,7 +31,8 @@ const sampleLocations: HcpLocation[] = [
     tag: "High Priority",
     isKol: true,
     engagementScore: 92,
-    prescribingPattern: "High"
+    prescribingPattern: "High",
+    hospital: "東京大学医学部附属病院"
   },
   {
     id: 2,
@@ -41,7 +43,8 @@ const sampleLocations: HcpLocation[] = [
     tag: "Key Decision Maker",
     isKol: true,
     engagementScore: 94,
-    prescribingPattern: "High"
+    prescribingPattern: "High",
+    hospital: "大阪大学医学部附属病院"
   },
   {
     id: 3,
@@ -52,7 +55,8 @@ const sampleLocations: HcpLocation[] = [
     tag: "High Prescriber",
     isKol: true,
     engagementScore: 85,
-    prescribingPattern: "Medium"
+    prescribingPattern: "Medium",
+    hospital: "九州大学病院"
   },
   {
     id: 4,
@@ -63,7 +67,8 @@ const sampleLocations: HcpLocation[] = [
     tag: "Potential KOL",
     isKol: true,
     engagementScore: 87,
-    prescribingPattern: "High"
+    prescribingPattern: "High",
+    hospital: "名古屋大学医学部附属病院"
   },
   {
     id: 5,
@@ -74,7 +79,8 @@ const sampleLocations: HcpLocation[] = [
     tag: "Research Focus",
     isKol: true,
     engagementScore: 83,
-    prescribingPattern: "Medium"
+    prescribingPattern: "Medium",
+    hospital: "北海道大学病院"
   },
   {
     id: 6,
@@ -85,7 +91,8 @@ const sampleLocations: HcpLocation[] = [
     tag: "Academic",
     isKol: false,
     engagementScore: 76,
-    prescribingPattern: "Medium"
+    prescribingPattern: "Medium",
+    hospital: "広島大学病院"
   },
   {
     id: 7,
@@ -96,7 +103,8 @@ const sampleLocations: HcpLocation[] = [
     tag: "Private Practice",
     isKol: false,
     engagementScore: 79,
-    prescribingPattern: "High"
+    prescribingPattern: "High",
+    hospital: "高崎総合医療センター"
   },
   {
     id: 8,
@@ -107,7 +115,8 @@ const sampleLocations: HcpLocation[] = [
     tag: "Early Adopter",
     isKol: false,
     engagementScore: 72,
-    prescribingPattern: "Low"
+    prescribingPattern: "Low",
+    hospital: "岡山大学病院"
   },
   {
     id: 9,
@@ -118,7 +127,8 @@ const sampleLocations: HcpLocation[] = [
     tag: "Conservative",
     isKol: false,
     engagementScore: 68,
-    prescribingPattern: "Low"
+    prescribingPattern: "Low",
+    hospital: "関門医療センター"
   },
   {
     id: 10,
@@ -129,7 +139,68 @@ const sampleLocations: HcpLocation[] = [
     tag: "Digital Savvy",
     isKol: false,
     engagementScore: 75,
-    prescribingPattern: "Medium"
+    prescribingPattern: "Medium",
+    hospital: "東北大学病院"
+  },
+  {
+    id: 11,
+    name: "高橋 良介 医師",
+    coordinates: [138.2529, 36.3381], // Matsumoto
+    location: "松本市 (Matsumoto)",
+    specialty: "Oncology",
+    tag: "Early Adopter",
+    isKol: false,
+    engagementScore: 77,
+    prescribingPattern: "Medium",
+    hospital: "信州大学医学部附属病院"
+  },
+  {
+    id: 12,
+    name: "木村 春香 医師",
+    coordinates: [127.6809, 26.2124], // Naha, Okinawa
+    location: "那覇市 (Naha)",
+    specialty: "Neurology",
+    tag: "Digital Savvy",
+    isKol: true,
+    engagementScore: 85,
+    prescribingPattern: "High",
+    hospital: "琉球大学病院"
+  },
+  {
+    id: 13,
+    name: "斎藤 健一 医師",
+    coordinates: [137.2167, 36.7054], // Toyama
+    location: "富山市 (Toyama)",
+    specialty: "Endocrinology",
+    tag: "Research Focus",
+    isKol: false,
+    engagementScore: 78,
+    prescribingPattern: "Medium",
+    hospital: "富山大学附属病院"
+  },
+  {
+    id: 14,
+    name: "青木 裕子 医師",
+    coordinates: [134.5573, 34.0400], // Tokushima
+    location: "徳島市 (Tokushima)",
+    specialty: "Cardiology",
+    tag: "High Prescriber",
+    isKol: true,
+    engagementScore: 88,
+    prescribingPattern: "High",
+    hospital: "徳島大学病院"
+  },
+  {
+    id: 15,
+    name: "井上 慎太郎 医師",
+    coordinates: [133.5435, 33.5597], // Kochi
+    location: "高知市 (Kochi)",
+    specialty: "Oncology",
+    tag: "Conservative",
+    isKol: false,
+    engagementScore: 71,
+    prescribingPattern: "Low",
+    hospital: "高知大学医学部附属病院"
   }
 ];
 
@@ -165,8 +236,8 @@ const getMarkerColor = (hcp: HcpLocation): string => {
 export function GeographicMap() {
   const [hoveredHcp, setHoveredHcp] = useState<HcpLocation | null>(null);
   const [position, setPosition] = useState<{ coordinates: [number, number], zoom: number }>({
-    coordinates: [138.0, 38.0], // Center of Japan approximately
-    zoom: 3.0 // Increased zoom for better visibility of Japan
+    coordinates: [137.0, 38.0], // Center of Japan approximately
+    zoom: 4.0 // Increased zoom for better visibility of Japan
   });
 
   return (
@@ -174,8 +245,8 @@ export function GeographicMap() {
       <ComposableMap
         projection="geoMercator"
         projectionConfig={{ 
-          scale: 1200, // Adjusted scale for better visibility
-          center: [138.0, 36.0] // Centered better on Japan's mainland
+          scale: 1500, // Increased scale for better visibility of Japan
+          center: [137.0, 38.0] // Centered on Japan's mainland
         }}
         className="bg-gray-900 rounded-md"
       >
@@ -183,6 +254,7 @@ export function GeographicMap() {
           center={position.coordinates}
           zoom={position.zoom}
           onMoveEnd={(position: any) => setPosition(position as { coordinates: [number, number], zoom: number })}
+          translateExtent={[[120, 20], [150, 50]]} // Limit panning to Japan region
         >
           {/* Japan map with prefectures */}
           <Geographies geography="https://raw.githubusercontent.com/deldersveld/topojson/master/countries/japan/japan-prefectures.json">
@@ -194,6 +266,11 @@ export function GeographicMap() {
                   fill="#334155" 
                   stroke="#ffffff"
                   strokeWidth={1.5}
+                  style={{
+                    default: { fill: "#334155", stroke: "#ffffff", strokeWidth: 1.5 },
+                    hover: { fill: "#475569", stroke: "#ffffff", strokeWidth: 1.5 },
+                    pressed: { fill: "#475569", stroke: "#ffffff", strokeWidth: 1.5 }
+                  }}
                 />
               ))
             }
@@ -221,6 +298,9 @@ export function GeographicMap() {
       {hoveredHcp && (
         <div className="absolute bottom-4 left-4 bg-slate-900 border border-slate-700 p-3 rounded-lg shadow-lg max-w-xs">
           <div className="text-white font-medium">{hoveredHcp.name}</div>
+          {hoveredHcp.hospital && (
+            <div className="text-xs text-slate-300 mt-1">{hoveredHcp.hospital}</div>
+          )}
           <div className="flex items-center space-x-2 mt-1">
             <span className="text-xs text-slate-300">{hoveredHcp.location}</span>
             <span className="text-xs px-1.5 py-0.5 bg-slate-700 rounded text-slate-300">{hoveredHcp.specialty}</span>

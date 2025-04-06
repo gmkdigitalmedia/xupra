@@ -1,0 +1,236 @@
+private async initializeSampleHcps() {
+  const sampleHcps = [
+    {
+      name: "鈴木 優子 医師",
+      specialty: "Cardiology",
+      subSpecialty: "Interventional Cardiology",
+      prescribingPattern: "High Volume",
+      engagementScore: 92,
+      tag: "High Priority",
+      email: "suzuki.yuko@example.jp",
+      organization: "東京大学医学部附属病院",
+      notes: "Interested in new cardiovascular treatments",
+      // Geographic Data
+      location: "東京都 (Tokyo)",
+      region: "Kanto",
+      urbanRural: "Urban",
+      // Affiliation Data
+      hospitalAffiliation: "東京大学医学部附属病院",
+      academicAffiliation: "東京大学",
+      professionalAssociations: ["日本循環器学会", "日本心臓病学会"],
+      // Influence Data
+      influenceScore: 92,
+      isKol: true,
+      publicationCount: 47,
+      speakingEngagements: 12,
+      // Patient Demographics
+      patientAgeGroup: ["Adult", "Geriatric"],
+      patientConditions: ["Coronary Artery Disease", "Hypertension", "Heart Failure"],
+      patientInsuranceTypes: ["National Health Insurance", "Private Insurance"],
+      // Engagement Preferences
+      preferredContactMethod: "Email",
+      preferredContactTime: "Morning",
+      digitalEngagementLevel: "High",
+      // Compliance
+      hasOptOut: false,
+      privacyRestrictions: {
+        dataSharing: false,
+        marketingRestrictions: false
+      }
+    },
+    {
+      name: "佐藤 健太 医師",
+      specialty: "Oncology",
+      subSpecialty: "Medical Oncology",
+      prescribingPattern: "High Volume",
+      engagementScore: 94,
+      tag: "Key Decision Maker",
+      email: "sato.kenta@example.jp",
+      organization: "大阪大学医学部附属病院",
+      notes: "Research focus on targeted therapies",
+      // Geographic Data
+      location: "大阪市 (Osaka)",
+      region: "Kansai",
+      urbanRural: "Urban",
+      // Affiliation Data
+      hospitalAffiliation: "大阪大学医学部附属病院",
+      academicAffiliation: "大阪大学",
+      professionalAssociations: ["日本癌学会", "日本臨床腫瘍学会"],
+      // Influence Data
+      influenceScore: 85,
+      isKol: true,
+      publicationCount: 32,
+      speakingEngagements: 8,
+      // Patient Demographics
+      patientAgeGroup: ["Adult", "Geriatric"],
+      patientConditions: ["Breast Cancer", "Lung Cancer", "Leukemia"],
+      patientInsuranceTypes: ["National Health Insurance", "Private Insurance"],
+      // Engagement Preferences
+      preferredContactMethod: "In-person",
+      preferredContactTime: "Afternoon",
+      digitalEngagementLevel: "Medium",
+      // Compliance
+      hasOptOut: false,
+      privacyRestrictions: {
+        dataSharing: true,
+        marketingRestrictions: false
+      }
+    },
+    {
+      name: "田中 誠 医師",
+      specialty: "Neurology",
+      subSpecialty: "Movement Disorders",
+      prescribingPattern: "Medium Volume",
+      engagementScore: 85,
+      tag: "High Prescriber",
+      email: "tanaka.makoto@example.jp",
+      organization: "九州大学病院",
+      notes: "Emphasizes patient quality of life in treatment decisions",
+      // Geographic Data
+      location: "福岡市 (Fukuoka)",
+      region: "Kyushu",
+      urbanRural: "Urban",
+      // Affiliation Data
+      hospitalAffiliation: "九州大学病院",
+      academicAffiliation: "九州大学",
+      professionalAssociations: ["日本神経学会"],
+      // Influence Data
+      influenceScore: 80,
+      isKol: true,
+      publicationCount: 24,
+      speakingEngagements: 6,
+      // Patient Demographics
+      patientAgeGroup: ["Adult", "Geriatric"],
+      patientConditions: ["Parkinson's Disease", "Essential Tremor", "Dystonia"],
+      patientInsuranceTypes: ["National Health Insurance", "Private Insurance"],
+      // Engagement Preferences
+      preferredContactMethod: "Phone",
+      preferredContactTime: "Morning",
+      digitalEngagementLevel: "Medium",
+      // Compliance
+      hasOptOut: false,
+      privacyRestrictions: {
+        dataSharing: false,
+        marketingRestrictions: false
+      }
+    },
+    {
+      name: "渡辺 美咲 医師",
+      specialty: "Neurology",
+      subSpecialty: "Neuro-oncology",
+      prescribingPattern: "High Volume",
+      engagementScore: 87,
+      tag: "Potential KOL",
+      email: "watanabe.misaki@example.jp",
+      organization: "名古屋大学医学部附属病院",
+      notes: "Interest in novel therapeutics for CNS disorders",
+      // Geographic Data
+      location: "名古屋市 (Nagoya)",
+      region: "Chubu",
+      urbanRural: "Urban",
+      // Affiliation Data
+      hospitalAffiliation: "名古屋大学医学部附属病院",
+      academicAffiliation: "名古屋大学",
+      professionalAssociations: ["日本神経学会", "日本脳腫瘍学会"],
+      // Influence Data
+      influenceScore: 78,
+      isKol: true,
+      publicationCount: 22,
+      speakingEngagements: 7,
+      // Patient Demographics
+      patientAgeGroup: ["Adult", "Geriatric"],
+      patientConditions: ["Brain Tumors", "Multiple Sclerosis", "Epilepsy"],
+      patientInsuranceTypes: ["National Health Insurance", "Private Insurance"],
+      // Engagement Preferences
+      preferredContactMethod: "Email",
+      preferredContactTime: "Afternoon",
+      digitalEngagementLevel: "High",
+      // Compliance
+      hasOptOut: false,
+      privacyRestrictions: {
+        dataSharing: false,
+        marketingRestrictions: true
+      }
+    },
+    {
+      name: "伊藤 直樹 医師",
+      specialty: "Endocrinology",
+      subSpecialty: "Diabetes Management",
+      prescribingPattern: "Medium Volume",
+      engagementScore: 83,
+      tag: "Research Focus",
+      email: "ito.naoki@example.jp",
+      organization: "北海道大学病院",
+      notes: "Leading research in diabetes management",
+      // Geographic Data
+      location: "札幌市 (Sapporo)",
+      region: "Hokkaido",
+      urbanRural: "Urban",
+      // Affiliation Data
+      hospitalAffiliation: "北海道大学病院",
+      academicAffiliation: "北海道大学",
+      professionalAssociations: ["日本内分泌学会", "日本糖尿病学会"],
+      // Influence Data
+      influenceScore: 81,
+      isKol: true,
+      publicationCount: 31,
+      speakingEngagements: 9,
+      // Patient Demographics
+      patientAgeGroup: ["Adult", "Geriatric"],
+      patientConditions: ["Diabetes", "Thyroid Disorders", "Adrenal Disorders"],
+      patientInsuranceTypes: ["National Health Insurance", "Private Insurance"],
+      // Engagement Preferences
+      preferredContactMethod: "Virtual Meeting",
+      preferredContactTime: "Morning",
+      digitalEngagementLevel: "High",
+      // Compliance
+      hasOptOut: false,
+      privacyRestrictions: {
+        dataSharing: false,
+        marketingRestrictions: false
+      }
+    },
+    {
+      name: "中村 隆太 医師",
+      specialty: "Pediatrics",
+      subSpecialty: "Pediatric Pulmonology",
+      prescribingPattern: "Medium Volume",
+      engagementScore: 79,
+      tag: "Private Practice",
+      email: "nakamura.ryuta@example.jp",
+      organization: "高崎市立病院",
+      notes: "Focused on minimizing side effects in pediatric patients",
+      // Geographic Data
+      location: "高崎市 (Takasaki)",
+      region: "Kanto",
+      urbanRural: "Suburban",
+      // Affiliation Data
+      hospitalAffiliation: "高崎市立病院",
+      academicAffiliation: "群馬大学",
+      professionalAssociations: ["日本小児科学会", "日本アレルギー学会"],
+      // Influence Data
+      influenceScore: 72,
+      isKol: false,
+      publicationCount: 14,
+      speakingEngagements: 5,
+      // Patient Demographics
+      patientAgeGroup: ["Pediatric"],
+      patientConditions: ["Asthma", "Allergies", "Respiratory Infections"],
+      patientInsuranceTypes: ["National Health Insurance", "Private Insurance"],
+      // Engagement Preferences
+      preferredContactMethod: "Virtual Meeting",
+      preferredContactTime: "Evening",
+      digitalEngagementLevel: "High",
+      // Compliance
+      hasOptOut: false,
+      privacyRestrictions: {
+        dataSharing: false,
+        marketingRestrictions: false
+      }
+    }
+  ];
+
+  for (const hcpData of sampleHcps) {
+    await this.createHcp(hcpData);
+  }
+}

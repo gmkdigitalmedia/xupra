@@ -1,0 +1,127 @@
+import { ComposableMap, Geographies, Geography, Marker, Line, ZoomableGroup } from "react-simple-maps";
+import React, { useState } from "react";
+
+// Focus on Japan's coordinates
+const JAPAN_CENTER = [138.0, 38.0];
+const JAPAN_ZOOM = 8;
+
+// Updated map styles for better visibility
+const MAP_STYLES = {
+  default: {
+    fill: "#213C5D",
+    stroke: "#7EAAC9",
+    strokeWidth: 0.75,
+    outline: "none",
+  },
+  hover: {
+    fill: "#2C5282",
+    stroke: "#9BBDD8",
+    strokeWidth: 1,
+    outline: "none",
+  },
+  pressed: {
+    fill: "#2B6CB0",
+    outline: "none",
+  },
+};
+
+// Updated HCP data for Japan
+const MARKERS = [
+  { name: "鈴木 優子 医師", coordinates: [139.7, 35.7], city: "Tokyo" },
+  { name: "佐藤 健太 医師", coordinates: [135.5, 34.7], city: "Osaka" },
+  { name: "田中 誠 医師", coordinates: [130.4, 33.6], city: "Fukuoka" },
+  { name: "渡辺 美咲 医師", coordinates: [136.9, 35.2], city: "Nagoya" },
+  { name: "伊藤 直樹 医師", coordinates: [141.3, 43.1], city: "Sapporo" }
+];
+
+export function GeographicMap() {
+  const [tooltipContent, setTooltipContent] = useState("");
+  const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
+  const [selectedMarker, setSelectedMarker] = useState<number | null>(null);
+
+  const handleMarkerMouseEnter = (marker: any, index: number, e: React.MouseEvent) => {
+    setTooltipContent(`${marker.name}, ${marker.city}`);
+    setTooltipPosition({ x: e.clientX, y: e.clientY });
+    setSelectedMarker(index);
+  };
+
+  const handleMarkerMouseLeave = () => {
+    setTooltipContent("");
+    setSelectedMarker(null);
+  };
+
+  return (
+    <div className="relative w-full h-full">
+      <ComposableMap
+        projection="geoMercator"
+        projectionConfig={{
+          scale: 800,
+        }}
+        className="w-full h-full"
+      >
+        <ZoomableGroup center={JAPAN_CENTER} zoom={JAPAN_ZOOM}>
+          <Geographies geography="/japan.json">
+            {({ geographies }) =>
+              geographies.map((geo) => (
+                <Geography
+                  key={geo.rsmKey}
+                  geography={geo}
+                  fill={MAP_STYLES.default.fill}
+                  stroke={MAP_STYLES.default.stroke}
+                  strokeWidth={MAP_STYLES.default.strokeWidth}
+                  style={{
+                    default: { fill: MAP_STYLES.default.fill, outline: "none" },
+                    hover: { fill: MAP_STYLES.hover.fill, outline: "none" },
+                    pressed: { fill: MAP_STYLES.pressed.fill, outline: "none" }
+                  }}
+                />
+              ))
+            }
+          </Geographies>
+
+          {MARKERS.map((marker, index) => (
+            <React.Fragment key={`marker-${index}`}>
+              <Marker
+                coordinates={marker.coordinates}
+                onMouseEnter={(e) => handleMarkerMouseEnter(marker, index, e)}
+                onMouseLeave={handleMarkerMouseLeave}
+              >
+                <circle
+                  r={selectedMarker === index ? 8 : 6}
+                  fill={selectedMarker === index ? "#F56565" : "#ED8936"}
+                  stroke="#FFF"
+                  strokeWidth={2}
+                  className="cursor-pointer"
+                />
+              </Marker>
+              
+              {selectedMarker === index && (
+                <Line
+                  from={[0, 0]}
+                  to={marker.coordinates}
+                  stroke="#ED8936"
+                  strokeWidth={2}
+                  strokeLinecap="round"
+                  strokeDasharray="6,6"
+                />
+              )}
+            </React.Fragment>
+          ))}
+        </ZoomableGroup>
+      </ComposableMap>
+
+      {tooltipContent && (
+        <div
+          className="absolute z-10 px-3 py-2 text-sm font-medium text-white bg-gray-800 rounded-md shadow-md"
+          style={{
+            left: tooltipPosition.x + 10,
+            top: tooltipPosition.y - 40,
+            transform: "translateX(-50%)",
+          }}
+        >
+          {tooltipContent}
+        </div>
+      )}
+    </div>
+  );
+}
