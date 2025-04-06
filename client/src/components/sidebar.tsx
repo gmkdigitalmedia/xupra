@@ -20,8 +20,17 @@ const NavItem = ({
 
   const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
-    setLocation(path);
-    if (onClick) onClick();
+    
+    // First close the mobile menu if onClick handler is provided
+    if (onClick) {
+      onClick();
+    }
+    
+    // Then navigate to the new location after a small delay
+    // This prevents UI glitches during transitions
+    setTimeout(() => {
+      setLocation(path);
+    }, 10);
   };
 
   return (

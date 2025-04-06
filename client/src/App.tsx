@@ -21,8 +21,20 @@ function AppRoutes() {
   
   // Close mobile menu on navigation
   useEffect(() => {
-    closeMobileMenu();
-  }, [window.location.pathname]);
+    const handleRouteChange = () => {
+      if (isMobileMenuOpen) {
+        closeMobileMenu();
+      }
+    };
+    
+    // Add listener for pathname changes
+    window.addEventListener('popstate', handleRouteChange);
+    
+    // Clean up
+    return () => {
+      window.removeEventListener('popstate', handleRouteChange);
+    };
+  }, [isMobileMenuOpen, closeMobileMenu]);
 
   if (!isLoggedIn) {
     return (
@@ -37,8 +49,8 @@ function AppRoutes() {
     <div className="flex flex-col md:flex-row min-h-screen bg-background">
       {/* Mobile menu overlay */}
       {isMobileMenuOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-70 z-20 md:hidden">
-          <div className="w-4/5 max-w-xs h-full bg-background">
+        <div className="fixed inset-0 bg-black bg-opacity-70 z-50 md:hidden" onClick={closeMobileMenu}>
+          <div className="w-4/5 max-w-xs h-full bg-background" onClick={(e) => e.stopPropagation()}>
             <Sidebar closeMobileMenu={closeMobileMenu} />
           </div>
         </div>
