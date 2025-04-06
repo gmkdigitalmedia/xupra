@@ -84,6 +84,69 @@ export class MemStorage implements IStorage {
       role: "admin",
       organization: "Xupra Demo"
     });
+    
+    // Initialize with sample HCP data
+    this.initializeSampleHcps();
+  }
+  
+  // Initialize sample HCP data
+  private async initializeSampleHcps() {
+    const sampleHcps = [
+      {
+        name: "Dr. Sarah Chen",
+        specialty: "Cardiology",
+        prescribingPattern: "High Volume",
+        engagementScore: 87,
+        tag: "Early Adopter",
+        email: "sarah.chen@example.com",
+        organization: "Metropolis Medical Center",
+        notes: "Interested in new cardiovascular treatments"
+      },
+      {
+        name: "Dr. James Wilson",
+        specialty: "Oncology",
+        prescribingPattern: "Medium Volume",
+        engagementScore: 76,
+        tag: "Evidence Driven",
+        email: "james.wilson@example.com",
+        organization: "City Cancer Institute",
+        notes: "Requires strong clinical data before adoption"
+      },
+      {
+        name: "Dr. Maria Rodriguez",
+        specialty: "Neurology",
+        prescribingPattern: "Low Volume",
+        engagementScore: 62,
+        tag: "Patient Focused",
+        email: "maria.rodriguez@example.com",
+        organization: "Westside Neuro Center",
+        notes: "Emphasizes patient quality of life in treatment decisions"
+      },
+      {
+        name: "Dr. Robert Johnson",
+        specialty: "General Practice",
+        prescribingPattern: "High Volume",
+        engagementScore: 81,
+        tag: "Balanced",
+        email: "robert.johnson@example.com",
+        organization: "Community Family Practice",
+        notes: "Considers multiple factors in prescribing decisions"
+      },
+      {
+        name: "Dr. Emily Chang",
+        specialty: "Pediatrics",
+        prescribingPattern: "Medium Volume",
+        engagementScore: 74,
+        tag: "Patient Focused",
+        email: "emily.chang@example.com",
+        organization: "Children's Medical Group",
+        notes: "Focused on minimizing side effects in pediatric patients"
+      }
+    ];
+    
+    for (const hcpData of sampleHcps) {
+      await this.createHcp(hcpData);
+    }
   }
 
   // User operations

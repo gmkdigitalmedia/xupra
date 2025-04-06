@@ -26,6 +26,9 @@ export async function generatePersonalizedContent(
   hcp?: string;
 }> {
   try {
+    console.log("OpenAI API Key exists:", !!process.env.OPENAI_API_KEY);
+    console.log("Generating content for HCP:", hcpData.name);
+    
     let prompt = `
     Generate personalized ${contentType} content for a healthcare professional with the following profile:
     - Name: ${hcpData.name}
