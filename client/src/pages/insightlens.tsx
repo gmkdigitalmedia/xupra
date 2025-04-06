@@ -50,7 +50,7 @@ const InsightLens = () => {
               <h3 className="text-lg font-semibold mb-4 md:mb-0">Campaign Analysis</h3>
               <div className="w-full md:w-72">
                 <select 
-                  className="w-full bg-background-dark text-white px-4 py-2 rounded-lg border border-gray-700 focus:outline-none focus:border-primary"
+                  className="w-full bg-background-dark !text-white px-4 py-2 rounded-lg border border-gray-700 focus:outline-none focus:border-primary"
                   value={selectedCampaign}
                   onChange={handleCampaignChange}
                 >
@@ -89,7 +89,7 @@ const InsightLens = () => {
                 <h3 className="font-semibold">Campaign Performance</h3>
                 <div className="flex space-x-4">
                   <span className="text-sm text-gray-400">Q2 2023</span>
-                  <select className="bg-background-dark text-white text-sm rounded-lg px-2 py-1 border border-gray-700">
+                  <select className="bg-background-dark !text-white text-sm rounded-lg px-2 py-1 border border-gray-700">
                     <option>Last 30 days</option>
                     <option>Last quarter</option>
                     <option>Last year</option>

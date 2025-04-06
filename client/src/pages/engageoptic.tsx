@@ -73,7 +73,7 @@ const EngageOptic = () => {
                   <div className="mb-4">
                     <label className="block text-sm font-medium mb-2">Select HCP Segment</label>
                     <select 
-                      className="w-full bg-background-dark text-white px-4 py-2 rounded-lg border border-gray-700 focus:outline-none focus:border-primary"
+                      className="w-full bg-background-dark !text-white px-4 py-2 rounded-lg border border-gray-700 focus:outline-none focus:border-primary"
                       value={selectedHcp}
                       onChange={(e) => setSelectedHcp(e.target.value)}
                     >
@@ -89,7 +89,7 @@ const EngageOptic = () => {
                   <div className="mb-4">
                     <label className="block text-sm font-medium mb-2">Select Content</label>
                     <select 
-                      className="w-full bg-background-dark text-white px-4 py-2 rounded-lg border border-gray-700 focus:outline-none focus:border-primary"
+                      className="w-full bg-background-dark !text-white px-4 py-2 rounded-lg border border-gray-700 focus:outline-none focus:border-primary"
                       value={selectedContent}
                       onChange={(e) => setSelectedContent(e.target.value)}
                     >

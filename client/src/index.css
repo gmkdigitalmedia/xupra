@@ -11,24 +11,15 @@
     @apply font-sans antialiased bg-background text-foreground;
   }
   
-  /* Fix dropdown option text color for better readability */
+  /* Fix dropdown option text color for better readability - BUT leave custom component styling alone */
   select option {
     @apply bg-white text-black;
   }
   
-  /* Ensure all inputs and textareas have proper text color for visibility */
-  input, textarea, select {
-    @apply text-black;
-  }
-  
-  /* Fix any white inputs with white text to have proper background */
-  input[type="text"], 
-  input[type="email"], 
-  input[type="password"], 
-  input[type="number"],
-  input[type="search"],
-  textarea,
-  select {
-    @apply bg-white border-gray-300;
+  /* Only apply styling to basic form elements - leave custom styling alone */
+  form input:not([class*="bg-"]), 
+  form textarea:not([class*="bg-"]), 
+  form select:not([class*="bg-"]) {
+    @apply bg-white text-black border-gray-300;
   }
 }
