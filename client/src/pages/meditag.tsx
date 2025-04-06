@@ -134,11 +134,11 @@ const MediTag = () => {
             onValueChange={setActiveTab}
             className="mb-8"
           >
-            <TabsList className="mb-6 flex flex-wrap gap-2 justify-center sm:justify-start">
-              <TabsTrigger value="database" className="text-xs sm:text-sm">HCP Database</TabsTrigger>
-              <TabsTrigger value="analytics" className="text-xs sm:text-sm">Segmentation Analytics</TabsTrigger>
-              <TabsTrigger value="geographic" className="text-xs sm:text-sm">Geographic Mapping</TabsTrigger>
-              <TabsTrigger value="influence" className="text-xs sm:text-sm">Influence Network</TabsTrigger>
+            <TabsList className="mb-6">
+              <TabsTrigger value="database">HCP Database</TabsTrigger>
+              <TabsTrigger value="analytics">Segmentation Analytics</TabsTrigger>
+              <TabsTrigger value="geographic">Geographic Mapping</TabsTrigger>
+              <TabsTrigger value="influence">Influence Network</TabsTrigger>
             </TabsList>
             
             <TabsContent value="database">

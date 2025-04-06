@@ -17,24 +17,12 @@ import Sidebar from "./components/sidebar";
 import { useEffect } from "react";
 
 function AppRoutes() {
-  const { isLoggedIn, isMobileMenuOpen, closeMobileMenu } = useAppContext();
+  const { isLoggedIn, isMobileMenuOpen, closeMobileMenu, toggleMobileMenu } = useAppContext();
   
   // Close mobile menu on navigation
   useEffect(() => {
-    const handleRouteChange = () => {
-      if (isMobileMenuOpen) {
-        closeMobileMenu();
-      }
-    };
-    
-    // Add listener for pathname changes
-    window.addEventListener('popstate', handleRouteChange);
-    
-    // Clean up
-    return () => {
-      window.removeEventListener('popstate', handleRouteChange);
-    };
-  }, [isMobileMenuOpen, closeMobileMenu]);
+    closeMobileMenu();
+  }, [window.location.pathname]);
 
   if (!isLoggedIn) {
     return (
@@ -49,8 +37,8 @@ function AppRoutes() {
     <div className="flex flex-col md:flex-row min-h-screen bg-background">
       {/* Mobile menu overlay */}
       {isMobileMenuOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-70 z-50 md:hidden" onClick={closeMobileMenu}>
-          <div className="w-4/5 max-w-xs h-full bg-background" onClick={(e) => e.stopPropagation()}>
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-20 md:hidden">
+          <div className="w-4/5 max-w-xs h-full">
             <Sidebar closeMobileMenu={closeMobileMenu} />
           </div>
         </div>
@@ -73,7 +61,7 @@ function AppRoutes() {
           <Route path="/asset-management" component={AssetManagement} />
           <Route path="/admin" component={AdminConnectionsPage} />
           <Route path="/slack-integration" component={SlackIntegrationPage} />
-          <Route path="/:anything*" component={NotFound} />
+          <Route component={NotFound} />
         </Switch>
       </div>
     </div>
