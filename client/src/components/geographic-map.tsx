@@ -177,7 +177,7 @@ export function GeographicMap() {
           scale: 1700,
           center: [138.0, 38.0] // Center on Japan
         }}
-        className="bg-slate-900 rounded-md"
+        className="bg-black rounded-md"
       >
         <ZoomableGroup
           center={position.coordinates}
@@ -191,9 +191,9 @@ export function GeographicMap() {
                 <Geography
                   key={geo.rsmKey}
                   geography={geo}
-                  fill="#1e293b"
-                  stroke="#64748b"
-                  strokeWidth={0.5}
+                  fill="#475569" 
+                  stroke="#e2e8f0"
+                  strokeWidth={1.0}
                 />
               ))
             }
@@ -207,11 +207,11 @@ export function GeographicMap() {
               onMouseLeave={() => setHoveredHcp(null)}
             >
               <circle
-                r={getMarkerSize(hcp)}
+                r={getMarkerSize(hcp) * 1.3} // Increased size
                 fill={getMarkerColor(hcp)}
-                stroke="#f1f5f9" // Slate-100
-                strokeWidth={0.5}
-                opacity={0.8}
+                stroke="#ffffff" // White for better visibility
+                strokeWidth={1.0}
+                opacity={0.9}
               />
             </Marker>
           ))}
