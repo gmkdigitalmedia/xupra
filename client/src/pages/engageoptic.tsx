@@ -6,13 +6,75 @@ import TagBadge from "@/components/tag-badge";
 const EngageOptic = () => {
   const [selectedHcp, setSelectedHcp] = useState("");
   const [selectedContent, setSelectedContent] = useState("");
+  const [generatingPlan, setGeneratingPlan] = useState(false);
+  const [campaignPlan, setCampaignPlan] = useState<null | {
+    title: string;
+    hcpSegment: string;
+    content: string;
+    channels: {name: string, percentage: number}[];
+    timingRecommendations: {
+      optimalSendTime: string;
+      optimalFollowUp: string;
+      reasoning: string;
+    };
+  }>(null);
   
   const handleGenerateCampaignPlan = () => {
+    if (!selectedHcp || !selectedContent) {
+      alert("Please select both an HCP segment and content type");
+      return;
+    }
+    
     // In a real implementation, this would make an API call to generate a campaign plan
+    setGeneratingPlan(true);
     console.log("Generating campaign plan for:", {
       hcp: selectedHcp,
       content: selectedContent,
     });
+    
+    // Simulate API call with timeout
+    setTimeout(() => {
+      const hcpSegmentName = selectedHcp === "cardiologists" ? "Cardiologists" :
+                      selectedHcp === "oncologists" ? "Oncologists" :
+                      selectedHcp === "neurologists" ? "Neurologists" :
+                      selectedHcp === "generalpractitioners" ? "General Practitioners" :
+                      selectedHcp === "pediatricians" ? "Pediatricians" : selectedHcp;
+                      
+      const contentName = selectedContent === "cardiox_update" ? "CardioX Clinical Trial Update" :
+                      selectedContent === "immunoplus_indication" ? "ImmunoPlus New Indication" :
+                      selectedContent === "neurocare_resources" ? "NeuroCare Patient Resources" :
+                      selectedContent === "diabeshield_launch" ? "DiabeShield Product Launch" :
+                      selectedContent === "respireclear_study" ? "RespireClear Clinical Study" : selectedContent;
+    
+      // Generate a plan based on the selection
+      setCampaignPlan({
+        title: `${hcpSegmentName} Engagement: ${contentName}`,
+        hcpSegment: hcpSegmentName,
+        content: contentName,
+        channels: [
+          { name: "Email", percentage: selectedHcp === "cardiologists" ? 42 : selectedHcp === "oncologists" ? 35 : 38 },
+          { name: "Video", percentage: selectedHcp === "cardiologists" ? 21 : selectedHcp === "oncologists" ? 28 : 22 },
+          { name: "In-person", percentage: selectedHcp === "cardiologists" ? 31 : selectedHcp === "oncologists" ? 25 : 15 },
+          { name: "Webinar", percentage: selectedHcp === "cardiologists" ? 13 : selectedHcp === "oncologists" ? 18 : 20 },
+          { name: "Call", percentage: selectedHcp === "cardiologists" ? 10 : selectedHcp === "oncologists" ? 7 : 12 }
+        ],
+        timingRecommendations: {
+          optimalSendTime: selectedHcp === "cardiologists" ? "Tuesday/Thursday mornings (8-10 AM)" : 
+                           selectedHcp === "oncologists" ? "Monday/Wednesday afternoons (1-3 PM)" : 
+                           "Tuesday/Friday mornings (9-11 AM)",
+          optimalFollowUp: selectedHcp === "cardiologists" ? "3-5 days after initial contact" : 
+                           selectedHcp === "oncologists" ? "5-7 days after initial contact" : 
+                           "2-4 days after initial contact",
+          reasoning: selectedHcp === "cardiologists" 
+            ? "Analysis of previous engagement patterns shows cardiologists have 32% higher response rates during early morning hours and are 2.7x more likely to engage with content on Tuesday/Thursday."
+            : selectedHcp === "oncologists"
+            ? "Historical data indicates oncologists prefer afternoon content review with 41% higher engagement rates compared to mornings. Monday and Wednesday show best response patterns."
+            : "Based on engagement data, this segment responds best to morning communications with quick follow-up timing for maximum effectiveness."
+        }
+      });
+      
+      setGeneratingPlan(false);
+    }, 1500); // Simulate 1.5 second API call
   };
   
   const channelOptions = [
@@ -72,34 +134,62 @@ const EngageOptic = () => {
                 <div className="col-span-1">
                   <div className="mb-4">
                     <label className="block text-sm font-medium mb-2">Select HCP Segment</label>
-                    <select 
-                      className="w-full bg-background-dark !text-white px-4 py-2 rounded-lg border border-gray-700 focus:outline-none focus:border-primary"
-                      value={selectedHcp}
-                      onChange={(e) => setSelectedHcp(e.target.value)}
-                    >
-                      <option value="">Select HCP segment</option>
-                      <option value="cardiologists">Cardiologists</option>
-                      <option value="oncologists">Oncologists</option>
-                      <option value="neurologists">Neurologists</option>
-                      <option value="generalpractitioners">General Practitioners</option>
-                      <option value="pediatricians">Pediatricians</option>
-                    </select>
+                    {selectedHcp ? (
+                      <input
+                        type="text"
+                        className="w-full bg-background-dark text-white px-4 py-2 rounded-lg border border-gray-700 focus:outline-none focus:border-primary"
+                        value={selectedHcp === "cardiologists" ? "Cardiologists" :
+                              selectedHcp === "oncologists" ? "Oncologists" :
+                              selectedHcp === "neurologists" ? "Neurologists" :
+                              selectedHcp === "generalpractitioners" ? "General Practitioners" :
+                              selectedHcp === "pediatricians" ? "Pediatricians" : selectedHcp}
+                        readOnly
+                        onClick={() => setSelectedHcp("")}
+                      />
+                    ) : (
+                      <select 
+                        className="w-full bg-background-dark text-white px-4 py-2 rounded-lg border border-gray-700 focus:outline-none focus:border-primary dark-select"
+                        value={selectedHcp}
+                        onChange={(e) => setSelectedHcp(e.target.value)}
+                      >
+                        <option value="">SELECT HCP SEGMENT</option>
+                        <option value="cardiologists">Cardiologists</option>
+                        <option value="oncologists">Oncologists</option>
+                        <option value="neurologists">Neurologists</option>
+                        <option value="generalpractitioners">General Practitioners</option>
+                        <option value="pediatricians">Pediatricians</option>
+                      </select>
+                    )}
                   </div>
                   
                   <div className="mb-4">
                     <label className="block text-sm font-medium mb-2">Select Content</label>
-                    <select 
-                      className="w-full bg-background-dark !text-white px-4 py-2 rounded-lg border border-gray-700 focus:outline-none focus:border-primary"
-                      value={selectedContent}
-                      onChange={(e) => setSelectedContent(e.target.value)}
-                    >
-                      <option value="">Select content</option>
-                      <option value="cardiox_update">CardioX Clinical Trial Update</option>
-                      <option value="immunoplus_indication">ImmunoPlus New Indication</option>
-                      <option value="neurocare_resources">NeuroCare Patient Resources</option>
-                      <option value="diabeshield_launch">DiabeShield Product Launch</option>
-                      <option value="respireclear_study">RespireClear Clinical Study</option>
-                    </select>
+                    {selectedContent ? (
+                      <input
+                        type="text"
+                        className="w-full bg-background-dark text-white px-4 py-2 rounded-lg border border-gray-700 focus:outline-none focus:border-primary"
+                        value={selectedContent === "cardiox_update" ? "CardioX Clinical Trial Update" :
+                              selectedContent === "immunoplus_indication" ? "ImmunoPlus New Indication" :
+                              selectedContent === "neurocare_resources" ? "NeuroCare Patient Resources" :
+                              selectedContent === "diabeshield_launch" ? "DiabeShield Product Launch" :
+                              selectedContent === "respireclear_study" ? "RespireClear Clinical Study" : selectedContent}
+                        readOnly
+                        onClick={() => setSelectedContent("")}
+                      />
+                    ) : (
+                      <select 
+                        className="w-full bg-background-dark text-white px-4 py-2 rounded-lg border border-gray-700 focus:outline-none focus:border-primary dark-select"
+                        value={selectedContent}
+                        onChange={(e) => setSelectedContent(e.target.value)}
+                      >
+                        <option value="">SELECT CONTENT</option>
+                        <option value="cardiox_update">CardioX Clinical Trial Update</option>
+                        <option value="immunoplus_indication">ImmunoPlus New Indication</option>
+                        <option value="neurocare_resources">NeuroCare Patient Resources</option>
+                        <option value="diabeshield_launch">DiabeShield Product Launch</option>
+                        <option value="respireclear_study">RespireClear Clinical Study</option>
+                      </select>
+                    )}
                   </div>
                   
                   <button 
@@ -113,54 +203,70 @@ const EngageOptic = () => {
                 <div className="col-span-2">
                   <label className="block text-sm font-medium mb-2">Channel Optimization</label>
                   <div className="bg-background-dark rounded-lg border border-gray-700 p-4 h-64">
-                    <div className="flex justify-between items-center mb-6">
-                      <h4 className="font-medium">Recommended Channels</h4>
-                      <span className="text-sm text-gray-400">Cardiology Specialists</span>
-                    </div>
-                    
-                    <div className="grid grid-cols-5 gap-4 w-full px-4">
-                      <div className="flex flex-col items-center">
-                        <div className="bg-primary h-32 w-6 rounded-t-lg"></div>
-                        <span className="text-xs mt-2">Email</span>
-                        <span className="text-xs text-gray-400">42%</span>
+                    {generatingPlan ? (
+                      <div className="flex flex-col items-center justify-center h-full">
+                        <div className="w-8 h-8 border-t-2 border-primary rounded-full animate-spin mb-4"></div>
+                        <p className="text-sm text-gray-400">Generating campaign plan...</p>
                       </div>
-                      <div className="flex flex-col items-center">
-                        <div className="bg-blue-400 h-16 w-6 rounded-t-lg"></div>
-                        <span className="text-xs mt-2">Video</span>
-                        <span className="text-xs text-gray-400">21%</span>
+                    ) : campaignPlan ? (
+                      <>
+                        <div className="flex justify-between items-center mb-6">
+                          <h4 className="font-medium">Recommended Channels</h4>
+                          <span className="text-sm text-gray-400">{campaignPlan.hcpSegment}</span>
+                        </div>
+                        
+                        <div className="grid grid-cols-5 gap-4 w-full px-4">
+                          {campaignPlan.channels.map((channel, idx) => (
+                            <div key={idx} className="flex flex-col items-center">
+                              <div 
+                                className={`${
+                                  idx === 0 ? "bg-primary" : 
+                                  idx === 1 ? "bg-blue-400" : 
+                                  idx === 2 ? "bg-indigo-400" : 
+                                  idx === 3 ? "bg-purple-400" : 
+                                  "bg-pink-400"
+                                } rounded-t-lg`} 
+                                style={{ 
+                                  height: `${channel.percentage * 1.6}px`,
+                                  width: '24px' 
+                                }}
+                              ></div>
+                              <span className="text-xs mt-2">{channel.name}</span>
+                              <span className="text-xs text-gray-400">{channel.percentage}%</span>
+                            </div>
+                          ))}
+                        </div>
+                      </>
+                    ) : (
+                      <div className="flex flex-col items-center justify-center h-full text-center">
+                        <p className="text-gray-400 mb-2">Select an HCP segment and content type</p>
+                        <p className="text-gray-500 text-sm">Then click "Generate Campaign Plan" to see channel optimization</p>
                       </div>
-                      <div className="flex flex-col items-center">
-                        <div className="bg-indigo-400 h-24 w-6 rounded-t-lg"></div>
-                        <span className="text-xs mt-2">In-person</span>
-                        <span className="text-xs text-gray-400">31%</span>
-                      </div>
-                      <div className="flex flex-col items-center">
-                        <div className="bg-purple-400 h-10 w-6 rounded-t-lg"></div>
-                        <span className="text-xs mt-2">Webinar</span>
-                        <span className="text-xs text-gray-400">13%</span>
-                      </div>
-                      <div className="flex flex-col items-center">
-                        <div className="bg-pink-400 h-8 w-6 rounded-t-lg"></div>
-                        <span className="text-xs mt-2">Call</span>
-                        <span className="text-xs text-gray-400">10%</span>
-                      </div>
-                    </div>
+                    )}
                   </div>
                   
                   <div className="mt-6">
                     <label className="block text-sm font-medium mb-2">Timing Recommendations</label>
                     <div className="bg-background-dark rounded-lg border border-gray-700 p-4">
-                      <p className="text-sm mb-2">
-                        <span className="font-medium">Optimal Send Time:</span> Tuesday/Thursday mornings (8-10 AM)
-                      </p>
-                      <p className="text-sm mb-2">
-                        <span className="font-medium">Optimal Follow-up:</span> 3-5 days after initial contact
-                      </p>
-                      <p className="text-sm">
-                        <span className="font-medium">Reasoning:</span> Analysis of previous engagement patterns shows 
-                        cardiologists have 32% higher response rates during early morning hours and are 2.7x more likely 
-                        to engage with content on Tuesday/Thursday.
-                      </p>
+                      {generatingPlan ? (
+                        <div className="flex items-center justify-center h-20">
+                          <div className="w-6 h-6 border-t-2 border-primary rounded-full animate-spin"></div>
+                        </div>
+                      ) : campaignPlan ? (
+                        <>
+                          <p className="text-sm mb-2">
+                            <span className="font-medium">Optimal Send Time:</span> {campaignPlan.timingRecommendations.optimalSendTime}
+                          </p>
+                          <p className="text-sm mb-2">
+                            <span className="font-medium">Optimal Follow-up:</span> {campaignPlan.timingRecommendations.optimalFollowUp}
+                          </p>
+                          <p className="text-sm">
+                            <span className="font-medium">Reasoning:</span> {campaignPlan.timingRecommendations.reasoning}
+                          </p>
+                        </>
+                      ) : (
+                        <p className="text-gray-400 text-center py-4">Generate a campaign plan to see timing recommendations</p>
+                      )}
                     </div>
                   </div>
                 </div>
