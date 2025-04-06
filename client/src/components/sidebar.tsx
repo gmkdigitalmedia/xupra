@@ -26,11 +26,8 @@ const NavItem = ({
       onClick();
     }
     
-    // Then navigate to the new location after a small delay
-    // This prevents UI glitches during transitions
-    setTimeout(() => {
-      setLocation(path);
-    }, 10);
+    // Navigate to the new location directly
+    setLocation(path);
   };
 
   return (

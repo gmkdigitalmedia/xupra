@@ -73,7 +73,7 @@ function AppRoutes() {
           <Route path="/asset-management" component={AssetManagement} />
           <Route path="/admin" component={AdminConnectionsPage} />
           <Route path="/slack-integration" component={SlackIntegrationPage} />
-          <Route component={NotFound} />
+          <Route path="*" component={NotFound} />
         </Switch>
       </div>
     </div>
