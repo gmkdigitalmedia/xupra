@@ -181,27 +181,20 @@ export function GeographicMap() {
           zoom={position.zoom}
           onMoveEnd={(position: any) => setPosition(position as { coordinates: [number, number], zoom: number })}
         >
-          {/* Using a simple placeholder for the geographies */}
-          <g>
-            <path
-              d="M215.5,100 L350,100 L350,200 L215.5,200 Z"
-              fill="#1e293b" // Slate-800
-              stroke="#0f172a" // Slate-900
-              strokeWidth={0.5}
-            />
-            <path
-              d="M100,120 L215.5,120 L215.5,220 L100,220 Z"
-              fill="#1e293b" // Slate-800
-              stroke="#0f172a" // Slate-900
-              strokeWidth={0.5}
-            />
-            <path
-              d="M350,120 L450,120 L450,180 L350,180 Z"
-              fill="#1e293b" // Slate-800
-              stroke="#0f172a" // Slate-900
-              strokeWidth={0.5}
-            />
-          </g>
+          {/* USA map with state boundaries */}
+          <Geographies geography="https://cdn.jsdelivr.net/npm/us-atlas@3/states-10m.json">
+            {({ geographies }) =>
+              geographies.map(geo => (
+                <Geography
+                  key={geo.rsmKey}
+                  geography={geo}
+                  fill="#1e293b"
+                  stroke="#64748b"
+                  strokeWidth={0.5}
+                />
+              ))
+            }
+          </Geographies>
           
           {sampleLocations.map(hcp => (
             <Marker 
