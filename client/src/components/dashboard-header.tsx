@@ -16,7 +16,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ title }) => {
           <span className="absolute top-0 right-0 w-2 h-2 bg-primary rounded-full"></span>
         </div>
         <div>
-          <select className="bg-background-card text-white text-sm rounded-lg px-2 py-1 border border-gray-700">
+          <select className="bg-white text-black text-sm rounded-lg px-2 py-1 border border-gray-300">
             <option>English</option>
             <option>Japanese</option>
           </select>

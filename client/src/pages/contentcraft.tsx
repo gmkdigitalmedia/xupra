@@ -215,7 +215,7 @@ const ContentCraft = () => {
                   <div className="mb-4">
                     <label className="block text-sm font-medium mb-2">Key Message</label>
                     <textarea 
-                      className="w-full bg-background-dark text-white px-4 py-2 rounded-lg border border-gray-700 focus:outline-none focus:border-primary h-24 resize-none" 
+                      className="w-full bg-white text-black px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:border-primary h-24 resize-none" 
                       placeholder="Enter key message or leave blank for AI to suggest"
                       value={keyMessage}
                       onChange={(e) => setKeyMessage(e.target.value)}
@@ -348,11 +348,11 @@ const ContentCraft = () => {
               <h3 className="font-semibold">Saved Content</h3>
               <div className="flex items-center space-x-2">
                 <div className="relative">
-                  <span className="material-icons text-gray-500 absolute left-3 top-1/2 transform -translate-y-1/2">search</span>
+                  <span className="material-icons text-gray-600 absolute left-3 top-1/2 transform -translate-y-1/2">search</span>
                   <input 
                     type="text" 
                     placeholder="Search content..." 
-                    className="bg-background-dark text-white pl-10 pr-4 py-2 rounded-lg text-sm border border-gray-700 focus:outline-none focus:border-primary"
+                    className="bg-white text-black pl-10 pr-4 py-2 rounded-lg text-sm border border-gray-300 focus:outline-none focus:border-primary"
                   />
                 </div>
                 <button className="bg-background-dark hover:bg-background-lighter text-white px-3 py-2 rounded-lg text-sm flex items-center space-x-1 transition">

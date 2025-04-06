@@ -15,4 +15,20 @@
   select option {
     @apply bg-white text-black;
   }
+  
+  /* Ensure all inputs and textareas have proper text color for visibility */
+  input, textarea, select {
+    @apply text-black;
+  }
+  
+  /* Fix any white inputs with white text to have proper background */
+  input[type="text"], 
+  input[type="email"], 
+  input[type="password"], 
+  input[type="number"],
+  input[type="search"],
+  textarea,
+  select {
+    @apply bg-white border-gray-300;
+  }
 }
