@@ -1,27 +1,128 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Sidebar from "@/components/sidebar";
 import DashboardHeader from "@/components/dashboard-header";
 import TagBadge from "@/components/tag-badge";
 
+// Improved dropdown component
+const CustomSelect = ({ 
+  label, 
+  options, 
+  value, 
+  onChange, 
+  placeholder = "Select an option" 
+}: { 
+  label: string; 
+  options: { value: string; label: string }[]; 
+  value: string; 
+  onChange: (value: string) => void; 
+  placeholder?: string;
+}) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [selectedLabel, setSelectedLabel] = useState(placeholder);
+
+  // Update the displayed label when value changes
+  useEffect(() => {
+    const option = options.find(opt => opt.value === value);
+    setSelectedLabel(option ? option.label : placeholder);
+  }, [value, options, placeholder]);
+
+  const handleSelect = (optionValue: string, optionLabel: string) => {
+    onChange(optionValue);
+    setSelectedLabel(optionLabel);
+    setIsOpen(false);
+  };
+
+  return (
+    <div className="mb-4 relative">
+      <label className="block text-sm font-medium mb-2">{label}</label>
+      <div 
+        className="w-full bg-background-dark text-white px-4 py-2 rounded-lg border border-gray-700 focus:outline-none focus:border-primary cursor-pointer flex items-center justify-between"
+        onClick={() => setIsOpen(!isOpen)}
+      >
+        <span className={value ? "text-white" : "text-gray-500"}>
+          {selectedLabel}
+        </span>
+        <span className="material-icons text-sm">
+          {isOpen ? "arrow_drop_up" : "arrow_drop_down"}
+        </span>
+      </div>
+      
+      {isOpen && (
+        <div className="absolute z-10 w-full mt-1 bg-background-dark border border-gray-700 rounded-lg overflow-hidden shadow-lg max-h-60 overflow-y-auto">
+          {options.map((option) => (
+            <div 
+              key={option.value} 
+              className={`px-4 py-2 hover:bg-background-lighter cursor-pointer ${option.value === value ? 'bg-primary/20 border-l-4 border-primary' : ''}`}
+              onClick={() => handleSelect(option.value, option.label)}
+            >
+              {option.label}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
 const EngageOptic = () => {
   const [selectedHcp, setSelectedHcp] = useState("");
   const [selectedContent, setSelectedContent] = useState("");
+  const [planGenerated, setPlanGenerated] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
   
   const handleGenerateCampaignPlan = () => {
+    if (!selectedHcp || !selectedContent) {
+      // Show visual feedback that selections are required
+      return;
+    }
+    
     // In a real implementation, this would make an API call to generate a campaign plan
-    console.log("Generating campaign plan for:", {
-      hcp: selectedHcp,
-      content: selectedContent,
-    });
+    setIsGenerating(true);
+    
+    // Simulate API call delay
+    setTimeout(() => {
+      setIsGenerating(false);
+      setPlanGenerated(true);
+      console.log("Generating campaign plan for:", {
+        hcp: selectedHcp,
+        content: selectedContent,
+      });
+    }, 1000);
   };
   
-  const channelOptions = [
-    { label: "Email", active: true },
-    { label: "Video", active: false },
-    { label: "In-person", active: false },
-    { label: "Webinar", active: false },
-    { label: "Call", active: false },
+  const hcpOptions = [
+    { value: "", label: "Select HCP segment" },
+    { value: "cardiologists", label: "Cardiologists" },
+    { value: "oncologists", label: "Oncologists" },
+    { value: "neurologists", label: "Neurologists" },
+    { value: "generalpractitioners", label: "General Practitioners" },
+    { value: "pediatricians", label: "Pediatricians" },
   ];
+  
+  const contentOptions = [
+    { value: "", label: "Select content" },
+    { value: "cardiox_update", label: "CardioX Clinical Trial Update" },
+    { value: "immunoplus_indication", label: "ImmunoPlus New Indication" },
+    { value: "neurocare_resources", label: "NeuroCare Patient Resources" },
+    { value: "diabeshield_launch", label: "DiabeShield Product Launch" },
+    { value: "respireclear_study", label: "RespireClear Clinical Study" },
+  ];
+  
+  const [channelOptions, setChannelOptions] = useState([
+    { id: 1, label: "Email", active: true },
+    { id: 2, label: "Video", active: false },
+    { id: 3, label: "In-person", active: false },
+    { id: 4, label: "Webinar", active: false },
+    { id: 5, label: "Call", active: false },
+  ]);
+  
+  const toggleChannel = (id: number) => {
+    setChannelOptions(options => 
+      options.map(option => 
+        option.id === id ? { ...option, active: !option.active } : option
+      )
+    );
+  };
   
   const campaigns = [
     {
@@ -70,43 +171,49 @@ const EngageOptic = () => {
               
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <div className="col-span-1">
-                  <div className="mb-4">
-                    <label className="block text-sm font-medium mb-2">Select HCP Segment</label>
-                    <select 
-                      className="w-full bg-background-dark text-white px-4 py-2 rounded-lg border border-gray-700 focus:outline-none focus:border-primary"
-                      value={selectedHcp}
-                      onChange={(e) => setSelectedHcp(e.target.value)}
-                    >
-                      <option value="">Select HCP segment</option>
-                      <option value="cardiologists">Cardiologists</option>
-                      <option value="oncologists">Oncologists</option>
-                      <option value="neurologists">Neurologists</option>
-                      <option value="generalpractitioners">General Practitioners</option>
-                      <option value="pediatricians">Pediatricians</option>
-                    </select>
-                  </div>
+                  <CustomSelect 
+                    label="Select HCP Segment"
+                    options={hcpOptions}
+                    value={selectedHcp}
+                    onChange={setSelectedHcp}
+                  />
                   
-                  <div className="mb-4">
-                    <label className="block text-sm font-medium mb-2">Select Content</label>
-                    <select 
-                      className="w-full bg-background-dark text-white px-4 py-2 rounded-lg border border-gray-700 focus:outline-none focus:border-primary"
-                      value={selectedContent}
-                      onChange={(e) => setSelectedContent(e.target.value)}
-                    >
-                      <option value="">Select content</option>
-                      <option value="cardiox_update">CardioX Clinical Trial Update</option>
-                      <option value="immunoplus_indication">ImmunoPlus New Indication</option>
-                      <option value="neurocare_resources">NeuroCare Patient Resources</option>
-                      <option value="diabeshield_launch">DiabeShield Product Launch</option>
-                      <option value="respireclear_study">RespireClear Clinical Study</option>
-                    </select>
-                  </div>
+                  <CustomSelect 
+                    label="Select Content"
+                    options={contentOptions}
+                    value={selectedContent}
+                    onChange={setSelectedContent}
+                  />
+                  
+                  {planGenerated && (
+                    <div className="mb-4 p-2 bg-green-900/30 text-green-400 rounded-lg text-sm">
+                      <span className="material-icons text-sm mr-1 align-text-bottom">check_circle</span>
+                      Campaign plan generated successfully!
+                    </div>
+                  )}
                   
                   <button 
-                    className="w-full bg-primary hover:bg-primary/80 text-white font-medium px-4 py-2 rounded-lg transition mt-4"
+                    className={`w-full font-medium px-4 py-2 rounded-lg transition mt-4 flex items-center justify-center ${
+                      !selectedHcp || !selectedContent 
+                        ? 'bg-gray-700 text-gray-400 cursor-not-allowed' 
+                        : isGenerating 
+                          ? 'bg-primary/70 text-white'
+                          : 'bg-primary hover:bg-primary/80 text-white'
+                    }`}
                     onClick={handleGenerateCampaignPlan}
+                    disabled={!selectedHcp || !selectedContent || isGenerating}
                   >
-                    Generate Campaign Plan
+                    {isGenerating ? (
+                      <>
+                        <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Generating...
+                      </>
+                    ) : (
+                      'Generate Campaign Plan'
+                    )}
                   </button>
                 </div>
                 
@@ -170,14 +277,21 @@ const EngageOptic = () => {
           
           {/* Channel Selection */}
           <div className="bg-background-card rounded-xl shadow-lg overflow-hidden mb-8 p-6">
-            <h3 className="text-lg font-semibold mb-4">Channel Selection</h3>
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold">Channel Selection</h3>
+              <div className="text-sm text-gray-400">
+                {channelOptions.filter(c => c.active).length} channels selected
+              </div>
+            </div>
+            <p className="text-sm text-gray-400 mb-4">Click to select or deselect channels for your campaign</p>
             <div className="flex flex-wrap gap-3">
-              {channelOptions.map((channel, index) => (
+              {channelOptions.map((channel) => (
                 <TagBadge 
-                  key={index}
+                  key={channel.id}
                   label={channel.label} 
                   color={channel.active ? "primary" : undefined} 
                   active={channel.active}
+                  onClick={() => toggleChannel(channel.id)}
                 />
               ))}
             </div>
