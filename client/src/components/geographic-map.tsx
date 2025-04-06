@@ -166,7 +166,7 @@ export function GeographicMap() {
   const [hoveredHcp, setHoveredHcp] = useState<HcpLocation | null>(null);
   const [position, setPosition] = useState<{ coordinates: [number, number], zoom: number }>({
     coordinates: [138.0, 38.0], // Center of Japan approximately
-    zoom: 2.0 // Zoomed out more to see all of Japan
+    zoom: 3.0 // Increased zoom for better visibility of Japan
   });
 
   return (
@@ -174,10 +174,10 @@ export function GeographicMap() {
       <ComposableMap
         projection="geoMercator"
         projectionConfig={{ 
-          scale: 1000, // Reduced scale to show more of Japan
-          center: [138.0, 38.0] // Center on Japan
+          scale: 1200, // Adjusted scale for better visibility
+          center: [138.0, 36.0] // Centered better on Japan's mainland
         }}
-        className="bg-black rounded-md"
+        className="bg-gray-900 rounded-md"
       >
         <ZoomableGroup
           center={position.coordinates}
@@ -191,9 +191,9 @@ export function GeographicMap() {
                 <Geography
                   key={geo.rsmKey}
                   geography={geo}
-                  fill="#64748b" 
+                  fill="#334155" 
                   stroke="#ffffff"
-                  strokeWidth={1.0}
+                  strokeWidth={1.5}
                 />
               ))
             }

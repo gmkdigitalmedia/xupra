@@ -11,9 +11,30 @@
     @apply font-sans antialiased bg-background text-foreground;
   }
   
-  /* Fix dropdown option text color for better readability - BUT leave custom component styling alone */
+  /* Force proper colors for dropdown options in dark mode */
   select option {
     @apply bg-white text-black;
+  }
+  
+  /* Force select text to be visible in dark backgrounds */
+  select.bg-background-dark,
+  select.bg-slate-800,
+  select.bg-slate-900,
+  select.bg-gray-800,
+  select.bg-gray-900,
+  .dark-select select {
+    color: white !important;
+  }
+
+  /* Make sure select options are black text on white background for readability */
+  select.bg-background-dark option,
+  select.bg-slate-800 option,
+  select.bg-slate-900 option,
+  select.bg-gray-800 option,
+  select.bg-gray-900 option,
+  .dark-select select option {
+    background-color: white !important;
+    color: black !important;
   }
   
   /* Only apply styling to basic form elements - leave custom styling alone */
