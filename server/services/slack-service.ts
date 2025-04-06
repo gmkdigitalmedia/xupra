@@ -1,219 +1,299 @@
-import { WebClient, ChatPostMessageArguments } from '@slack/web-api';
-import { log } from '../vite';
+import { WebClient, ChatPostMessageArguments } from "@slack/web-api";
 
-/**
- * Creates a Slack client with the given token
- * @param token Slack bot token
- */
-export function createSlackClient(token: string): WebClient {
-  return new WebClient(token);
+// Initialize the Slack client
+const slackClient = process.env.SLACK_BOT_TOKEN 
+  ? new WebClient(process.env.SLACK_BOT_TOKEN)
+  : null;
+
+const defaultChannelId = process.env.SLACK_CHANNEL_ID || "";
+
+export interface SlackMessageOptions {
+  channelId?: string;
+  text?: string;
+  blocks?: any[];
 }
 
 /**
- * Sends a message to a Slack channel
- * @param client Slack WebClient
- * @param channelId Channel ID to send message to
- * @param message Message text or blocks to send
- * @returns Promise resolving to the message timestamp
+ * Sends a message to Slack
+ * @param options Message options including channel, text and blocks
+ * @returns Promise with the message result or error details
  */
-export async function sendSlackMessage(
-  client: WebClient,
-  channelId: string,
-  message: string | any[]
-): Promise<string | undefined> {
+export async function sendSlackMessage(options: SlackMessageOptions): Promise<{ success: boolean; message: string; timestamp?: string }> {
   try {
-    let messageArgs: ChatPostMessageArguments;
-
-    if (typeof message === 'string') {
-      messageArgs = {
-        channel: channelId,
-        text: message
-      };
-    } else {
-      messageArgs = {
-        channel: channelId,
-        blocks: message
+    if (!slackClient) {
+      return { 
+        success: false, 
+        message: "Slack integration not configured. Please add SLACK_BOT_TOKEN to your environment variables." 
       };
     }
 
-    const response = await client.chat.postMessage(messageArgs);
-    log(`Message sent to Slack channel ${channelId}`, 'slack');
-    return response.ts;
-  } catch (error) {
-    log(`Error sending message to Slack: ${error}`, 'slack');
-    throw error;
+    const channelId = options.channelId || defaultChannelId;
+    
+    if (!channelId) {
+      return { 
+        success: false, 
+        message: "No Slack channel specified. Please add SLACK_CHANNEL_ID to your environment variables or specify a channel." 
+      };
+    }
+
+    const messageOptions: ChatPostMessageArguments = {
+      channel: channelId,
+      text: options.text || "Message from Xupra",
+      blocks: options.blocks,
+    };
+
+    const result = await slackClient.chat.postMessage(messageOptions);
+    
+    return {
+      success: true,
+      message: "Message sent successfully",
+      timestamp: result.ts
+    };
+  } catch (error: any) {
+    console.error("Error sending Slack message:", error);
+    return {
+      success: false,
+      message: `Failed to send message: ${error.message || "Unknown error"}`
+    };
   }
 }
 
 /**
- * Reads the history of a Slack channel
- * @param client Slack WebClient
- * @param channelId Channel ID to read message history from
+ * Reads message history from a Slack channel
+ * @param channelId The channel ID to read history from (defaults to environment value)
  * @param limit Maximum number of messages to retrieve
- * @returns Promise resolving to the conversation history
+ * @returns Promise with the message history or error details
  */
-export async function readSlackHistory(
-  client: WebClient,
-  channelId: string,
-  limit: number = 10
-): Promise<any> {
+export async function getSlackHistory(channelId?: string, limit: number = 100): Promise<{ 
+  success: boolean; 
+  messages?: any[]; 
+  message?: string;
+}> {
   try {
-    const response = await client.conversations.history({
-      channel: channelId,
-      limit
+    if (!slackClient) {
+      return { 
+        success: false, 
+        message: "Slack integration not configured. Please add SLACK_BOT_TOKEN to your environment variables." 
+      };
+    }
+
+    const channel = channelId || defaultChannelId;
+    
+    if (!channel) {
+      return { 
+        success: false, 
+        message: "No Slack channel specified. Please add SLACK_CHANNEL_ID to your environment variables or specify a channel." 
+      };
+    }
+
+    const result = await slackClient.conversations.history({
+      channel,
+      limit,
     });
-    return response;
-  } catch (error) {
-    log(`Error reading Slack channel history: ${error}`, 'slack');
-    throw error;
+    
+    return {
+      success: true,
+      messages: result.messages || []
+    };
+  } catch (error: any) {
+    console.error("Error fetching Slack history:", error);
+    return {
+      success: false,
+      message: `Failed to fetch message history: ${error.message || "Unknown error"}`
+    };
   }
 }
 
 /**
- * Posts an HCP engagement update to Slack
- * @param client Slack WebClient
- * @param channelId Channel ID to send message to
- * @param hcpName Name of the healthcare professional
- * @param action Type of engagement (email, meeting, content share)
- * @param details Additional engagement details
- * @returns Promise resolving to the message timestamp
+ * Creates and sends a formatted HCP engagement message to Slack
+ * @param hcpData HCP engagement data
+ * @returns Promise with the message result
  */
-export async function postHcpEngagementUpdate(
-  client: WebClient,
-  channelId: string,
-  hcpName: string,
-  action: string,
-  details: string
-): Promise<string | undefined> {
+export async function sendHcpEngagementMessage(hcpData: any): Promise<{ success: boolean; message: string; timestamp?: string }> {
   try {
-    const message: ChatPostMessageArguments = {
-      channel: channelId,
-      blocks: [
-        {
-          type: 'header',
-          text: {
-            type: 'plain_text',
-            text: '🩺 HCP Engagement Update',
-            emoji: true
-          }
-        },
-        {
-          type: 'section',
-          fields: [
-            {
-              type: 'mrkdwn',
-              text: `*Healthcare Professional:*\n${hcpName}`
-            },
-            {
-              type: 'mrkdwn',
-              text: `*Action:*\n${action}`
-            }
-          ]
-        },
-        {
-          type: 'section',
-          text: {
-            type: 'mrkdwn',
-            text: `*Details:*\n${details}`
-          }
-        },
-        {
-          type: 'context',
-          elements: [
-            {
-              type: 'mrkdwn',
-              text: `Posted via Xupra HCP Platform • ${new Date().toLocaleString()}`
-            }
-          ]
+    const blocks = [
+      {
+        type: "header",
+        text: {
+          type: "plain_text",
+          text: "🏥 HCP Engagement Update",
+          emoji: true
         }
-      ]
-    };
+      },
+      {
+        type: "section",
+        fields: [
+          {
+            type: "mrkdwn",
+            text: `*Name:*\n${hcpData.name}`
+          },
+          {
+            type: "mrkdwn",
+            text: `*Specialty:*\n${hcpData.specialty}`
+          }
+        ]
+      },
+      {
+        type: "section",
+        fields: [
+          {
+            type: "mrkdwn",
+            text: `*Hospital:*\n${hcpData.hospital || "N/A"}`
+          },
+          {
+            type: "mrkdwn",
+            text: `*Location:*\n${hcpData.location}`
+          }
+        ]
+      },
+      {
+        type: "section",
+        fields: [
+          {
+            type: "mrkdwn",
+            text: `*Engagement Score:*\n${hcpData.engagementScore}/10`
+          },
+          {
+            type: "mrkdwn",
+            text: `*KOL Status:*\n${hcpData.isKol ? "Yes ⭐" : "No"}`
+          }
+        ]
+      },
+      {
+        type: "section",
+        fields: [
+          {
+            type: "mrkdwn",
+            text: `*Tag:*\n${hcpData.tag}`
+          },
+          {
+            type: "mrkdwn",
+            text: `*Prescribing Pattern:*\n${hcpData.prescribingPattern}`
+          }
+        ]
+      },
+      {
+        type: "context",
+        elements: [
+          {
+            type: "mrkdwn",
+            text: `📊 Data from Xupra Platform | ${new Date().toLocaleDateString()}`
+          }
+        ]
+      }
+    ];
 
-    const response = await client.chat.postMessage(message);
-    log(`HCP engagement update sent to Slack channel ${channelId}`, 'slack');
-    return response.ts;
-  } catch (error) {
-    log(`Error sending HCP engagement update to Slack: ${error}`, 'slack');
-    throw error;
+    return await sendSlackMessage({
+      blocks,
+      text: `HCP Engagement Update for ${hcpData.name}`
+    });
+  } catch (error: any) {
+    console.error("Error creating HCP engagement message:", error);
+    return {
+      success: false,
+      message: `Failed to create HCP engagement message: ${error.message || "Unknown error"}`
+    };
   }
 }
 
 /**
- * Posts a campaign analytics update to Slack
- * @param client Slack WebClient
- * @param channelId Channel ID to send message to
- * @param campaignName Name of the campaign
- * @param metrics Campaign performance metrics
- * @returns Promise resolving to the message timestamp
+ * Creates and sends a formatted campaign analytics message to Slack
+ * @param campaignData Campaign analytics data
+ * @returns Promise with the message result
  */
-export async function postCampaignAnalytics(
-  client: WebClient,
-  channelId: string,
-  campaignName: string,
-  metrics: {
-    reach: number;
-    engagement: number;
-    conversionRate: number;
-    roi: number;
-  }
-): Promise<string | undefined> {
+export async function sendCampaignAnalyticsMessage(campaignData: any): Promise<{ success: boolean; message: string; timestamp?: string }> {
   try {
-    const message: ChatPostMessageArguments = {
-      channel: channelId,
-      blocks: [
-        {
-          type: 'header',
-          text: {
-            type: 'plain_text',
-            text: '📊 Campaign Analytics Update',
-            emoji: true
-          }
-        },
-        {
-          type: 'section',
-          text: {
-            type: 'mrkdwn',
-            text: `*Campaign:* ${campaignName}`
-          }
-        },
-        {
-          type: 'section',
-          fields: [
-            {
-              type: 'mrkdwn',
-              text: `*Reach:*\n${metrics.reach.toLocaleString()} HCPs`
-            },
-            {
-              type: 'mrkdwn',
-              text: `*Engagement:*\n${metrics.engagement.toLocaleString()} interactions`
-            },
-            {
-              type: 'mrkdwn',
-              text: `*Conversion Rate:*\n${metrics.conversionRate.toFixed(2)}%`
-            },
-            {
-              type: 'mrkdwn',
-              text: `*ROI:*\n${metrics.roi.toFixed(2)}x`
-            }
-          ]
-        },
-        {
-          type: 'context',
-          elements: [
-            {
-              type: 'mrkdwn',
-              text: `Posted via Xupra HCP Platform • ${new Date().toLocaleString()}`
-            }
-          ]
+    // Calculate engagement rate as a percentage
+    const engagementRate = ((campaignData.engagements / campaignData.reach) * 100).toFixed(1);
+    
+    const blocks = [
+      {
+        type: "header",
+        text: {
+          type: "plain_text",
+          text: "📣 Campaign Analytics Report",
+          emoji: true
         }
-      ]
-    };
+      },
+      {
+        type: "section",
+        fields: [
+          {
+            type: "mrkdwn",
+            text: `*Campaign:*\n${campaignData.name}`
+          },
+          {
+            type: "mrkdwn",
+            text: `*Status:*\n${campaignData.status}`
+          }
+        ]
+      },
+      {
+        type: "section",
+        fields: [
+          {
+            type: "mrkdwn",
+            text: `*Start Date:*\n${new Date(campaignData.startDate).toLocaleDateString()}`
+          },
+          {
+            type: "mrkdwn",
+            text: `*End Date:*\n${new Date(campaignData.endDate).toLocaleDateString()}`
+          }
+        ]
+      },
+      {
+        type: "section",
+        fields: [
+          {
+            type: "mrkdwn",
+            text: `*Reach:*\n${campaignData.reach.toLocaleString()} HCPs`
+          },
+          {
+            type: "mrkdwn",
+            text: `*Engagements:*\n${campaignData.engagements.toLocaleString()}`
+          }
+        ]
+      },
+      {
+        type: "section",
+        fields: [
+          {
+            type: "mrkdwn",
+            text: `*Engagement Rate:*\n${engagementRate}%`
+          },
+          {
+            type: "mrkdwn",
+            text: `*Avg. Time Spent:*\n${campaignData.avgTimeSpent}s`
+          }
+        ]
+      },
+      {
+        type: "section",
+        text: {
+          type: "mrkdwn",
+          text: `*Top Performing Content:*\n${campaignData.topContent}`
+        }
+      },
+      {
+        type: "context",
+        elements: [
+          {
+            type: "mrkdwn",
+            text: `📊 Analytics from Xupra Platform | ${new Date().toLocaleDateString()}`
+          }
+        ]
+      }
+    ];
 
-    const response = await client.chat.postMessage(message);
-    log(`Campaign analytics update sent to Slack channel ${channelId}`, 'slack');
-    return response.ts;
-  } catch (error) {
-    log(`Error sending campaign analytics update to Slack: ${error}`, 'slack');
-    throw error;
+    return await sendSlackMessage({
+      blocks,
+      text: `Campaign Analytics Report for ${campaignData.name}`
+    });
+  } catch (error: any) {
+    console.error("Error creating campaign analytics message:", error);
+    return {
+      success: false,
+      message: `Failed to create campaign analytics message: ${error.message || "Unknown error"}`
+    };
   }
 }

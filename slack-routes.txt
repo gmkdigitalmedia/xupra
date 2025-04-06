@@ -1,0 +1,198 @@
+    try {
+      const { message, channelId } = req.body;
+      
+      if (!message || !channelId) {
+        return res.status(400).json({ message: "Missing required fields: message, channelId" });
+      }
+      
+      // Check if we have the Slack token
+      if (!process.env.SLACK_BOT_TOKEN) {
+        return res.status(500).json({ 
+          message: "Slack bot token not configured", 
+          needsToken: true 
+        });
+      }
+      
+      // Create Slack client
+      const slackClient = createSlackClient(process.env.SLACK_BOT_TOKEN);
+      
+      // Send message
+      const timestamp = await sendSlackMessage(slackClient, channelId, message);
+      
+      res.json({
+        success: true,
+        message: "Message sent successfully",
+        timestamp
+      });
+    } catch (error) {
+      console.error("Error sending Slack message:", error);
+      res.status(500).json({ message: "Failed to send Slack message" });
+    }
+  });
+  
+  app.post("/api/slack/hcp-engagement", async (req: Request, res: Response) => {
+    try {
+      const { hcpId, action, details, channelId } = req.body;
+      
+      if (!hcpId || !action || !details || !channelId) {
+        return res.status(400).json({ 
+          message: "Missing required fields: hcpId, action, details, channelId" 
+        });
+      }
+      
+      // Check if we have the Slack token
+      if (!process.env.SLACK_BOT_TOKEN) {
+        return res.status(500).json({ 
+          message: "Slack bot token not configured", 
+          needsToken: true 
+        });
+      }
+      
+      // Get HCP data
+      const id = parseInt(hcpId);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid HCP ID" });
+      }
+      
+      const hcp = await storage.getHcp(id);
+      if (!hcp) {
+        return res.status(404).json({ message: "HCP not found" });
+      }
+      
+      // Create Slack client
+      const slackClient = createSlackClient(process.env.SLACK_BOT_TOKEN);
+      
+      // Post engagement update
+      const timestamp = await postHcpEngagementUpdate(
+        slackClient, 
+        channelId, 
+        hcp.name, 
+        action, 
+        details
+      );
+      
+      // Create activity record
+      await storage.createActivity({
+        activity: `HCP Engagement: ${action}`,
+        user: "John Doe",
+        status: "Completed",
+        relatedTo: `HCP:${hcp.id}`
+      });
+      
+      res.json({
+        success: true,
+        message: "HCP engagement posted to Slack",
+        timestamp
+      });
+    } catch (error) {
+      console.error("Error posting HCP engagement to Slack:", error);
+      res.status(500).json({ message: "Failed to post HCP engagement" });
+    }
+  });
+  
+  app.post("/api/slack/campaign-analytics", async (req: Request, res: Response) => {
+    try {
+      const { campaignId, metrics, channelId } = req.body;
+      
+      if (!campaignId || !metrics || !channelId) {
+        return res.status(400).json({ 
+          message: "Missing required fields: campaignId, metrics, channelId" 
+        });
+      }
+      
+      if (!metrics.reach || !metrics.engagement || 
+          metrics.conversionRate === undefined || metrics.roi === undefined) {
+        return res.status(400).json({ 
+          message: "Missing metrics: reach, engagement, conversionRate, roi" 
+        });
+      }
+      
+      // Check if we have the Slack token
+      if (!process.env.SLACK_BOT_TOKEN) {
+        return res.status(500).json({ 
+          message: "Slack bot token not configured", 
+          needsToken: true 
+        });
+      }
+      
+      // Get campaign data
+      const id = parseInt(campaignId);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid campaign ID" });
+      }
+      
+      const campaign = await storage.getCampaign(id);
+      if (!campaign) {
+        return res.status(404).json({ message: "Campaign not found" });
+      }
+      
+      // Create Slack client
+      const slackClient = createSlackClient(process.env.SLACK_BOT_TOKEN);
+      
+      // Post campaign analytics
+      const timestamp = await postCampaignAnalytics(
+        slackClient, 
+        channelId, 
+        campaign.name, 
+        metrics
+      );
+      
+      // Create activity record
+      await storage.createActivity({
+        activity: `Campaign Analytics Posted: ${campaign.name}`,
+        user: "John Doe",
+        status: "Completed",
+        relatedTo: `Campaign:${campaign.id}`
+      });
+      
+      res.json({
+        success: true,
+        message: "Campaign analytics posted to Slack",
+        timestamp
+      });
+    } catch (error) {
+      console.error("Error posting campaign analytics to Slack:", error);
+      res.status(500).json({ message: "Failed to post campaign analytics" });
+    }
+  });
+  
+  app.get("/api/slack/history", async (req: Request, res: Response) => {
+    try {
+      const { channelId, limit } = req.query;
+      
+      if (!channelId) {
+        return res.status(400).json({ message: "Missing required query parameter: channelId" });
+      }
+      
+      // Check if we have the Slack token
+      if (!process.env.SLACK_BOT_TOKEN) {
+        return res.status(500).json({ 
+          message: "Slack bot token not configured", 
+          needsToken: true 
+        });
+      }
+      
+      // Create Slack client
+      const slackClient = createSlackClient(process.env.SLACK_BOT_TOKEN);
+      
+      // Read channel history
+      const history = await readSlackHistory(
+        slackClient, 
+        channelId as string, 
+        limit ? parseInt(limit as string) : undefined
+      );
+      
+      res.json({
+        success: true,
+        messages: history.messages,
+        hasMore: history.has_more
+      });
+    } catch (error) {
+      console.error("Error reading Slack history:", error);
+      res.status(500).json({ message: "Failed to read Slack history" });
+    }
+  });
+
+  const httpServer = createServer(app);
+  return httpServer;
+}

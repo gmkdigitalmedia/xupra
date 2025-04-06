@@ -18,11 +18,12 @@ import {
   tagHcpWithMediTag 
 } from "./services/openai-service";
 import { testApiConnection } from "./services/api-connection-service";
-import { 
-  sendSlackMessage, 
-  getSlackHistory, 
-  sendHcpEngagementMessage, 
-  sendCampaignAnalyticsMessage 
+import {
+  createSlackClient,
+  sendSlackMessage,
+  readSlackHistory,
+  postHcpEngagementUpdate,
+  postCampaignAnalytics
 } from "./services/slack-service";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -793,65 +794,75 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // HCP data upload via CSV
   app.post("/api/hcp/upload", async (req: Request, res: Response) => {
     try {
-      // In a production environment, we would process the actual CSV file
-      // For demonstration purposes, we'll generate Japanese HCP records
-      
-      // Generate a random number of HCPs between the range
-      const minHcps = 5;
-      const maxHcps = 15;
-      const numberOfHcps = Math.floor(Math.random() * (maxHcps - minHcps + 1)) + minHcps;
-      
-      // Sample data for generation
-      const specialties = ["Cardiology", "Oncology", "Neurology", "Pediatrics", "Dermatology", "Internal Medicine"];
-      const tags = ["Early Adopter", "Evidence Driven", "Patient Focused", "Balanced", "Cost Conscious", "Conservative"];
-      const prescribingPatterns = ["High Volume", "Medium Volume", "Low Volume"];
-      const organizations = ["Tokyo Medical Center", "Osaka University Hospital", "Kyoto Medical Clinic", "Yokohama General Hospital"];
-      
-      // Create HCPs with Japanese names for the sample
-      const firstNames = ["Hiroshi", "Takashi", "Yuki", "Akira", "Naomi", "Keiko", "Satoshi", "Shigeru", "Yuriko", "Atsuko"];
-      const lastNames = ["Tanaka", "Suzuki", "Takahashi", "Watanabe", "Ito", "Yamamoto", "Nakamura", "Kobayashi", "Saito", "Kato"];
-      
-      // Generate HCPs
-      const hcps = Array.from({ length: numberOfHcps }, () => {
-        const firstName = firstNames[Math.floor(Math.random() * firstNames.length)];
-        const lastName = lastNames[Math.floor(Math.random() * lastNames.length)];
-        const specialty = specialties[Math.floor(Math.random() * specialties.length)];
-        const tag = tags[Math.floor(Math.random() * tags.length)];
-        const prescribingPattern = prescribingPatterns[Math.floor(Math.random() * prescribingPatterns.length)];
-        const organization = organizations[Math.floor(Math.random() * organizations.length)];
-        const engagementScore = Math.floor(Math.random() * 41) + 60; // 60-100 range
-        const isKol = Math.random() > 0.8; // 20% chance of being a KOL
-        
-        return {
-          name: `Dr. ${firstName} ${lastName}`,
-          specialty,
-          prescribingPattern,
-          engagementScore,
-          tag,
-          email: `${firstName.toLowerCase()}.${lastName.toLowerCase()}@example.com`,
-          organization,
-          isKol,
-          location: "Tokyo, Japan",
-          notes: `Specializes in ${specialty.toLowerCase()} treatments and research`
-        };
-      });
-      
-      // Save HCPs to storage
+      // In a real implementation, CSV parsing would happen here
+      // For now, we'll just create some mock HCP records
+
+      // Create sample HCPs based on the mock data needed
+      const hcps = [
+        {
+          name: "Dr. Sarah Chen",
+          specialty: "Cardiology",
+          prescribingPattern: "High Volume",
+          engagementScore: 87,
+          tag: "Early Adopter",
+          email: "sarah.chen@example.com",
+          organization: "Metropolis Medical Center",
+          notes: "Interested in new cardiovascular treatments"
+        },
+        {
+          name: "Dr. James Wilson",
+          specialty: "Oncology",
+          prescribingPattern: "Medium Volume",
+          engagementScore: 76,
+          tag: "Evidence Driven",
+          email: "james.wilson@example.com",
+          organization: "City Cancer Institute",
+          notes: "Requires strong clinical data before adoption"
+        },
+        {
+          name: "Dr. Maria Rodriguez",
+          specialty: "Neurology",
+          prescribingPattern: "Low Volume",
+          engagementScore: 62,
+          tag: "Patient Focused",
+          email: "maria.rodriguez@example.com",
+          organization: "Westside Neuro Center",
+          notes: "Emphasizes patient quality of life in treatment decisions"
+        },
+        {
+          name: "Dr. Robert Johnson",
+          specialty: "General Practice",
+          prescribingPattern: "High Volume",
+          engagementScore: 81,
+          tag: "Balanced",
+          email: "robert.johnson@example.com",
+          organization: "Community Family Practice",
+          notes: "Considers multiple factors in prescribing decisions"
+        },
+        {
+          name: "Dr. Emily Chang",
+          specialty: "Pediatrics",
+          prescribingPattern: "Medium Volume",
+          engagementScore: 74,
+          tag: "Patient Focused",
+          email: "emily.chang@example.com",
+          organization: "Children's Medical Group",
+          notes: "Focused on minimizing side effects in pediatric patients"
+        }
+      ];
+
+      // Create HCPs in storage
       const createdHcps = await Promise.all(hcps.map(hcp => storage.createHcp(hcp)));
-      
+
       // Create activity record for this upload
       await storage.createActivity({
-        activity: `Imported ${createdHcps.length} HCP records from CSV`,
-        user: "admin",
+        activity: "CSV HCP data imported",
+        user: "John Doe",
         status: "Completed",
         relatedTo: "HCP"
       });
-      
-      res.status(201).json({ 
-        message: "HCP data uploaded successfully", 
-        count: createdHcps.length,
-        success: true
-      });
+
+      res.status(201).json({ message: "HCP data uploaded successfully", count: createdHcps.length });
     } catch (error) {
       console.error("Error uploading HCP data:", error);
       res.status(500).json({ message: "Failed to upload HCP data" });
@@ -861,27 +872,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Slack Integration Routes
   app.post("/api/slack/send", async (req: Request, res: Response) => {
     try {
-      const { text, blocks, channelId } = req.body;
+      const { message, channelId } = req.body;
       
-      if (!text && !blocks) {
-        return res.status(400).json({ message: "Missing required fields: either text or blocks must be provided" });
+      if (!message || !channelId) {
+        return res.status(400).json({ message: "Missing required fields: message, channelId" });
       }
       
-      const result = await sendSlackMessage({
-        text,
-        blocks,
-        channelId
-      });
-      
-      if (!result.success) {
-        const errorMessage = result.message || "Unknown error";
+      // Check if we have the Slack token
+      if (!process.env.SLACK_BOT_TOKEN) {
         return res.status(500).json({ 
-          message: errorMessage,
-          needsToken: errorMessage.includes("not configured")
+          message: "Slack bot token not configured", 
+          needsToken: true 
         });
       }
       
-      res.json(result);
+      // Create Slack client
+      const slackClient = createSlackClient(process.env.SLACK_BOT_TOKEN);
+      
+      // Send message
+      const timestamp = await sendSlackMessage(slackClient, channelId, message);
+      
+      res.json({
+        success: true,
+        message: "Message sent successfully",
+        timestamp
+      });
     } catch (error) {
       console.error("Error sending Slack message:", error);
       res.status(500).json({ message: "Failed to send Slack message" });
@@ -890,11 +905,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   app.post("/api/slack/hcp-engagement", async (req: Request, res: Response) => {
     try {
-      const { hcpId } = req.body;
+      const { hcpId, action, details, channelId } = req.body;
       
-      if (!hcpId) {
+      if (!hcpId || !action || !details || !channelId) {
         return res.status(400).json({ 
-          message: "Missing required field: hcpId" 
+          message: "Missing required fields: hcpId, action, details, channelId" 
+        });
+      }
+      
+      // Check if we have the Slack token
+      if (!process.env.SLACK_BOT_TOKEN) {
+        return res.status(500).json({ 
+          message: "Slack bot token not configured", 
+          needsToken: true 
         });
       }
       
@@ -909,19 +932,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "HCP not found" });
       }
       
-      const result = await sendHcpEngagementMessage(hcp);
+      // Create Slack client
+      const slackClient = createSlackClient(process.env.SLACK_BOT_TOKEN);
       
-      if (!result.success) {
-        const errorMessage = result.message || "Unknown error";
-        return res.status(500).json({ 
-          message: errorMessage,
-          needsToken: errorMessage.includes("not configured")
-        });
-      }
+      // Post engagement update
+      const timestamp = await postHcpEngagementUpdate(
+        slackClient, 
+        channelId, 
+        hcp.name, 
+        action, 
+        details
+      );
       
       // Create activity record
       await storage.createActivity({
-        activity: "HCP Engagement Message Sent",
+        activity: `HCP Engagement: ${action}`,
         user: "John Doe",
         status: "Completed",
         relatedTo: `HCP:${hcp.id}`
@@ -930,7 +955,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({
         success: true,
         message: "HCP engagement posted to Slack",
-        timestamp: result.timestamp
+        timestamp
       });
     } catch (error) {
       console.error("Error posting HCP engagement to Slack:", error);
@@ -940,11 +965,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   app.post("/api/slack/campaign-analytics", async (req: Request, res: Response) => {
     try {
-      const { campaignId } = req.body;
+      const { campaignId, metrics, channelId } = req.body;
       
-      if (!campaignId) {
+      if (!campaignId || !metrics || !channelId) {
         return res.status(400).json({ 
-          message: "Missing required field: campaignId" 
+          message: "Missing required fields: campaignId, metrics, channelId" 
+        });
+      }
+      
+      if (!metrics.reach || !metrics.engagement || 
+          metrics.conversionRate === undefined || metrics.roi === undefined) {
+        return res.status(400).json({ 
+          message: "Missing metrics: reach, engagement, conversionRate, roi" 
+        });
+      }
+      
+      // Check if we have the Slack token
+      if (!process.env.SLACK_BOT_TOKEN) {
+        return res.status(500).json({ 
+          message: "Slack bot token not configured", 
+          needsToken: true 
         });
       }
       
@@ -959,28 +999,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Campaign not found" });
       }
       
-      // Get analytics for this campaign (simplified)
-      const estimatedReach = 5000; // Simulated data
-      const analytics = {
-        name: campaign.name,
-        status: campaign.status,
-        startDate: campaign.startDate,
-        endDate: campaign.endDate,
-        reach: estimatedReach,
-        engagements: Math.floor(estimatedReach * 0.65), // Simulated data
-        avgTimeSpent: 42, // Simulated data
-        topContent: "Drug efficacy comparison infographic", // Simulated data
-      };
+      // Create Slack client
+      const slackClient = createSlackClient(process.env.SLACK_BOT_TOKEN);
       
-      const result = await sendCampaignAnalyticsMessage(analytics);
-      
-      if (!result.success) {
-        const errorMessage = result.message || "Unknown error";
-        return res.status(500).json({ 
-          message: errorMessage,
-          needsToken: errorMessage.includes("not configured")
-        });
-      }
+      // Post campaign analytics
+      const timestamp = await postCampaignAnalytics(
+        slackClient, 
+        channelId, 
+        campaign.name, 
+        metrics
+      );
       
       // Create activity record
       await storage.createActivity({
@@ -993,7 +1021,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({
         success: true,
         message: "Campaign analytics posted to Slack",
-        timestamp: result.timestamp
+        timestamp
       });
     } catch (error) {
       console.error("Error posting campaign analytics to Slack:", error);
@@ -1005,22 +1033,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { channelId, limit } = req.query;
       
-      const result = await getSlackHistory(
-        channelId as string | undefined,
-        limit ? parseInt(limit as string) : undefined
-      );
+      if (!channelId) {
+        return res.status(400).json({ message: "Missing required query parameter: channelId" });
+      }
       
-      if (!result.success) {
-        const errorMessage = result.message || "Unknown error";
+      // Check if we have the Slack token
+      if (!process.env.SLACK_BOT_TOKEN) {
         return res.status(500).json({ 
-          message: errorMessage,
-          needsToken: errorMessage.includes("not configured")
+          message: "Slack bot token not configured", 
+          needsToken: true 
         });
       }
       
+      // Create Slack client
+      const slackClient = createSlackClient(process.env.SLACK_BOT_TOKEN);
+      
+      // Read channel history
+      const history = await readSlackHistory(
+        slackClient, 
+        channelId as string, 
+        limit ? parseInt(limit as string) : undefined
+      );
+      
       res.json({
         success: true,
-        messages: result.messages
+        messages: history.messages,
+        hasMore: history.has_more
       });
     } catch (error) {
       console.error("Error reading Slack history:", error);
