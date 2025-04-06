@@ -36,7 +36,8 @@ const CustomSelect = ({
     <div className="mb-4 relative">
       <label className="block text-sm font-medium mb-2">{label}</label>
       <div 
-        className="w-full bg-background-dark text-white px-4 py-2 rounded-lg border border-gray-700 focus:outline-none focus:border-primary cursor-pointer flex items-center justify-between"
+        className="w-full text-white px-4 py-2 rounded-lg border border-gray-700 focus:outline-none focus:border-primary cursor-pointer flex items-center justify-between"
+        style={{ backgroundColor: "#1e1e1e" }}
         onClick={() => setIsOpen(!isOpen)}
       >
         <span className={value ? "text-white" : "text-gray-500"}>
@@ -48,12 +49,16 @@ const CustomSelect = ({
       </div>
       
       {isOpen && (
-        <div className="absolute z-10 w-full mt-1 bg-background-dark border border-gray-700 rounded-lg overflow-hidden shadow-lg max-h-60 overflow-y-auto">
-          <div className="bg-background-dark">
+        <div className="absolute z-20 w-full mt-1 border border-gray-700 rounded-lg shadow-xl max-h-60 overflow-hidden">
+          <div className="overflow-y-auto" style={{ backgroundColor: "#1e1e1e" }}>
             {options.map((option) => (
               <div 
                 key={option.value} 
-                className={`px-4 py-2 hover:bg-background-lighter cursor-pointer ${option.value === value ? 'bg-primary/20 border-l-4 border-primary' : ''}`}
+                style={{ 
+                  backgroundColor: option.value === value ? "#2c3e62" : "#1e1e1e",
+                  borderLeft: option.value === value ? "4px solid #3b82f6" : "none"
+                }}
+                className="px-4 py-2 hover:bg-gray-800 cursor-pointer"
                 onClick={() => handleSelect(option.value, option.label)}
               >
                 {option.label}
