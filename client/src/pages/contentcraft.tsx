@@ -174,7 +174,9 @@ const ContentCraft = () => {
   ];
 
   return (
-    <div className="h-screen flex flex-col bg-background">
+    <div className="h-screen flex flex-col md:flex-row bg-background">
+      {/* Sidebar is now managed globally in App.tsx */}
+      
       <main className="flex-1 overflow-y-auto bg-background-dark">
         <DashboardHeader 
           title="ContentCraft AI" 
