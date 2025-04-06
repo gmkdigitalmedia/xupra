@@ -90,3 +90,55 @@ export const getAssets = async () => {
 export const deleteAsset = async (id: string) => {
   return apiRequest("DELETE", `/api/asset/${id}`);
 };
+
+// API Connection related endpoints
+export const getApiConnections = async () => {
+  return apiRequest("GET", "/api/connection").then(res => res.json());
+};
+
+export const getApiConnectionsByService = async (service: string) => {
+  return apiRequest("GET", `/api/connection/service/${service}`).then(res => res.json());
+};
+
+export const getApiConnection = async (id: string) => {
+  return apiRequest("GET", `/api/connection/${id}`).then(res => res.json());
+};
+
+export const createApiConnection = async (data: {
+  name: string;
+  service: string;
+  baseUrl: string;
+  apiKey?: string;
+  apiSecret?: string;
+  accessToken?: string;
+  refreshToken?: string;
+  clientId?: string;
+  clientSecret?: string;
+  description?: string;
+  additionalConfig?: any;
+}) => {
+  return apiRequest("POST", "/api/connection", data);
+};
+
+export const updateApiConnection = async (id: string, data: Partial<{
+  name: string;
+  baseUrl: string;
+  apiKey: string;
+  apiSecret: string;
+  accessToken: string;
+  refreshToken: string;
+  clientId: string;
+  clientSecret: string;
+  description: string;
+  additionalConfig: any;
+}>) => {
+  return apiRequest("PUT", `/api/connection/${id}`, data);
+};
+
+export const testApiConnection = async (id: string) => {
+  return apiRequest("POST", `/api/connection/${id}/test`).then(res => res.json());
+};
+
+export const deleteApiConnection = async (id: string) => {
+  return apiRequest("DELETE", `/api/connection/${id}`);
+};

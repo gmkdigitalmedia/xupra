@@ -19,6 +19,41 @@ export const insertUserSchema = createInsertSchema(users).pick({
   organization: true,
 });
 
+// API Connection schema
+export const apiConnections = pgTable("api_connections", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  service: text("service").notNull(), // 'veeva', 'salesforce', 'slack', 'google', 'oncore'
+  apiKey: text("api_key"),
+  apiSecret: text("api_secret"),
+  accessToken: text("access_token"),
+  refreshToken: text("refresh_token"),
+  clientId: text("client_id"),
+  clientSecret: text("client_secret"),
+  baseUrl: text("base_url"),
+  additionalConfig: jsonb("additional_config"),
+  isActive: boolean("is_active").default(true),
+  lastTested: timestamp("last_tested"),
+  createdBy: text("created_by"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertApiConnectionSchema = createInsertSchema(apiConnections).pick({
+  name: true,
+  service: true,
+  apiKey: true,
+  apiSecret: true,
+  accessToken: true,
+  refreshToken: true,
+  clientId: true,
+  clientSecret: true,
+  baseUrl: true,
+  additionalConfig: true,
+  isActive: true,
+  createdBy: true,
+});
+
 // HCP (Healthcare Provider) schema
 export const hcps = pgTable("hcps", {
   id: serial("id").primaryKey(),
@@ -134,6 +169,9 @@ export const insertActivitySchema = createInsertSchema(activities).pick({
 // Types for TypeScript
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
+
+export type InsertApiConnection = z.infer<typeof insertApiConnectionSchema>;
+export type ApiConnection = typeof apiConnections.$inferSelect;
 
 export type InsertHcp = z.infer<typeof insertHcpSchema>;
 export type Hcp = typeof hcps.$inferSelect;

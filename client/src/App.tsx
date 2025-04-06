@@ -10,6 +10,7 @@ import ContentCraft from "@/pages/contentcraft";
 import EngageOptic from "@/pages/engageoptic";
 import InsightLens from "@/pages/insightlens";
 import AssetManagement from "@/pages/asset-management";
+import AdminConnectionsPage from "@/pages/admin";
 import { useAppContext, AppProvider } from "./contexts/app-context";
 
 function AppRoutes() {
@@ -24,6 +25,7 @@ function AppRoutes() {
       <Route path="/engageoptic" component={EngageOptic} />
       <Route path="/insightlens" component={InsightLens} />
       <Route path="/asset-management" component={AssetManagement} />
+      <Route path="/admin" component={AdminConnectionsPage} />
       <Route component={NotFound} />
     </Switch>
   );

@@ -1,5 +1,6 @@
 import { 
   users, User, InsertUser, 
+  apiConnections, ApiConnection, InsertApiConnection,
   hcps, Hcp, InsertHcp,
   contents, Content, InsertContent,
   campaigns, Campaign, InsertCampaign,
@@ -12,6 +13,15 @@ export interface IStorage {
   getUser(id: number): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
+
+  // API Connection operations
+  getApiConnections(): Promise<ApiConnection[]>;
+  getApiConnectionsByService(service: string): Promise<ApiConnection[]>;
+  getApiConnection(id: number): Promise<ApiConnection | undefined>;
+  createApiConnection(connection: InsertApiConnection): Promise<ApiConnection>;
+  updateApiConnection(id: number, connection: Partial<InsertApiConnection>): Promise<ApiConnection | undefined>;
+  deleteApiConnection(id: number): Promise<boolean>;
+  updateApiConnectionStatus(id: number, isActive: boolean, lastTested?: Date): Promise<ApiConnection | undefined>;
 
   // HCP operations
   getHcps(): Promise<Hcp[]>;
@@ -49,6 +59,7 @@ export interface IStorage {
 
 export class MemStorage implements IStorage {
   private users: Map<number, User>;
+  private apiConnections: Map<number, ApiConnection>;
   private hcps: Map<number, Hcp>;
   private contents: Map<number, Content>;
   private campaigns: Map<number, Campaign>;
@@ -56,6 +67,7 @@ export class MemStorage implements IStorage {
   private activities: Map<number, Activity>;
   
   private userCurrentId: number;
+  private apiConnectionCurrentId: number;
   private hcpCurrentId: number;
   private contentCurrentId: number;
   private campaignCurrentId: number;
@@ -64,6 +76,7 @@ export class MemStorage implements IStorage {
 
   constructor() {
     this.users = new Map();
+    this.apiConnections = new Map();
     this.hcps = new Map();
     this.contents = new Map();
     this.campaigns = new Map();
@@ -71,6 +84,7 @@ export class MemStorage implements IStorage {
     this.activities = new Map();
     
     this.userCurrentId = 1;
+    this.apiConnectionCurrentId = 1;
     this.hcpCurrentId = 1;
     this.contentCurrentId = 1;
     this.campaignCurrentId = 1;
@@ -85,8 +99,67 @@ export class MemStorage implements IStorage {
       organization: "Xupra Demo"
     });
     
+    // Initialize with sample API connections
+    this.initializeSampleApiConnections();
+    
     // Initialize with sample HCP data
     this.initializeSampleHcps();
+  }
+  
+  // Initialize sample API connections
+  private async initializeSampleApiConnections() {
+    const sampleConnections = [
+      {
+        name: "Veeva CRM - Production",
+        service: "veeva",
+        baseUrl: "https://api.veeva.com/api/v1",
+        clientId: "veeva_client_id_placeholder",
+        clientSecret: "veeva_client_secret_placeholder",
+        isActive: true,
+        createdBy: "admin"
+      },
+      {
+        name: "Salesforce Marketing Cloud",
+        service: "salesforce",
+        baseUrl: "https://api.salesforce.com/data/v54.0",
+        clientId: "salesforce_client_id_placeholder",
+        clientSecret: "salesforce_client_secret_placeholder",
+        isActive: true,
+        createdBy: "admin"
+      },
+      {
+        name: "Slack Notifications",
+        service: "slack",
+        baseUrl: "https://slack.com/api",
+        apiKey: "xoxb-slack_token_placeholder",
+        additionalConfig: {
+          defaultChannel: "marketing-updates"
+        },
+        isActive: false,
+        createdBy: "admin"
+      },
+      {
+        name: "Google Workspace",
+        service: "google",
+        clientId: "google_client_id_placeholder",
+        clientSecret: "google_client_secret_placeholder",
+        refreshToken: "google_refresh_token_placeholder",
+        isActive: false,
+        createdBy: "admin"
+      },
+      {
+        name: "Oncore Clinical Trials",
+        service: "oncore",
+        baseUrl: "https://api.oncore.io/v1",
+        apiKey: "oncore_api_key_placeholder",
+        isActive: false,
+        createdBy: "admin"
+      }
+    ];
+    
+    for (const connectionData of sampleConnections) {
+      await this.createApiConnection(connectionData);
+    }
   }
   
   // Initialize sample HCP data
@@ -166,6 +239,107 @@ export class MemStorage implements IStorage {
     const user: User = { ...insertUser, id, createdAt };
     this.users.set(id, user);
     return user;
+  }
+  
+  // API Connection operations
+  async getApiConnections(): Promise<ApiConnection[]> {
+    return Array.from(this.apiConnections.values());
+  }
+  
+  async getApiConnectionsByService(service: string): Promise<ApiConnection[]> {
+    return Array.from(this.apiConnections.values()).filter(
+      (connection) => connection.service === service
+    );
+  }
+  
+  async getApiConnection(id: number): Promise<ApiConnection | undefined> {
+    return this.apiConnections.get(id);
+  }
+  
+  async createApiConnection(connection: InsertApiConnection): Promise<ApiConnection> {
+    const id = this.apiConnectionCurrentId++;
+    const createdAt = new Date();
+    const updatedAt = new Date();
+    const apiConnection: ApiConnection = { 
+      ...connection, 
+      id, 
+      createdAt, 
+      updatedAt,
+      isActive: connection.isActive ?? true,
+      lastTested: null
+    };
+    
+    this.apiConnections.set(id, apiConnection);
+    
+    // Create activity for API connection creation
+    this.createActivity({
+      activity: `API Connection "${connection.name}" for ${connection.service} created`,
+      user: connection.createdBy || "admin",
+      status: "Completed",
+      relatedTo: "API Connection",
+    });
+    
+    return apiConnection;
+  }
+  
+  async updateApiConnection(id: number, connection: Partial<InsertApiConnection>): Promise<ApiConnection | undefined> {
+    const existingConnection = this.apiConnections.get(id);
+    if (!existingConnection) return undefined;
+    
+    const updatedConnection: ApiConnection = { 
+      ...existingConnection, 
+      ...connection, 
+      updatedAt: new Date() 
+    };
+    
+    this.apiConnections.set(id, updatedConnection);
+    
+    // Create activity for API connection update
+    this.createActivity({
+      activity: `API Connection "${existingConnection.name}" updated`,
+      user: connection.createdBy || "admin",
+      status: "Completed",
+      relatedTo: "API Connection",
+    });
+    
+    return updatedConnection;
+  }
+  
+  async deleteApiConnection(id: number): Promise<boolean> {
+    const connection = this.apiConnections.get(id);
+    if (connection) {
+      this.createActivity({
+        activity: `API Connection "${connection.name}" deleted`,
+        user: "admin",
+        status: "Completed",
+        relatedTo: "API Connection",
+      });
+    }
+    return this.apiConnections.delete(id);
+  }
+  
+  async updateApiConnectionStatus(id: number, isActive: boolean, lastTested?: Date): Promise<ApiConnection | undefined> {
+    const existingConnection = this.apiConnections.get(id);
+    if (!existingConnection) return undefined;
+    
+    const updatedConnection: ApiConnection = { 
+      ...existingConnection, 
+      isActive,
+      lastTested: lastTested || new Date(),
+      updatedAt: new Date() 
+    };
+    
+    this.apiConnections.set(id, updatedConnection);
+    
+    // Create activity for API connection status update
+    this.createActivity({
+      activity: `API Connection "${existingConnection.name}" ${isActive ? 'activated' : 'deactivated'}`,
+      user: "admin",
+      status: "Completed",
+      relatedTo: "API Connection",
+    });
+    
+    return updatedConnection;
   }
 
   // HCP operations

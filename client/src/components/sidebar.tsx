@@ -47,6 +47,7 @@ const Sidebar = () => {
     { icon: "trending_up", label: "EngageOptic", path: "/engageoptic" },
     { icon: "pie_chart", label: "InsightLens", path: "/insightlens" },
     { icon: "folder", label: "Asset Management", path: "/asset-management" },
+    { icon: "settings", label: "API Connections", path: "/admin" },
   ];
 
   return (
