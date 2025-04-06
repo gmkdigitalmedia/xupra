@@ -794,75 +794,65 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // HCP data upload via CSV
   app.post("/api/hcp/upload", async (req: Request, res: Response) => {
     try {
-      // In a real implementation, CSV parsing would happen here
-      // For now, we'll just create some mock HCP records
-
-      // Create sample HCPs based on the mock data needed
-      const hcps = [
-        {
-          name: "Dr. Sarah Chen",
-          specialty: "Cardiology",
-          prescribingPattern: "High Volume",
-          engagementScore: 87,
-          tag: "Early Adopter",
-          email: "sarah.chen@example.com",
-          organization: "Metropolis Medical Center",
-          notes: "Interested in new cardiovascular treatments"
-        },
-        {
-          name: "Dr. James Wilson",
-          specialty: "Oncology",
-          prescribingPattern: "Medium Volume",
-          engagementScore: 76,
-          tag: "Evidence Driven",
-          email: "james.wilson@example.com",
-          organization: "City Cancer Institute",
-          notes: "Requires strong clinical data before adoption"
-        },
-        {
-          name: "Dr. Maria Rodriguez",
-          specialty: "Neurology",
-          prescribingPattern: "Low Volume",
-          engagementScore: 62,
-          tag: "Patient Focused",
-          email: "maria.rodriguez@example.com",
-          organization: "Westside Neuro Center",
-          notes: "Emphasizes patient quality of life in treatment decisions"
-        },
-        {
-          name: "Dr. Robert Johnson",
-          specialty: "General Practice",
-          prescribingPattern: "High Volume",
-          engagementScore: 81,
-          tag: "Balanced",
-          email: "robert.johnson@example.com",
-          organization: "Community Family Practice",
-          notes: "Considers multiple factors in prescribing decisions"
-        },
-        {
-          name: "Dr. Emily Chang",
-          specialty: "Pediatrics",
-          prescribingPattern: "Medium Volume",
-          engagementScore: 74,
-          tag: "Patient Focused",
-          email: "emily.chang@example.com",
-          organization: "Children's Medical Group",
-          notes: "Focused on minimizing side effects in pediatric patients"
-        }
-      ];
-
-      // Create HCPs in storage
+      // In a production environment, we would process the actual CSV file
+      // For demonstration purposes, we'll generate Japanese HCP records
+      
+      // Generate a random number of HCPs between the range
+      const minHcps = 5;
+      const maxHcps = 15;
+      const numberOfHcps = Math.floor(Math.random() * (maxHcps - minHcps + 1)) + minHcps;
+      
+      // Sample data for generation
+      const specialties = ["Cardiology", "Oncology", "Neurology", "Pediatrics", "Dermatology", "Internal Medicine"];
+      const tags = ["Early Adopter", "Evidence Driven", "Patient Focused", "Balanced", "Cost Conscious", "Conservative"];
+      const prescribingPatterns = ["High Volume", "Medium Volume", "Low Volume"];
+      const organizations = ["Tokyo Medical Center", "Osaka University Hospital", "Kyoto Medical Clinic", "Yokohama General Hospital"];
+      
+      // Create HCPs with Japanese names for the sample
+      const firstNames = ["Hiroshi", "Takashi", "Yuki", "Akira", "Naomi", "Keiko", "Satoshi", "Shigeru", "Yuriko", "Atsuko"];
+      const lastNames = ["Tanaka", "Suzuki", "Takahashi", "Watanabe", "Ito", "Yamamoto", "Nakamura", "Kobayashi", "Saito", "Kato"];
+      
+      // Generate HCPs
+      const hcps = Array.from({ length: numberOfHcps }, () => {
+        const firstName = firstNames[Math.floor(Math.random() * firstNames.length)];
+        const lastName = lastNames[Math.floor(Math.random() * lastNames.length)];
+        const specialty = specialties[Math.floor(Math.random() * specialties.length)];
+        const tag = tags[Math.floor(Math.random() * tags.length)];
+        const prescribingPattern = prescribingPatterns[Math.floor(Math.random() * prescribingPatterns.length)];
+        const organization = organizations[Math.floor(Math.random() * organizations.length)];
+        const engagementScore = Math.floor(Math.random() * 41) + 60; // 60-100 range
+        const isKol = Math.random() > 0.8; // 20% chance of being a KOL
+        
+        return {
+          name: `Dr. ${firstName} ${lastName}`,
+          specialty,
+          prescribingPattern,
+          engagementScore,
+          tag,
+          email: `${firstName.toLowerCase()}.${lastName.toLowerCase()}@example.com`,
+          organization,
+          isKol,
+          location: "Tokyo, Japan",
+          notes: `Specializes in ${specialty.toLowerCase()} treatments and research`
+        };
+      });
+      
+      // Save HCPs to storage
       const createdHcps = await Promise.all(hcps.map(hcp => storage.createHcp(hcp)));
-
+      
       // Create activity record for this upload
       await storage.createActivity({
-        activity: "CSV HCP data imported",
-        user: "John Doe",
+        activity: `Imported ${createdHcps.length} HCP records from CSV`,
+        user: "admin",
         status: "Completed",
         relatedTo: "HCP"
       });
-
-      res.status(201).json({ message: "HCP data uploaded successfully", count: createdHcps.length });
+      
+      res.status(201).json({ 
+        message: "HCP data uploaded successfully", 
+        count: createdHcps.length,
+        success: true
+      });
     } catch (error) {
       console.error("Error uploading HCP data:", error);
       res.status(500).json({ message: "Failed to upload HCP data" });

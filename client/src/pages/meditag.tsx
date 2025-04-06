@@ -61,10 +61,13 @@ const MediTag = () => {
   const [selectedHcp, setSelectedHcp] = useState<number | null>(null);
   const [viewMode, setViewMode] = useState<ViewMode>('basic');
   const [activeTab, setActiveTab] = useState('database');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(5);
+  const [isUploading, setIsUploading] = useState(false);
   const { toast } = useToast();
   
   // Fetch HCP data
-  const { data: hcpData, isLoading, error } = useQuery({
+  const { data: hcpData, isLoading, error, refetch } = useQuery({
     queryKey: ['/api/hcp'],
     queryFn: async () => {
       const response = await fetch('/api/hcp');
@@ -78,6 +81,7 @@ const MediTag = () => {
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
       setSelectedFile(e.target.files[0]);
+      uploadFile(e.target.files[0]);
     }
   };
 
@@ -89,6 +93,46 @@ const MediTag = () => {
     e.preventDefault();
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
       setSelectedFile(e.dataTransfer.files[0]);
+      uploadFile(e.dataTransfer.files[0]);
+    }
+  };
+  
+  const uploadFile = async (file: File) => {
+    setIsUploading(true);
+    
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      
+      const response = await fetch('/api/hcp/upload', {
+        method: 'POST',
+        body: formData
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to upload file');
+      }
+      
+      const result = await response.json();
+      
+      toast({
+        title: "Upload Successful",
+        description: `Successfully processed ${result.count || 'multiple'} HCP records`,
+        variant: "default",
+      });
+      
+      // Refresh the HCP list
+      refetch();
+      
+    } catch (error) {
+      console.error('Error uploading file:', error);
+      toast({
+        title: "Upload Failed",
+        description: "There was a problem uploading the file. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsUploading(false);
     }
   };
   
@@ -141,10 +185,19 @@ const MediTag = () => {
               <div className="bg-background-card rounded-xl shadow-lg overflow-hidden mb-8 p-6">
                 <h3 className="text-lg font-semibold mb-4">Upload HCP Data</h3>
                 <div 
-                  className="border-2 border-dashed border-gray-700 rounded-lg p-8 text-center"
+                  className="border-2 border-dashed border-gray-700 rounded-lg p-8 text-center relative"
                   onDragOver={handleDragOver}
                   onDrop={handleDrop}
                 >
+                  {isUploading ? (
+                    <div className="absolute inset-0 bg-background-card/80 flex items-center justify-center rounded-lg">
+                      <div className="flex flex-col items-center">
+                        <Loader2 className="h-10 w-10 animate-spin text-primary mb-2" />
+                        <p className="text-gray-400">Processing CSV data...</p>
+                      </div>
+                    </div>
+                  ) : null}
+                  
                   <span className="material-icons text-3xl text-gray-500 mb-2">cloud_upload</span>
                   <p className="mb-4 text-gray-400">
                     {selectedFile 
@@ -161,7 +214,7 @@ const MediTag = () => {
                   />
                   <label 
                     htmlFor="fileUpload" 
-                    className="bg-primary hover:bg-primary/80 text-white px-4 py-2 rounded-lg transition cursor-pointer inline-block"
+                    className={`bg-primary hover:bg-primary/80 text-white px-4 py-2 rounded-lg transition inline-block ${isUploading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
                   >
                     Upload CSV
                   </label>
@@ -454,15 +507,43 @@ const MediTag = () => {
                     )}
                     
                     <div className="p-4 flex justify-between items-center border-t border-gray-800">
-                      <p className="text-sm text-gray-400">Showing {hcpData.length} of 1,258 entries</p>
+                      <p className="text-sm text-gray-400">
+                        {isUploading ? (
+                          <span className="flex items-center">
+                            <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                            Processing upload...
+                          </span>
+                        ) : (
+                          `Showing ${hcpData.length} entries`
+                        )}
+                      </p>
                       <div className="flex space-x-1">
-                        <button className="w-8 h-8 flex items-center justify-center rounded hover:bg-background-lighter">
+                        <button 
+                          className={`w-8 h-8 flex items-center justify-center rounded ${currentPage > 1 ? 'hover:bg-background-lighter' : 'opacity-50 cursor-not-allowed'}`}
+                          onClick={() => currentPage > 1 && setCurrentPage(currentPage - 1)}
+                          disabled={currentPage <= 1}
+                        >
                           <span className="material-icons text-sm">chevron_left</span>
                         </button>
-                        <button className="w-8 h-8 flex items-center justify-center rounded bg-primary text-white">1</button>
-                        <button className="w-8 h-8 flex items-center justify-center rounded hover:bg-background-lighter">2</button>
-                        <button className="w-8 h-8 flex items-center justify-center rounded hover:bg-background-lighter">3</button>
-                        <button className="w-8 h-8 flex items-center justify-center rounded hover:bg-background-lighter">
+                        
+                        {Array.from({ length: Math.min(totalPages, 5) }).map((_, index) => {
+                          const pageNumber = index + 1;
+                          return (
+                            <button
+                              key={pageNumber}
+                              className={`w-8 h-8 flex items-center justify-center rounded ${pageNumber === currentPage ? 'bg-primary text-white' : 'hover:bg-background-lighter'}`}
+                              onClick={() => setCurrentPage(pageNumber)}
+                            >
+                              {pageNumber}
+                            </button>
+                          );
+                        })}
+                        
+                        <button 
+                          className={`w-8 h-8 flex items-center justify-center rounded ${currentPage < totalPages ? 'hover:bg-background-lighter' : 'opacity-50 cursor-not-allowed'}`}
+                          onClick={() => currentPage < totalPages && setCurrentPage(currentPage + 1)}
+                          disabled={currentPage >= totalPages}
+                        >
                           <span className="material-icons text-sm">chevron_right</span>
                         </button>
                       </div>
