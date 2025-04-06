@@ -1,21 +1,76 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
 import Sidebar from "@/components/sidebar";
 import DashboardHeader from "@/components/dashboard-header";
+import { Campaign } from "@shared/schema";
+import Spinner from "../components/ui/spinner";
+
+interface AnalyticsData {
+  metrics: {
+    label: string;
+    value: string;
+    target: string;
+  }[];
+  performance: {
+    weeks: string[];
+    data: {
+      name: string;
+      values: number[];
+    }[];
+  };
+  segmentComparison: {
+    segment: string;
+    openRate: number;
+    responseRate: number;
+    engagement: number;
+    roi: number;
+  }[];
+}
+
+interface InsightData {
+  insights: string[];
+  recommendations: string[];
+}
 
 const InsightLens = () => {
-  const [selectedCampaign, setSelectedCampaign] = useState("");
+  const [selectedCampaign, setSelectedCampaign] = useState<string>("");
+  
+  // Fetch all campaigns
+  const { data: campaigns, isLoading: isCampaignsLoading } = useQuery<Campaign[]>({
+    queryKey: ['/api/campaign'],
+  });
+  
+  // Fetch analytics for selected campaign
+  const { data: analyticsData, isLoading: isAnalyticsLoading } = useQuery<AnalyticsData>({
+    queryKey: ['/api/analytics/campaign', selectedCampaign],
+    enabled: !!selectedCampaign,
+  });
+  
+  // Fetch AI insights for selected campaign
+  const { data: insightData, isLoading: isInsightsLoading } = useQuery<InsightData>({
+    queryKey: ['/api/analytics/insights', selectedCampaign],
+    enabled: !!selectedCampaign,
+  });
+  
+  // Set first campaign as default when data loads
+  useEffect(() => {
+    if (campaigns && campaigns.length > 0 && !selectedCampaign) {
+      setSelectedCampaign(campaigns[0].id.toString());
+    }
+  }, [campaigns, selectedCampaign]);
   
   const handleCampaignChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setSelectedCampaign(e.target.value);
   };
 
-  const keyMetrics = [
+  // Default values in case data is still loading
+  const keyMetrics = analyticsData?.metrics || [
     { label: "Open Rate", value: "78%", target: "65%" },
     { label: "Response Rate", value: "36%", target: "25%" },
     { label: "ROI", value: "3.2x", target: "2.5x" },
   ];
 
-  const aiInsights = [
+  const aiInsights = insightData?.insights || [
     "Cardiologists showed 28% higher engagement with clinical trial data vs. general product information.",
     "Tuesday morning emails had 34% higher open rates than other days/times.",
     "HCPs who received personalized content were 2.1x more likely to schedule follow-up meetings.",
@@ -23,7 +78,7 @@ const InsightLens = () => {
     "Compliance-flagged content had 18% lower engagement rates."
   ];
 
-  const recommendations = [
+  const recommendations = insightData?.recommendations || [
     "Increase frequency of clinical data updates for Evidence-Driven HCPs.",
     "Schedule email sends for Tuesday/Thursday mornings to maximize open rates.",
     "Develop more personalized content for high-value HCP segments.",
@@ -49,37 +104,56 @@ const InsightLens = () => {
             <div className="flex flex-col md:flex-row md:items-center md:justify-between">
               <h3 className="text-lg font-semibold mb-4 md:mb-0">Campaign Analysis</h3>
               <div className="w-full md:w-72">
-                <select 
-                  className="w-full bg-background-dark !text-white px-4 py-2 rounded-lg border border-gray-700 focus:outline-none focus:border-primary"
-                  value={selectedCampaign}
-                  onChange={handleCampaignChange}
-                >
-                  <option value="">Select a campaign</option>
-                  <option value="cardiox_q2">Q2 Cardiology Engagement</option>
-                  <option value="oncology_launch">Oncology New Product Launch</option>
-                  <option value="pediatric_series">Pediatrician Educational Series</option>
-                </select>
+                {isCampaignsLoading ? (
+                  <div className="flex justify-center py-2">
+                    <Spinner className="h-6 w-6 text-primary" />
+                  </div>
+                ) : (
+                  <select 
+                    className="w-full bg-background-dark !text-white px-4 py-2 rounded-lg border border-gray-700 focus:outline-none focus:border-primary"
+                    value={selectedCampaign}
+                    onChange={handleCampaignChange}
+                    disabled={!campaigns || campaigns.length === 0}
+                  >
+                    <option value="">Select a campaign</option>
+                    {campaigns && campaigns.map((campaign) => (
+                      <option key={campaign.id} value={campaign.id.toString()}>
+                        {campaign.name}
+                      </option>
+                    ))}
+                  </select>
+                )}
               </div>
             </div>
           </div>
           
           {/* Key Metrics */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            {keyMetrics.map((metric, index) => (
-              <div key={index} className="bg-background-card rounded-xl shadow-lg p-6">
-                <h3 className="text-sm text-gray-400 mb-1">{metric.label}</h3>
-                <div className="flex items-end space-x-2">
-                  <span className="text-3xl font-bold">{metric.value}</span>
-                  <span className="text-sm text-green-400">vs {metric.target} target</span>
+            {isAnalyticsLoading && selectedCampaign ? (
+              <>
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="bg-background-card rounded-xl shadow-lg p-6 flex justify-center items-center h-28">
+                    <Spinner className="h-8 w-8 text-primary" />
+                  </div>
+                ))}
+              </>
+            ) : (
+              keyMetrics.map((metric, index) => (
+                <div key={index} className="bg-background-card rounded-xl shadow-lg p-6">
+                  <h3 className="text-sm text-gray-400 mb-1">{metric.label}</h3>
+                  <div className="flex items-end space-x-2">
+                    <span className="text-3xl font-bold">{metric.value}</span>
+                    <span className="text-sm text-green-400">vs {metric.target} target</span>
+                  </div>
+                  <div className="mt-4 h-2 bg-background-dark rounded-full">
+                    <div 
+                      className="h-2 bg-primary rounded-full" 
+                      style={{ width: `${parseInt(metric.value) + 10}%` }}
+                    ></div>
+                  </div>
                 </div>
-                <div className="mt-4 h-2 bg-background-dark rounded-full">
-                  <div 
-                    className="h-2 bg-primary rounded-full" 
-                    style={{ width: `${parseInt(metric.value) + 10}%` }}
-                  ></div>
-                </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
           
           {/* Performance Chart */}
@@ -147,39 +221,52 @@ const InsightLens = () => {
           
           {/* AI Insights and Recommendations */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-            <div className="bg-background-card rounded-xl shadow-lg overflow-hidden">
-              <div className="p-6">
-                <div className="flex items-center space-x-2 mb-4">
-                  <span className="material-icons text-primary">lightbulb</span>
-                  <h3 className="font-semibold">AI Insights</h3>
+            {isInsightsLoading && selectedCampaign ? (
+              <>
+                <div className="bg-background-card rounded-xl shadow-lg p-6 flex justify-center items-center h-60">
+                  <Spinner className="h-8 w-8 text-primary" />
                 </div>
-                <ul className="space-y-3">
-                  {aiInsights.map((insight, index) => (
-                    <li key={index} className="flex items-start">
-                      <span className="material-icons text-primary text-sm mr-2 mt-1">arrow_right</span>
-                      <span className="text-sm">{insight}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-            
-            <div className="bg-background-card rounded-xl shadow-lg overflow-hidden">
-              <div className="p-6">
-                <div className="flex items-center space-x-2 mb-4">
-                  <span className="material-icons text-primary">tips_and_updates</span>
-                  <h3 className="font-semibold">Recommendations</h3>
+                <div className="bg-background-card rounded-xl shadow-lg p-6 flex justify-center items-center h-60">
+                  <Spinner className="h-8 w-8 text-primary" />
                 </div>
-                <ul className="space-y-3">
-                  {recommendations.map((recommendation, index) => (
-                    <li key={index} className="flex items-start">
-                      <span className="material-icons text-green-400 text-sm mr-2 mt-1">check_circle</span>
-                      <span className="text-sm">{recommendation}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
+              </>
+            ) : (
+              <>
+                <div className="bg-background-card rounded-xl shadow-lg overflow-hidden">
+                  <div className="p-6">
+                    <div className="flex items-center space-x-2 mb-4">
+                      <span className="material-icons text-primary">lightbulb</span>
+                      <h3 className="font-semibold">AI Insights</h3>
+                    </div>
+                    <ul className="space-y-3">
+                      {aiInsights.map((insight, index) => (
+                        <li key={index} className="flex items-start">
+                          <span className="material-icons text-primary text-sm mr-2 mt-1">arrow_right</span>
+                          <span className="text-sm">{insight}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+                
+                <div className="bg-background-card rounded-xl shadow-lg overflow-hidden">
+                  <div className="p-6">
+                    <div className="flex items-center space-x-2 mb-4">
+                      <span className="material-icons text-primary">tips_and_updates</span>
+                      <h3 className="font-semibold">Recommendations</h3>
+                    </div>
+                    <ul className="space-y-3">
+                      {recommendations.map((recommendation, index) => (
+                        <li key={index} className="flex items-start">
+                          <span className="material-icons text-green-400 text-sm mr-2 mt-1">check_circle</span>
+                          <span className="text-sm">{recommendation}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              </>
+            )}
           </div>
           
           {/* Segment Comparison */}
@@ -187,47 +274,75 @@ const InsightLens = () => {
             <div className="p-6">
               <h3 className="font-semibold mb-4">Segment Comparison</h3>
               <div className="overflow-x-auto">
-                <table className="min-w-full">
-                  <thead>
-                    <tr className="bg-background-lighter">
-                      <th className="py-3 px-4 text-left text-sm text-gray-400 font-medium">HCP Segment</th>
-                      <th className="py-3 px-4 text-left text-sm text-gray-400 font-medium">Open Rate</th>
-                      <th className="py-3 px-4 text-left text-sm text-gray-400 font-medium">Response Rate</th>
-                      <th className="py-3 px-4 text-left text-sm text-gray-400 font-medium">Avg. Engagement</th>
-                      <th className="py-3 px-4 text-left text-sm text-gray-400 font-medium">ROI</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr className="border-b border-gray-800 hover:bg-background-lighter">
-                      <td className="py-3 px-4">Early Adopters</td>
-                      <td className="py-3 px-4 text-green-400">84%</td>
-                      <td className="py-3 px-4 text-green-400">42%</td>
-                      <td className="py-3 px-4 text-green-400">7.8/10</td>
-                      <td className="py-3 px-4 text-green-400">3.8x</td>
-                    </tr>
-                    <tr className="border-b border-gray-800 hover:bg-background-lighter">
-                      <td className="py-3 px-4">Evidence Driven</td>
-                      <td className="py-3 px-4 text-green-400">76%</td>
-                      <td className="py-3 px-4">35%</td>
-                      <td className="py-3 px-4">6.9/10</td>
-                      <td className="py-3 px-4">3.1x</td>
-                    </tr>
-                    <tr className="border-b border-gray-800 hover:bg-background-lighter">
-                      <td className="py-3 px-4">Patient Focused</td>
-                      <td className="py-3 px-4">72%</td>
-                      <td className="py-3 px-4">32%</td>
-                      <td className="py-3 px-4">6.2/10</td>
-                      <td className="py-3 px-4">2.7x</td>
-                    </tr>
-                    <tr className="hover:bg-background-lighter">
-                      <td className="py-3 px-4">Balanced</td>
-                      <td className="py-3 px-4 text-yellow-400">65%</td>
-                      <td className="py-3 px-4 text-yellow-400">28%</td>
-                      <td className="py-3 px-4 text-yellow-400">5.8/10</td>
-                      <td className="py-3 px-4 text-yellow-400">2.4x</td>
-                    </tr>
-                  </tbody>
-                </table>
+                {isAnalyticsLoading && selectedCampaign ? (
+                  <div className="flex justify-center items-center py-8">
+                    <Spinner className="h-8 w-8 text-primary" />
+                  </div>
+                ) : (
+                  <table className="min-w-full">
+                    <thead>
+                      <tr className="bg-background-lighter">
+                        <th className="py-3 px-4 text-left text-sm text-gray-400 font-medium">HCP Segment</th>
+                        <th className="py-3 px-4 text-left text-sm text-gray-400 font-medium">Open Rate</th>
+                        <th className="py-3 px-4 text-left text-sm text-gray-400 font-medium">Response Rate</th>
+                        <th className="py-3 px-4 text-left text-sm text-gray-400 font-medium">Avg. Engagement</th>
+                        <th className="py-3 px-4 text-left text-sm text-gray-400 font-medium">ROI</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {analyticsData?.segmentComparison ? (
+                        analyticsData.segmentComparison.map((segment, index) => (
+                          <tr key={index} className={index < analyticsData.segmentComparison.length - 1 ? "border-b border-gray-800 hover:bg-background-lighter" : "hover:bg-background-lighter"}>
+                            <td className="py-3 px-4">{segment.segment}</td>
+                            <td className={`py-3 px-4 ${segment.openRate >= 75 ? 'text-green-400' : segment.openRate < 70 ? 'text-yellow-400' : ''}`}>
+                              {segment.openRate}%
+                            </td>
+                            <td className={`py-3 px-4 ${segment.responseRate >= 40 ? 'text-green-400' : segment.responseRate < 30 ? 'text-yellow-400' : ''}`}>
+                              {segment.responseRate}%
+                            </td>
+                            <td className={`py-3 px-4 ${segment.engagement >= 7.5 ? 'text-green-400' : segment.engagement < 6 ? 'text-yellow-400' : ''}`}>
+                              {segment.engagement}/10
+                            </td>
+                            <td className={`py-3 px-4 ${segment.roi >= 3.5 ? 'text-green-400' : segment.roi < 2.5 ? 'text-yellow-400' : ''}`}>
+                              {segment.roi}x
+                            </td>
+                          </tr>
+                        ))
+                      ) : (
+                        <>
+                          <tr className="border-b border-gray-800 hover:bg-background-lighter">
+                            <td className="py-3 px-4">Early Adopters</td>
+                            <td className="py-3 px-4 text-green-400">84%</td>
+                            <td className="py-3 px-4 text-green-400">42%</td>
+                            <td className="py-3 px-4 text-green-400">7.8/10</td>
+                            <td className="py-3 px-4 text-green-400">3.8x</td>
+                          </tr>
+                          <tr className="border-b border-gray-800 hover:bg-background-lighter">
+                            <td className="py-3 px-4">Evidence Driven</td>
+                            <td className="py-3 px-4 text-green-400">76%</td>
+                            <td className="py-3 px-4">35%</td>
+                            <td className="py-3 px-4">6.9/10</td>
+                            <td className="py-3 px-4">3.1x</td>
+                          </tr>
+                          <tr className="border-b border-gray-800 hover:bg-background-lighter">
+                            <td className="py-3 px-4">Patient Focused</td>
+                            <td className="py-3 px-4">72%</td>
+                            <td className="py-3 px-4">32%</td>
+                            <td className="py-3 px-4">6.2/10</td>
+                            <td className="py-3 px-4">2.7x</td>
+                          </tr>
+                          <tr className="hover:bg-background-lighter">
+                            <td className="py-3 px-4">Balanced</td>
+                            <td className="py-3 px-4 text-yellow-400">65%</td>
+                            <td className="py-3 px-4 text-yellow-400">28%</td>
+                            <td className="py-3 px-4 text-yellow-400">5.8/10</td>
+                            <td className="py-3 px-4 text-yellow-400">2.4x</td>
+                          </tr>
+                        </>
+                      )}
+                    </tbody>
+                  </table>
+                )}
               </div>
             </div>
           </div>
