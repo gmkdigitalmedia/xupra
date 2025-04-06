@@ -142,3 +142,41 @@ export const testApiConnection = async (id: string) => {
 export const deleteApiConnection = async (id: string) => {
   return apiRequest("DELETE", `/api/connection/${id}`);
 };
+
+// Slack Integration API endpoints
+export const sendSlackMessage = async (data: {
+  message: string;
+  channelId: string;
+}) => {
+  return apiRequest("POST", "/api/slack/send", data).then(res => res.json());
+};
+
+export const postHcpEngagementToSlack = async (data: {
+  hcpId: string | number;
+  action: string;
+  details: string;
+  channelId: string;
+}) => {
+  return apiRequest("POST", "/api/slack/hcp-engagement", data).then(res => res.json());
+};
+
+export const postCampaignAnalyticsToSlack = async (data: {
+  campaignId: string | number;
+  metrics: {
+    reach: number;
+    engagement: number;
+    conversionRate: number;
+    roi: number;
+  };
+  channelId: string;
+}) => {
+  return apiRequest("POST", "/api/slack/campaign-analytics", data).then(res => res.json());
+};
+
+export const getSlackHistory = async (channelId: string, limit?: number) => {
+  const params = new URLSearchParams();
+  params.append("channelId", channelId);
+  if (limit) params.append("limit", limit.toString());
+  
+  return apiRequest("GET", `/api/slack/history?${params.toString()}`).then(res => res.json());
+};

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import Sidebar from '@/components/sidebar';
 import DashboardHeader from '@/components/dashboard-header';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
@@ -390,29 +391,255 @@ function AdminConnectionsPage() {
   };
 
   return (
-    <div className="container mx-auto p-4">
-      <DashboardHeader title="API Connections" />
+    <div className="flex flex-col md:flex-row min-h-screen">
+      <Sidebar />
+      <div className="flex-1 p-4">
+        <DashboardHeader title="API Connections" />
 
-      <div className="flex justify-between items-center mb-6">
-        <div>
-          <h2 className="text-2xl font-bold">Manage External API Connections</h2>
-          <p className="text-gray-500">
-            Configure and manage connections to external CRM and productivity services
-          </p>
+        <div className="flex justify-between items-center mb-6">
+          <div>
+            <h2 className="text-2xl font-bold">Manage External API Connections</h2>
+            <p className="text-gray-500">
+              Configure and manage connections to external CRM and productivity services
+            </p>
+          </div>
+          <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
+            <DialogTrigger asChild>
+              <Button>Add New Connection</Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[600px]">
+              <DialogHeader>
+                <DialogTitle>Create API Connection</DialogTitle>
+                <DialogDescription>
+                  Fill in the details to create a new API connection for external services.
+                </DialogDescription>
+              </DialogHeader>
+              <Form {...form}>
+                <form onSubmit={form.handleSubmit(onCreateSubmit)} className="space-y-4">
+                  <FormField
+                    control={form.control}
+                    name="name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Connection Name</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Enter a name for this connection" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={form.control}
+                    name="service"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Service Type</FormLabel>
+                        <Select
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select a service" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="veeva">Veeva CRM</SelectItem>
+                            <SelectItem value="salesforce">Salesforce</SelectItem>
+                            <SelectItem value="slack">Slack</SelectItem>
+                            <SelectItem value="google">Google Workspace</SelectItem>
+                            <SelectItem value="oncore">Oncore</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={form.control}
+                    name="baseUrl"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Base URL</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Enter API base URL" {...field} />
+                        </FormControl>
+                        <FormDescription>
+                          The base URL for the API service (e.g., https://api.example.com)
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  {form.watch('service') && renderServiceFields(form.watch('service'))}
+                  
+                  <FormField
+                    control={form.control}
+                    name="description"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Description</FormLabel>
+                        <FormControl>
+                          <Textarea
+                            placeholder="Enter a description of this connection"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <DialogFooter>
+                    <Button type="button" variant="outline" onClick={() => setIsCreateOpen(false)}>
+                      Cancel
+                    </Button>
+                    <Button type="submit" disabled={createMutation.isPending}>
+                      {createMutation.isPending ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Creating
+                        </>
+                      ) : (
+                        'Create Connection'
+                      )}
+                    </Button>
+                  </DialogFooter>
+                </form>
+              </Form>
+            </DialogContent>
+          </Dialog>
         </div>
-        <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
-          <DialogTrigger asChild>
-            <Button>Add New Connection</Button>
-          </DialogTrigger>
+
+        <Tabs defaultValue="all" value={activeTab} onValueChange={setActiveTab}>
+          <TabsList className="mb-4">
+            <TabsTrigger value="all">All Connections</TabsTrigger>
+            <TabsTrigger value="veeva">Veeva CRM</TabsTrigger>
+            <TabsTrigger value="salesforce">Salesforce</TabsTrigger>
+            <TabsTrigger value="slack">Slack</TabsTrigger>
+            <TabsTrigger value="google">Google Workspace</TabsTrigger>
+            <TabsTrigger value="oncore">Oncore</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value={activeTab}>
+            {isLoading ? (
+              <div className="flex justify-center items-center h-64">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              </div>
+            ) : isError ? (
+              <div className="text-center py-8 text-red-500">
+                Error loading API connections. Please try again.
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {filteredConnections?.length === 0 ? (
+                  <div className="col-span-full text-center py-8 text-gray-500">
+                    No connections found. Create one to get started.
+                  </div>
+                ) : (
+                  filteredConnections?.map((connection: ApiConnection) => (
+                    <Card key={connection.id} className="overflow-hidden">
+                      <CardHeader className="pb-2">
+                        <div className="flex justify-between items-start">
+                          <CardTitle className="text-lg">{connection.name}</CardTitle>
+                          <Badge
+                            variant={connection.isActive ? 'default' : 'destructive'}
+                            className="ml-2"
+                          >
+                            {connection.isActive ? 'Active' : 'Inactive'}
+                          </Badge>
+                        </div>
+                        <CardDescription className="flex items-center gap-1">
+                          {connection.service.charAt(0).toUpperCase() + connection.service.slice(1)}
+                          <span className="text-xs ml-2 text-gray-500">
+                            {connection.lastTested
+                              ? `Last tested: ${new Date(connection.lastTested).toLocaleDateString()}`
+                              : 'Never tested'}
+                          </span>
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent className="text-sm">
+                        <p className="line-clamp-2 text-gray-600 mb-2">
+                          {connection.description || 'No description provided'}
+                        </p>
+                        <p className="truncate text-xs text-gray-500">URL: {connection.baseUrl}</p>
+                      </CardContent>
+                      <CardFooter className="bg-gray-50 flex justify-between pt-2">
+                        <div className="flex space-x-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleEditConnection(connection)}
+                          >
+                            Edit
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleTestConnection(connection.id)}
+                            className={`${
+                              connection.isActive ? 'text-green-600' : 'text-amber-600'
+                            }`}
+                            disabled={testMutation.isPending}
+                          >
+                            {testMutation.isPending ? (
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : (
+                              <>
+                                <RefreshCw className="h-4 w-4 mr-1" /> Test
+                              </>
+                            )}
+                          </Button>
+                        </div>
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button variant="ghost" size="sm" className="text-red-600">
+                              Delete
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                This action cannot be undone. This will permanently delete the API
+                                connection and remove it from our servers.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancel</AlertDialogCancel>
+                              <AlertDialogAction
+                                onClick={() => handleDeleteConnection(connection.id)}
+                                className="bg-red-600 hover:bg-red-700"
+                              >
+                                Delete
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      </CardFooter>
+                    </Card>
+                  ))
+                )}
+              </div>
+            )}
+          </TabsContent>
+        </Tabs>
+
+        {/* Edit Connection Dialog */}
+        <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
           <DialogContent className="sm:max-w-[600px]">
             <DialogHeader>
-              <DialogTitle>Create API Connection</DialogTitle>
+              <DialogTitle>Edit API Connection</DialogTitle>
               <DialogDescription>
-                Fill in the details to create a new API connection for external services.
+                Update the connection details for {editingConnection?.name}.
               </DialogDescription>
             </DialogHeader>
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(onCreateSubmit)} className="space-y-4">
+              <form onSubmit={form.handleSubmit(onEditSubmit)} className="space-y-4">
                 <FormField
                   control={form.control}
                   name="name"
@@ -433,23 +660,12 @@ function AdminConnectionsPage() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Service Type</FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select a service" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="veeva">Veeva CRM</SelectItem>
-                          <SelectItem value="salesforce">Salesforce</SelectItem>
-                          <SelectItem value="slack">Slack</SelectItem>
-                          <SelectItem value="google">Google Workspace</SelectItem>
-                          <SelectItem value="oncore">Oncore</SelectItem>
-                        </SelectContent>
-                      </Select>
+                      <FormControl>
+                        <Input disabled {...field} />
+                      </FormControl>
+                      <FormDescription>
+                        Service type cannot be changed after creation
+                      </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -472,7 +688,7 @@ function AdminConnectionsPage() {
                   )}
                 />
                 
-                {form.watch('service') && renderServiceFields(form.watch('service'))}
+                {editingConnection?.service && renderServiceFields(editingConnection.service)}
                 
                 <FormField
                   control={form.control}
@@ -492,17 +708,24 @@ function AdminConnectionsPage() {
                 />
                 
                 <DialogFooter>
-                  <Button type="button" variant="outline" onClick={() => setIsCreateOpen(false)}>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => {
+                      setIsEditOpen(false);
+                      setEditingConnection(null);
+                    }}
+                  >
                     Cancel
                   </Button>
-                  <Button type="submit" disabled={createMutation.isPending}>
-                    {createMutation.isPending ? (
+                  <Button type="submit" disabled={updateMutation.isPending}>
+                    {updateMutation.isPending ? (
                       <>
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Creating
+                        Updating
                       </>
                     ) : (
-                      'Create Connection'
+                      'Update Connection'
                     )}
                   </Button>
                 </DialogFooter>
@@ -511,225 +734,6 @@ function AdminConnectionsPage() {
           </DialogContent>
         </Dialog>
       </div>
-
-      <Tabs defaultValue="all" value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="mb-4">
-          <TabsTrigger value="all">All Connections</TabsTrigger>
-          <TabsTrigger value="veeva">Veeva CRM</TabsTrigger>
-          <TabsTrigger value="salesforce">Salesforce</TabsTrigger>
-          <TabsTrigger value="slack">Slack</TabsTrigger>
-          <TabsTrigger value="google">Google Workspace</TabsTrigger>
-          <TabsTrigger value="oncore">Oncore</TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value={activeTab}>
-          {isLoading ? (
-            <div className="flex justify-center items-center h-64">
-              <Loader2 className="h-8 w-8 animate-spin text-primary" />
-            </div>
-          ) : isError ? (
-            <div className="text-center py-8 text-red-500">
-              Error loading API connections. Please try again.
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {filteredConnections?.length === 0 ? (
-                <div className="col-span-full text-center py-8 text-gray-500">
-                  No connections found. Create one to get started.
-                </div>
-              ) : (
-                filteredConnections?.map((connection: ApiConnection) => (
-                  <Card key={connection.id} className="overflow-hidden">
-                    <CardHeader className="pb-2">
-                      <div className="flex justify-between items-start">
-                        <CardTitle className="text-lg">{connection.name}</CardTitle>
-                        <Badge
-                          variant={connection.isActive ? 'default' : 'destructive'}
-                          className="ml-2"
-                        >
-                          {connection.isActive ? 'Active' : 'Inactive'}
-                        </Badge>
-                      </div>
-                      <CardDescription className="flex items-center gap-1">
-                        {connection.service.charAt(0).toUpperCase() + connection.service.slice(1)}
-                        <span className="text-xs ml-2 text-gray-500">
-                          {connection.lastTested
-                            ? `Last tested: ${new Date(connection.lastTested).toLocaleDateString()}`
-                            : 'Never tested'}
-                        </span>
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent className="text-sm">
-                      <p className="line-clamp-2 text-gray-600 mb-2">
-                        {connection.description || 'No description provided'}
-                      </p>
-                      <p className="truncate text-xs text-gray-500">URL: {connection.baseUrl}</p>
-                    </CardContent>
-                    <CardFooter className="bg-gray-50 flex justify-between pt-2">
-                      <div className="flex space-x-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleEditConnection(connection)}
-                        >
-                          Edit
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleTestConnection(connection.id)}
-                          className={`${
-                            connection.isActive ? 'text-green-600' : 'text-amber-600'
-                          }`}
-                          disabled={testMutation.isPending}
-                        >
-                          {testMutation.isPending ? (
-                            <Loader2 className="h-4 w-4 animate-spin" />
-                          ) : (
-                            <>
-                              <RefreshCw className="h-4 w-4 mr-1" /> Test
-                            </>
-                          )}
-                        </Button>
-                      </div>
-                      <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                          <Button variant="ghost" size="sm" className="text-red-600">
-                            Delete
-                          </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                          <AlertDialogHeader>
-                            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                            <AlertDialogDescription>
-                              This action cannot be undone. This will permanently delete the API
-                              connection and remove it from our servers.
-                            </AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel>Cancel</AlertDialogCancel>
-                            <AlertDialogAction
-                              onClick={() => handleDeleteConnection(connection.id)}
-                              className="bg-red-600 hover:bg-red-700"
-                            >
-                              Delete
-                            </AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
-                    </CardFooter>
-                  </Card>
-                ))
-              )}
-            </div>
-          )}
-        </TabsContent>
-      </Tabs>
-
-      {/* Edit Connection Dialog */}
-      <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
-        <DialogContent className="sm:max-w-[600px]">
-          <DialogHeader>
-            <DialogTitle>Edit API Connection</DialogTitle>
-            <DialogDescription>
-              Update the connection details for {editingConnection?.name}.
-            </DialogDescription>
-          </DialogHeader>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onEditSubmit)} className="space-y-4">
-              <FormField
-                control={form.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Connection Name</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Enter a name for this connection" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              <FormField
-                control={form.control}
-                name="service"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Service Type</FormLabel>
-                    <FormControl>
-                      <Input disabled {...field} />
-                    </FormControl>
-                    <FormDescription>
-                      Service type cannot be changed after creation
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              <FormField
-                control={form.control}
-                name="baseUrl"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Base URL</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Enter API base URL" {...field} />
-                    </FormControl>
-                    <FormDescription>
-                      The base URL for the API service (e.g., https://api.example.com)
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              {editingConnection?.service && renderServiceFields(editingConnection.service)}
-              
-              <FormField
-                control={form.control}
-                name="description"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Description</FormLabel>
-                    <FormControl>
-                      <Textarea
-                        placeholder="Enter a description of this connection"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              <DialogFooter>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => {
-                    setIsEditOpen(false);
-                    setEditingConnection(null);
-                  }}
-                >
-                  Cancel
-                </Button>
-                <Button type="submit" disabled={updateMutation.isPending}>
-                  {updateMutation.isPending ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Updating
-                    </>
-                  ) : (
-                    'Update Connection'
-                  )}
-                </Button>
-              </DialogFooter>
-            </form>
-          </Form>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }

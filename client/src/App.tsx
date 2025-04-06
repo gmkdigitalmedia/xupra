@@ -11,6 +11,7 @@ import EngageOptic from "@/pages/engageoptic";
 import InsightLens from "@/pages/insightlens";
 import AssetManagement from "@/pages/asset-management";
 import AdminConnectionsPage from "@/pages/admin";
+import SlackIntegrationPage from "@/pages/slack-integration";
 import { useAppContext, AppProvider } from "./contexts/app-context";
 
 function AppRoutes() {
@@ -26,6 +27,7 @@ function AppRoutes() {
       <Route path="/insightlens" component={InsightLens} />
       <Route path="/asset-management" component={AssetManagement} />
       <Route path="/admin" component={AdminConnectionsPage} />
+      <Route path="/slack-integration" component={SlackIntegrationPage} />
       <Route component={NotFound} />
     </Switch>
   );
