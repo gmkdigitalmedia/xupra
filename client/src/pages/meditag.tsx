@@ -9,6 +9,8 @@ import { Label } from "@/components/ui/label";
 import { useQuery } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Star, MapPin, Network, UserCheck, Users, Activity, Calendar, BarChart4 } from "lucide-react";
+import { GeographicMap } from "@/components/geographic-map";
+import { InfluenceNetwork } from "@/components/influence-network";
 
 // Mock data for visualization examples (to be replaced by real data later)
 const regionDistribution = [
@@ -678,23 +680,8 @@ const MediTag = () => {
                 </CardHeader>
                 <CardContent className="h-[400px] p-0">
                   <div className="h-full w-full">
-                    {/* Import and use the GeographicMap component here */}
-                    {(() => {
-                      try {
-                        // Dynamic import to prevent potential SSR issues
-                        const GeographicMap = require('@/components/geographic-map').GeographicMap;
-                        return <GeographicMap />;
-                      } catch (error) {
-                        // Fallback if component fails to load
-                        return (
-                          <div className="text-center p-8 text-gray-400 border-2 border-dashed border-gray-800 m-6 rounded-lg w-full">
-                            <MapPin className="h-8 w-8 mx-auto mb-4 text-gray-500" />
-                            <p className="mb-2">Could not load map visualization</p>
-                            <p className="text-sm text-gray-500">Please check if react-simple-maps is properly installed</p>
-                          </div>
-                        );
-                      }
-                    })()}
+                    {/* Geographic map from component */}
+                    <GeographicMap />
                   </div>
                 </CardContent>
               </Card>
@@ -815,22 +802,8 @@ const MediTag = () => {
                 </CardHeader>
                 <CardContent className="h-[400px] p-0">
                   <div className="h-full w-full">
-                    {/* Import and use the InfluenceNetwork component here */}
-                    {(() => {
-                      try {
-                        const InfluenceNetwork = require('@/components/influence-network').InfluenceNetwork;
-                        return <InfluenceNetwork />;
-                      } catch (error) {
-                        // Fallback if component fails to load
-                        return (
-                          <div className="text-center p-8 text-gray-400 border-2 border-dashed border-gray-800 m-6 rounded-lg w-full">
-                            <Network className="h-8 w-8 mx-auto mb-4 text-gray-500" />
-                            <p className="mb-2">Interactive network visualization would be displayed here</p>
-                            <p className="text-sm text-gray-500">Implementation requires a graph visualization library</p>
-                          </div>
-                        );
-                      }
-                    })()}
+                    {/* Influence network from component */}
+                    <InfluenceNetwork />
                   </div>
                 </CardContent>
               </Card>
