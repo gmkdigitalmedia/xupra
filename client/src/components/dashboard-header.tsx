@@ -2,29 +2,12 @@ import React from 'react';
 
 interface DashboardHeaderProps {
   title: string;
-  onMobileMenuToggle?: () => void;
-  showMobileMenu?: boolean;
 }
 
-const DashboardHeader: React.FC<DashboardHeaderProps> = ({ 
-  title, 
-  onMobileMenuToggle,
-  showMobileMenu = false
-}) => {
+const DashboardHeader: React.FC<DashboardHeaderProps> = ({ title }) => {
   return (
     <div className="bg-background-lighter p-4 flex justify-between items-center sticky top-0 z-10">
-      <div className="flex items-center space-x-3">
-        <button 
-          onClick={onMobileMenuToggle}
-          className="md:hidden text-gray-400 hover:text-white transition"
-          aria-label="Toggle mobile menu"
-        >
-          <span className="material-icons">
-            {showMobileMenu ? 'close' : 'menu'}
-          </span>
-        </button>
-        <h1 className="text-xl font-bold">{title}</h1>
-      </div>
+      <h1 className="text-xl font-bold">{title}</h1>
       <div className="flex items-center space-x-4">
         <div className="relative">
           <button className="text-gray-400 hover:text-white transition">

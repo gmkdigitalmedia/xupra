@@ -1,6 +1,6 @@
 import { useState, useRef } from "react";
+import Sidebar from "@/components/sidebar";
 import DashboardHeader from "@/components/dashboard-header";
-import { useAppContext } from "@/contexts/app-context";
 import ComplianceBadge from "@/components/compliance-badge";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -33,7 +33,6 @@ const ContentCraft = () => {
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
-  const { toggleMobileMenu, isMobileMenuOpen } = useAppContext();
   
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
@@ -175,14 +174,10 @@ const ContentCraft = () => {
 
   return (
     <div className="h-screen flex flex-col md:flex-row bg-background">
-      {/* Sidebar is now managed globally in App.tsx */}
+      <Sidebar />
       
       <main className="flex-1 overflow-y-auto bg-background-dark">
-        <DashboardHeader 
-          title="ContentCraft AI" 
-          onMobileMenuToggle={toggleMobileMenu}
-          showMobileMenu={isMobileMenuOpen}
-        />
+        <DashboardHeader title="ContentCraft AI" />
         
         <div className="p-6">
           <div className="mb-8">

@@ -1,11 +1,8 @@
-import { createContext, useContext, useState, ReactNode, useEffect } from "react";
+import { createContext, useContext, useState, ReactNode } from "react";
 import { useLocation } from "wouter";
 
 interface AppContextType {
   isLoggedIn: boolean;
-  isMobileMenuOpen: boolean;
-  toggleMobileMenu: () => void;
-  closeMobileMenu: () => void;
   login: () => void;
   logout: () => void;
 }
@@ -14,20 +11,7 @@ const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export function AppProvider({ children }: { children: ReactNode }) {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [, setLocation] = useLocation();
-
-  // Close mobile menu when screen becomes larger than mobile size
-  useEffect(() => {
-    const handleResize = () => {
-      if (window.innerWidth >= 768) {
-        setIsMobileMenuOpen(false);
-      }
-    };
-
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
 
   const login = () => {
     setIsLoggedIn(true);
@@ -39,23 +23,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setLocation("/");
   };
 
-  const toggleMobileMenu = () => {
-    setIsMobileMenuOpen(prev => !prev);
-  };
-
-  const closeMobileMenu = () => {
-    setIsMobileMenuOpen(false);
-  };
-
   return (
-    <AppContext.Provider value={{ 
-      isLoggedIn, 
-      isMobileMenuOpen,
-      toggleMobileMenu,
-      closeMobileMenu,
-      login, 
-      logout 
-    }}>
+    <AppContext.Provider value={{ isLoggedIn, login, logout }}>
       {children}
     </AppContext.Provider>
   );
