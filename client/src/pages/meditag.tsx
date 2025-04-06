@@ -662,7 +662,7 @@ const MediTag = () => {
                     </div>
                     <div className="flex gap-2 text-sm">
                       <Badge variant="outline" className="bg-background-lighter">
-                        <span className="h-2 w-2 rounded-full bg-primary mr-1"></span>
+                        <span className="h-2 w-2 rounded-full bg-amber-500 mr-1"></span>
                         KOLs
                       </Badge>
                       <Badge variant="outline" className="bg-background-lighter">
@@ -676,11 +676,25 @@ const MediTag = () => {
                     </div>
                   </div>
                 </CardHeader>
-                <CardContent className="h-[400px] flex items-center justify-center p-0">
-                  <div className="text-center p-8 text-gray-400 border-2 border-dashed border-gray-800 m-6 rounded-lg w-full">
-                    <MapPin className="h-8 w-8 mx-auto mb-4 text-gray-500" />
-                    <p className="mb-2">Interactive map visualization would be displayed here</p>
-                    <p className="text-sm text-gray-500">Implementation requires a mapping library integration like react-simple-maps or Mapbox</p>
+                <CardContent className="h-[400px] p-0">
+                  <div className="h-full w-full">
+                    {/* Import and use the GeographicMap component here */}
+                    {(() => {
+                      try {
+                        // Dynamic import to prevent potential SSR issues
+                        const GeographicMap = require('@/components/geographic-map').GeographicMap;
+                        return <GeographicMap />;
+                      } catch (error) {
+                        // Fallback if component fails to load
+                        return (
+                          <div className="text-center p-8 text-gray-400 border-2 border-dashed border-gray-800 m-6 rounded-lg w-full">
+                            <MapPin className="h-8 w-8 mx-auto mb-4 text-gray-500" />
+                            <p className="mb-2">Could not load map visualization</p>
+                            <p className="text-sm text-gray-500">Please check if react-simple-maps is properly installed</p>
+                          </div>
+                        );
+                      }
+                    })()}
                   </div>
                 </CardContent>
               </Card>
@@ -799,11 +813,24 @@ const MediTag = () => {
                     </Badge>
                   </div>
                 </CardHeader>
-                <CardContent className="h-[400px] flex items-center justify-center p-0">
-                  <div className="text-center p-8 text-gray-400 border-2 border-dashed border-gray-800 m-6 rounded-lg w-full">
-                    <Network className="h-8 w-8 mx-auto mb-4 text-gray-500" />
-                    <p className="mb-2">Interactive network visualization would be displayed here</p>
-                    <p className="text-sm text-gray-500">Implementation requires a graph visualization library like react-force-graph or vis.js</p>
+                <CardContent className="h-[400px] p-0">
+                  <div className="h-full w-full">
+                    {/* Import and use the InfluenceNetwork component here */}
+                    {(() => {
+                      try {
+                        const InfluenceNetwork = require('@/components/influence-network').InfluenceNetwork;
+                        return <InfluenceNetwork />;
+                      } catch (error) {
+                        // Fallback if component fails to load
+                        return (
+                          <div className="text-center p-8 text-gray-400 border-2 border-dashed border-gray-800 m-6 rounded-lg w-full">
+                            <Network className="h-8 w-8 mx-auto mb-4 text-gray-500" />
+                            <p className="mb-2">Interactive network visualization would be displayed here</p>
+                            <p className="text-sm text-gray-500">Implementation requires a graph visualization library</p>
+                          </div>
+                        );
+                      }
+                    })()}
                   </div>
                 </CardContent>
               </Card>
