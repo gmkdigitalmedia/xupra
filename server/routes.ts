@@ -9,6 +9,13 @@ import {
   insertActivitySchema 
 } from "@shared/schema";
 import { z } from "zod";
+import { 
+  generatePersonalizedContent, 
+  analyzeMedicalCompliance, 
+  generateCampaignPlan, 
+  generateInsights,
+  tagHcpWithMediTag 
+} from "./services/openai-service";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // API Routes - All API routes are prefixed with /api
@@ -88,18 +95,50 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Invalid HCP ID" });
       }
 
-      const { tag } = req.body;
-      if (!tag) {
-        return res.status(400).json({ message: "Tag is required" });
-      }
-
-      const updatedHcp = await storage.updateHcp(id, { tag });
+      const { tag, autoTag } = req.body;
       
-      if (!updatedHcp) {
-        return res.status(404).json({ message: "HCP not found" });
+      // If autoTag is true, use AI to generate tags
+      if (autoTag) {
+        const hcp = await storage.getHcp(id);
+        if (!hcp) {
+          return res.status(404).json({ message: "HCP not found" });
+        }
+        
+        const tagResult = await tagHcpWithMediTag({
+          name: hcp.name || "",
+          specialty: hcp.specialty || "",
+          prescribingPattern: hcp.prescribingPattern || "",
+          organization: hcp.organization || "",
+          notes: hcp.notes || ""
+        });
+        
+        const updatedHcp = await storage.updateHcp(id, { 
+          tag: tagResult.tag,
+          engagementScore: tagResult.engagementScore
+        });
+        
+        if (!updatedHcp) {
+          return res.status(404).json({ message: "HCP not found" });
+        }
+        
+        return res.json({
+          hcp: updatedHcp,
+          rationale: tagResult.rationale
+        });
+      } 
+      // Manual tagging
+      else if (tag) {
+        const updatedHcp = await storage.updateHcp(id, { tag });
+        
+        if (!updatedHcp) {
+          return res.status(404).json({ message: "HCP not found" });
+        }
+        
+        return res.json(updatedHcp);
+      } 
+      else {
+        return res.status(400).json({ message: "Tag is required for manual tagging" });
       }
-
-      res.json(updatedHcp);
     } catch (error) {
       console.error("Error tagging HCP:", error);
       res.status(500).json({ message: "Failed to tag HCP" });
@@ -172,21 +211,58 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/content/generate", async (req: Request, res: Response) => {
     try {
-      const { hcp, contentType, productFocus, keyMessage } = req.body;
+      const { hcpId, contentType, productInfo, keyMessage } = req.body;
       
-      if (!hcp || !contentType || !productFocus) {
-        return res.status(400).json({ message: "Missing required fields: hcp, contentType, productFocus" });
+      if (!hcpId || !contentType || !productInfo) {
+        return res.status(400).json({ message: "Missing required fields: hcpId, contentType, productInfo" });
       }
-
-      // Mock AI-generated content
+      
+      // Get HCP data
+      const id = parseInt(hcpId);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid HCP ID" });
+      }
+      
+      const hcp = await storage.getHcp(id);
+      if (!hcp) {
+        return res.status(404).json({ message: "HCP not found" });
+      }
+      
+      // Generate personalized content using OpenAI
+      const productDescription = `${productInfo} ${keyMessage || ""}`.trim();
+      const content = await generatePersonalizedContent(
+        {
+          name: hcp.name || "",
+          specialty: hcp.specialty || "",
+          prescribingPattern: hcp.prescribingPattern || "",
+          engagementScore: hcp.engagementScore || 50,
+          tag: hcp.tag || ""
+        },
+        contentType,
+        productDescription
+      );
+      
+      // Analyze compliance
+      const complianceResult = await analyzeMedicalCompliance(content);
+      
       const generatedContent = {
-        subject: `New ${productFocus} Information for Your Review`,
-        content: `Dear ${hcp},\n\nI wanted to share some important information about ${productFocus} that aligns with your practice. ${keyMessage || "Recent clinical data has shown promising results that I believe would interest you."}\n\nWould you be available for a brief discussion about these findings?\n\nBest regards,\nJohn Doe\nMedical Science Liaison`,
+        subject: `${productInfo} Information for ${hcp.name}`,
+        content,
         compliance: {
-          medical: { status: "approved", notes: "All claims supported by clinical data" },
-          legal: { status: "approved", notes: "No legal concerns identified" },
-          regulatory: { status: "warning", notes: "Include full safety information in final version" }
-        }
+          medical: { 
+            status: complianceResult.isCompliant ? "approved" : "warning", 
+            notes: complianceResult.isCompliant ? "All claims supported by clinical data" : complianceResult.issues.join("; ")
+          },
+          legal: { 
+            status: complianceResult.isCompliant ? "approved" : "review", 
+            notes: "Legal review recommended" 
+          },
+          regulatory: { 
+            status: "warning", 
+            notes: complianceResult.suggestions.join("; ") || "Include full safety information in final version" 
+          }
+        },
+        hcp: hcp.name
       };
 
       res.json(generatedContent);
@@ -286,25 +362,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/campaign/plan", async (req: Request, res: Response) => {
     try {
-      const { hcpSegment, content } = req.body;
+      const { hcpId, contentId, previousEngagements } = req.body;
       
-      if (!hcpSegment) {
-        return res.status(400).json({ message: "Missing required field: hcpSegment" });
+      if (!hcpId || !contentId) {
+        return res.status(400).json({ message: "Missing required fields: hcpId, contentId" });
       }
 
-      // Mock AI-generated campaign plan
+      // Get HCP data
+      const id = parseInt(hcpId);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid HCP ID" });
+      }
+      
+      const hcp = await storage.getHcp(id);
+      if (!hcp) {
+        return res.status(404).json({ message: "HCP not found" });
+      }
+      
+      // Generate campaign plan using OpenAI
+      const plan = await generateCampaignPlan(
+        {
+          name: hcp.name || "",
+          specialty: hcp.specialty || "",
+          prescribingPattern: hcp.prescribingPattern || "",
+          engagementScore: hcp.engagementScore || 50,
+          tag: hcp.tag || ""
+        },
+        contentId,
+        previousEngagements || []
+      );
+      
+      // Format the response
       const campaignPlan = {
-        recommendedChannels: [
-          { channel: "Email", percentage: 42 },
-          { channel: "In-person", percentage: 31 },
-          { channel: "Video", percentage: 21 },
-          { channel: "Webinar", percentage: 13 },
-          { channel: "Call", percentage: 10 }
-        ],
+        recommendedChannels: plan.recommendedChannels.map((channel, index) => {
+          return {
+            channel,
+            percentage: Math.round(100 / (index + 2)) // Just a simple way to generate decreasing percentages
+          };
+        }),
         timing: {
-          optimalSendTime: "Tuesday/Thursday mornings (8-10 AM)",
-          optimalFollowup: "3-5 days after initial contact",
-          reasoning: `Analysis of previous engagement patterns shows ${hcpSegment} have 32% higher response rates during early morning hours and are 2.7x more likely to engage with content on Tuesday/Thursday.`
+          optimalSendTime: plan.optimalTiming,
+          optimalFollowup: plan.frequencyRecommendation,
+          reasoning: plan.rationale
         }
       };
 
@@ -485,22 +584,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/analytics/insights/:id", async (req: Request, res: Response) => {
     try {
       const id = req.params.id;
-      // Mock insights data
+      
+      // Get campaign data
+      const campaignId = parseInt(id);
+      if (isNaN(campaignId)) {
+        return res.status(400).json({ message: "Invalid campaign ID" });
+      }
+      
+      const campaign = await storage.getCampaign(campaignId);
+      if (!campaign) {
+        return res.status(404).json({ message: "Campaign not found" });
+      }
+      
+      // Sample performance metrics for demo purposes
+      const performanceMetrics = {
+        openRate: 0.78,
+        responseRate: 0.36,
+        clickThroughRate: 0.42,
+        engagementScore: 7.2,
+        conversionRate: 0.15,
+        roi: 3.2,
+        segmentPerformance: {
+          "High Value": { openRate: 0.84, response: 0.42, engagement: 7.8 },
+          "Growth Potential": { openRate: 0.76, response: 0.35, engagement: 6.9 },
+          "Maintenance": { openRate: 0.72, response: 0.32, engagement: 6.2 },
+          "Low Engagement": { openRate: 0.65, response: 0.28, engagement: 5.8 }
+        },
+        channelPerformance: {
+          email: { openRate: 0.78, response: 0.36, cost: 1000 },
+          inPerson: { attendance: 0.85, followUp: 0.72, cost: 5000 },
+          webinar: { attendance: 0.62, engagement: 6.5, cost: 2000 }
+        }
+      };
+      
+      // Generate insights using OpenAI
+      const aiGeneratedInsights = await generateInsights(campaign, performanceMetrics);
+      
       const insights = {
-        aiInsights: [
-          "Cardiologists showed 28% higher engagement with clinical trial data vs. general product information.",
-          "Tuesday morning emails had 34% higher open rates than other days/times.",
-          "HCPs who received personalized content were 2.1x more likely to schedule follow-up meetings.",
-          "Content focusing on patient outcomes resonated better with 'Patient-Focused' tagged HCPs.",
-          "Compliance-flagged content had 18% lower engagement rates."
-        ],
-        recommendations: [
-          "Increase frequency of clinical data updates for Evidence-Driven HCPs.",
-          "Schedule email sends for Tuesday/Thursday mornings to maximize open rates.",
-          "Develop more personalized content for high-value HCP segments.",
-          "Focus on patient outcome messaging for Patient-Focused segment.",
-          "Address regulatory compliance flags before campaign launch."
-        ]
+        aiInsights: aiGeneratedInsights.insights,
+        recommendations: aiGeneratedInsights.improvementSuggestions,
+        predictiveMetrics: aiGeneratedInsights.predictiveMetrics
       };
 
       res.json(insights);
