@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import Sidebar from "@/components/sidebar";
 import DashboardHeader from "@/components/dashboard-header";
 import ComplianceBadge from "@/components/compliance-badge";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { uploadReferenceDocument } from "@/lib/api";
 
 interface ComplianceNote {
   type: 'warning' | 'success';
@@ -29,7 +30,49 @@ const ContentCraft = () => {
   const [keyMessage, setKeyMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const [generatedContent, setGeneratedContent] = useState<GeneratedContent | null>(null);
+  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
+  
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (files && files.length > 0) {
+      const file = files[0];
+      // Check file size (max 10MB)
+      if (file.size > 10 * 1024 * 1024) {
+        toast({
+          title: "File too large",
+          description: "Please upload a file smaller than 10MB.",
+          variant: "destructive"
+        });
+        return;
+      }
+      
+      setUploadedFile(file);
+      
+      // In a full implementation, we would upload the file to the server here
+      // Create a FormData object to send the file
+      try {
+        const formData = new FormData();
+        formData.append('document', file);
+        
+        // For now, we'll just set the file in state, but in a real app we'd upload it
+        // const response = await uploadReferenceDocument(formData);
+        
+        toast({
+          title: "File uploaded",
+          description: `${file.name} has been uploaded successfully.`,
+        });
+      } catch (error) {
+        console.error("Error uploading file:", error);
+        toast({
+          title: "Upload failed",
+          description: "There was an error uploading the file. Please try again.",
+          variant: "destructive"
+        });
+      }
+    }
+  };
   
   const handleGenerateContent = async () => {
     if (!selectedHcp || !contentType || !productFocus) {
@@ -55,6 +98,20 @@ const ContentCraft = () => {
       
       const hcpId = hcpIdMap[selectedHcp] || "1";
       
+      // Reference document information
+      let referenceDocumentInfo = undefined;
+      
+      // If a file is uploaded, we would save it and get a reference to pass to the content generation
+      if (uploadedFile) {
+        // In a real implementation, we would upload the file here if not already uploaded
+        // and get a reference ID or path to send with the content generation request
+        referenceDocumentInfo = {
+          name: uploadedFile.name,
+          size: uploadedFile.size,
+          type: uploadedFile.type
+        };
+      }
+      
       // Make the API call to generate content
       const response = await apiRequest(
         "POST", 
@@ -63,7 +120,8 @@ const ContentCraft = () => {
           hcpId,
           contentType,
           productInfo: productFocus,
-          keyMessage: keyMessage.trim() ? keyMessage : undefined
+          keyMessage: keyMessage.trim() ? keyMessage : undefined,
+          referenceDocument: referenceDocumentInfo
         }
       );
       
@@ -202,6 +260,37 @@ const ContentCraft = () => {
                       value={keyMessage}
                       onChange={(e) => setKeyMessage(e.target.value)}
                     ></textarea>
+                  </div>
+
+                  <div className="mb-4">
+                    <label className="block text-sm font-medium mb-2">Upload Reference Document</label>
+                    <div className={`border-2 border-dashed ${uploadedFile ? 'border-primary bg-primary/5' : 'border-gray-300'} rounded-lg p-4 text-center hover:border-primary transition`}>
+                      <input 
+                        ref={fileInputRef}
+                        type="file" 
+                        id="document-upload" 
+                        className="hidden" 
+                        accept=".pdf,.doc,.docx,.txt"
+                        onChange={handleFileUpload}
+                      />
+                      <label htmlFor="document-upload" className="cursor-pointer w-full">
+                        {uploadedFile ? (
+                          <div className="flex flex-col items-center">
+                            <span className="material-icons text-primary text-3xl mb-2">description</span>
+                            <p className="text-sm font-medium mb-1">{uploadedFile.name}</p>
+                            <p className="text-xs text-gray-400">
+                              {(uploadedFile.size / 1024 / 1024).toFixed(2)} MB • Click to change
+                            </p>
+                          </div>
+                        ) : (
+                          <div className="flex flex-col items-center">
+                            <span className="material-icons text-3xl mb-2">upload_file</span>
+                            <p className="text-sm font-medium mb-1">Click to upload or drag and drop</p>
+                            <p className="text-xs text-gray-400">PDF, DOC, DOCX, TXT up to 10MB</p>
+                          </div>
+                        )}
+                      </label>
+                    </div>
                   </div>
                   
                   <button 

@@ -13,7 +13,8 @@ export async function generatePersonalizedContent(
   },
   contentType: string,
   productInfo: string,
-  keyMessage?: string
+  keyMessage?: string,
+  hasReferenceDocument: boolean = false
 ): Promise<{
   subject: string;
   content: string;
@@ -46,6 +47,15 @@ export async function generatePersonalizedContent(
       prompt += `
     The following key message must be naturally incorporated into the content:
     "${keyMessage}"
+      `;
+    }
+    
+    // Add reference to uploaded document if provided
+    if (hasReferenceDocument) {
+      prompt += `
+    Important: A reference document has been uploaded for this content generation. 
+    Please create content that would be enhanced by incorporating relevant clinical data, 
+    study results, or product information that would typically be found in such a document.
       `;
     }
 

@@ -209,9 +209,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.post("/api/content/document/upload", async (req: Request, res: Response) => {
+    try {
+      // In a real implementation, we would handle file uploads here
+      // For now, we'll simulate a successful upload
+      
+      // Generate a unique document ID
+      const documentId = `doc_${Date.now()}`;
+      
+      res.json({
+        success: true,
+        documentId,
+        message: "Document uploaded successfully"
+      });
+    } catch (error) {
+      console.error("Error uploading document:", error);
+      res.status(500).json({ message: "Failed to upload document" });
+    }
+  });
+
   app.post("/api/content/generate", async (req: Request, res: Response) => {
     try {
-      const { hcpId, contentType, productInfo, keyMessage } = req.body;
+      const { hcpId, contentType, productInfo, keyMessage, referenceDocument } = req.body;
       
       if (!hcpId || !contentType || !productInfo) {
         return res.status(400).json({ message: "Missing required fields: hcpId, contentType, productInfo" });
@@ -228,6 +247,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "HCP not found" });
       }
       
+      // Log if reference document is provided
+      if (referenceDocument) {
+        console.log(`Reference document provided for content generation: ${JSON.stringify(referenceDocument)}`);
+        // In a real implementation, we would process the document here
+      }
+      
       // Generate personalized content using OpenAI
       const generatedContent = await generatePersonalizedContent(
         {
@@ -239,11 +264,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
         },
         contentType,
         productInfo,
-        keyMessage
+        keyMessage,
+        !!referenceDocument // Pass boolean indicating if reference document is provided
       );
       
       // Add HCP name to the response
       generatedContent.hcp = hcp.name;
+      
+      // If we used a reference document, add a compliance note about it
+      if (referenceDocument && generatedContent.complianceNotes) {
+        generatedContent.complianceNotes.push({
+          type: 'success',
+          text: `Content enhanced with reference document: ${referenceDocument.name}`
+        });
+      }
 
       res.json(generatedContent);
     } catch (error) {

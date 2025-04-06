@@ -19,6 +19,11 @@ export const generateContent = async (data: {
   contentType: string;
   productFocus: string;
   keyMessage?: string;
+  referenceDocument?: {
+    name: string;
+    size: number;
+    type: string;
+  };
 }) => {
   return apiRequest("POST", "/api/content/generate", data).then(res => res.json());
 };
@@ -66,6 +71,11 @@ export const getCampaignAnalytics = async (campaignId: string) => {
 
 export const getInsights = async (campaignId: string) => {
   return apiRequest("GET", `/api/analytics/insights/${campaignId}`).then(res => res.json());
+};
+
+// Document related API endpoints
+export const uploadReferenceDocument = async (data: FormData) => {
+  return apiRequest("POST", "/api/content/document/upload", data);
 };
 
 // Asset related API endpoints
