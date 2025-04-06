@@ -19,13 +19,13 @@ interface HcpLocation {
   prescribingPattern: string;
 }
 
-// Sample data for demonstration
+// Sample data for Japanese hospitals and HCPs
 const sampleLocations: HcpLocation[] = [
   {
     id: 1,
-    name: "Dr. Sarah Chen",
-    coordinates: [-73.97, 40.78], // NYC
-    location: "New York",
+    name: "鈴木 優子 医師",
+    coordinates: [139.7594, 35.6850], // Tokyo
+    location: "東京都 (Tokyo)",
     specialty: "Cardiology",
     tag: "High Priority",
     isKol: true,
@@ -34,9 +34,9 @@ const sampleLocations: HcpLocation[] = [
   },
   {
     id: 2,
-    name: "Dr. Michael Lee",
-    coordinates: [-118.24, 34.05], // LA
-    location: "Los Angeles",
+    name: "佐藤 健太 医師",
+    coordinates: [135.5023, 34.6937], // Osaka
+    location: "大阪市 (Osaka)",
     specialty: "Oncology",
     tag: "Key Decision Maker",
     isKol: true,
@@ -45,9 +45,9 @@ const sampleLocations: HcpLocation[] = [
   },
   {
     id: 3,
-    name: "Dr. James Wilson",
-    coordinates: [-77.03, 38.90], // Washington DC
-    location: "Washington DC",
+    name: "田中 誠 医師",
+    coordinates: [130.4017, 33.5902], // Fukuoka
+    location: "福岡市 (Fukuoka)",
     specialty: "Oncology",
     tag: "High Prescriber",
     isKol: true,
@@ -56,9 +56,9 @@ const sampleLocations: HcpLocation[] = [
   },
   {
     id: 4,
-    name: "Dr. Lisa Anderson",
-    coordinates: [-87.62, 41.88], // Chicago
-    location: "Chicago",
+    name: "渡辺 美咲 医師",
+    coordinates: [136.9066, 35.1815], // Nagoya
+    location: "名古屋市 (Nagoya)",
     specialty: "Neurology",
     tag: "Potential KOL",
     isKol: true,
@@ -67,9 +67,9 @@ const sampleLocations: HcpLocation[] = [
   },
   {
     id: 5,
-    name: "Dr. David Kim",
-    coordinates: [-122.33, 47.60], // Seattle
-    location: "Seattle",
+    name: "伊藤 直樹 医師",
+    coordinates: [141.3544, 43.0621], // Sapporo
+    location: "札幌市 (Sapporo)",
     specialty: "Endocrinology",
     tag: "Research Focus",
     isKol: true,
@@ -78,9 +78,9 @@ const sampleLocations: HcpLocation[] = [
   },
   {
     id: 6,
-    name: "Dr. Jennifer Park",
-    coordinates: [-71.06, 42.36], // Boston
-    location: "Boston",
+    name: "山本 恵 医師",
+    coordinates: [132.4553, 34.3853], // Hiroshima
+    location: "広島市 (Hiroshima)",
     specialty: "Oncology",
     tag: "Academic",
     isKol: false,
@@ -89,9 +89,9 @@ const sampleLocations: HcpLocation[] = [
   },
   {
     id: 7,
-    name: "Dr. Robert Johnson",
-    coordinates: [-95.37, 29.76], // Houston
-    location: "Houston",
+    name: "中村 隆太 医師",
+    coordinates: [139.0261, 36.3219], // Takasaki
+    location: "高崎市 (Takasaki)",
     specialty: "Cardiology",
     tag: "Private Practice",
     isKol: false,
@@ -100,9 +100,9 @@ const sampleLocations: HcpLocation[] = [
   },
   {
     id: 8,
-    name: "Dr. Emily Davis",
-    coordinates: [-84.39, 33.75], // Atlanta
-    location: "Atlanta",
+    name: "小林 七海 医師",
+    coordinates: [133.9250, 34.6619], // Okayama
+    location: "岡山市 (Okayama)",
     specialty: "Neurology",
     tag: "Early Adopter",
     isKol: false,
@@ -111,9 +111,9 @@ const sampleLocations: HcpLocation[] = [
   },
   {
     id: 9,
-    name: "Dr. Thomas Brown",
-    coordinates: [-112.07, 33.45], // Phoenix
-    location: "Phoenix",
+    name: "加藤 隆 医師",
+    coordinates: [131.4229, 34.1861], // Shimonoseki
+    location: "下関市 (Shimonoseki)",
     specialty: "Endocrinology",
     tag: "Conservative",
     isKol: false,
@@ -122,9 +122,9 @@ const sampleLocations: HcpLocation[] = [
   },
   {
     id: 10,
-    name: "Dr. Maria Garcia",
-    coordinates: [-80.19, 25.76], // Miami
-    location: "Miami",
+    name: "吉田 千代 医師",
+    coordinates: [140.8694, 38.2682], // Sendai
+    location: "仙台市 (Sendai)",
     specialty: "Cardiology",
     tag: "Digital Savvy",
     isKol: false,
@@ -165,15 +165,18 @@ const getMarkerColor = (hcp: HcpLocation): string => {
 export function GeographicMap() {
   const [hoveredHcp, setHoveredHcp] = useState<HcpLocation | null>(null);
   const [position, setPosition] = useState<{ coordinates: [number, number], zoom: number }>({
-    coordinates: [-98, 40], // Center of USA approximately
-    zoom: 3.5
+    coordinates: [138.0, 38.0], // Center of Japan approximately
+    zoom: 5.5
   });
 
   return (
     <div className="relative w-full h-full">
       <ComposableMap
-        projection="geoAlbersUsa"
-        projectionConfig={{ scale: 800 }}
+        projection="geoMercator"
+        projectionConfig={{ 
+          scale: 1700,
+          center: [138.0, 38.0] // Center on Japan
+        }}
         className="bg-slate-900 rounded-md"
       >
         <ZoomableGroup
@@ -181,8 +184,8 @@ export function GeographicMap() {
           zoom={position.zoom}
           onMoveEnd={(position: any) => setPosition(position as { coordinates: [number, number], zoom: number })}
         >
-          {/* USA map with state boundaries */}
-          <Geographies geography="https://cdn.jsdelivr.net/npm/us-atlas@3/states-10m.json">
+          {/* Japan map with prefectures */}
+          <Geographies geography="https://raw.githubusercontent.com/deldersveld/topojson/master/countries/japan/japan-prefectures.json">
             {({ geographies }) =>
               geographies.map(geo => (
                 <Geography
