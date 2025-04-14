@@ -2,7 +2,7 @@ import { useLocation } from "wouter";
 import Logo from "./logo";
 import { useAppContext } from "@/contexts/app-context";
 import { useMobileMenu } from "@/contexts/mobile-menu-context";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 const NavItem = ({ 
   icon, 
@@ -54,25 +54,13 @@ const Sidebar = () => {
   const { logout } = useAppContext();
   const { isMobileMenuOpen, closeMobileMenu } = useMobileMenu();
 
-  // Close mobile menu on location change
+  // Create a direct reference to mobile menu state
+  const [mounted, setMounted] = useState(false);
+  
+  // Set mounted to true after component is mounted
   useEffect(() => {
-    closeMobileMenu();
-  }, [location, closeMobileMenu]);
-
-  // Close mobile menu when pressing escape key
-  useEffect(() => {
-    const handleEsc = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        closeMobileMenu();
-      }
-    };
-    
-    window.addEventListener('keydown', handleEsc);
-    
-    return () => {
-      window.removeEventListener('keydown', handleEsc);
-    };
-  }, [closeMobileMenu]);
+    setMounted(true);
+  }, []);
 
   const navItems = [
     { icon: "dashboard", label: "Dashboard", path: "/dashboard" },
@@ -85,47 +73,26 @@ const Sidebar = () => {
     { icon: "settings", label: "API Connections", path: "/admin" },
   ];
 
-  // Combine classes for the sidebar based on mobile menu state
-  const sidebarClasses = `
-    fixed md:static top-0 left-0 z-10
-    w-64 md:w-64 
-    bg-background-lighter 
-    h-screen 
-    overflow-y-auto 
-    flex-shrink-0
-    shadow-lg md:shadow-none
-    transition-all duration-300 ease-in-out
-    transform ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
-  `;
+  // Simplified approach: create CSS classes directly with hard values instead of using template strings
+  const sidebarStyles = {
+    mobile: {
+      open: 'fixed top-0 left-0 z-40 h-screen w-64 bg-background-lighter shadow-lg transform transition-transform duration-300 translate-x-0',
+      closed: 'fixed top-0 left-0 z-40 h-screen w-64 bg-background-lighter shadow-lg transform transition-transform duration-300 -translate-x-full'
+    },
+    desktop: 'fixed top-0 left-0 z-30 h-screen w-64 bg-background-lighter hidden md:block'
+  };
 
-  // Add overlay for mobile
-  const overlayClasses = `
-    fixed inset-0 bg-black bg-opacity-50 z-0
-    transition-opacity duration-300 ease-in-out
-    md:hidden
-    ${isMobileMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}
-  `;
+  // Simplified overlay with direct styles
+  const overlayStyle = isMobileMenuOpen 
+    ? 'fixed inset-0 bg-black bg-opacity-50 z-30 md:hidden' 
+    : 'hidden';
 
   return (
     <>
-      {/* Mobile overlay */}
-      <div 
-        className={overlayClasses}
-        onClick={closeMobileMenu}
-        aria-hidden="true"
-      />
-      
-      {/* Sidebar */}
-      <aside className={sidebarClasses}>
+      {/* Desktop Sidebar - Always visible on md screens and above */}
+      <aside className={sidebarStyles.desktop}>
         <div className="p-4 flex items-center justify-between border-b border-gray-800">
           <Logo />
-          <button 
-            onClick={closeMobileMenu}
-            className="md:hidden text-gray-400 hover:text-white"
-            aria-label="Close navigation"
-          >
-            <span className="material-icons">close</span>
-          </button>
         </div>
         
         <nav className="p-4">
@@ -137,7 +104,6 @@ const Sidebar = () => {
                 label={item.label} 
                 path={item.path} 
                 isActive={location === item.path}
-                onClick={closeMobileMenu}
               />
             ))}
           </ul>
@@ -162,6 +128,59 @@ const Sidebar = () => {
           </div>
         </nav>
       </aside>
+
+      {/* Mobile Sidebar - Only visible on small screens when toggled */}
+      {mounted && (
+        <>
+          <div className={overlayStyle} onClick={closeMobileMenu}></div>
+          <aside className={isMobileMenuOpen ? sidebarStyles.mobile.open : sidebarStyles.mobile.closed}>
+            <div className="p-4 flex items-center justify-between border-b border-gray-800">
+              <Logo />
+              <button 
+                onClick={closeMobileMenu}
+                className="text-gray-400 hover:text-white"
+                aria-label="Close navigation"
+              >
+                <span className="material-icons">close</span>
+              </button>
+            </div>
+            
+            <nav className="p-4">
+              <ul className="space-y-2">
+                {navItems.map((item) => (
+                  <NavItem 
+                    key={item.path}
+                    icon={item.icon} 
+                    label={item.label} 
+                    path={item.path} 
+                    isActive={location === item.path}
+                    onClick={closeMobileMenu}
+                  />
+                ))}
+              </ul>
+              
+              <div className="mt-8 pt-4 border-t border-gray-800">
+                <div className="flex items-center p-3 space-x-3">
+                  <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
+                    <span className="text-sm font-medium">JD</span>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium">John Doe</p>
+                    <p className="text-xs text-gray-400">Admin</p>
+                  </div>
+                </div>
+                <button 
+                  onClick={logout}
+                  className="mt-4 flex items-center text-gray-400 hover:text-white transition p-3 w-full"
+                >
+                  <span className="material-icons text-sm mr-2">logout</span>
+                  <span>Logout</span>
+                </button>
+              </div>
+            </nav>
+          </aside>
+        </>
+      )}
     </>
   );
 };

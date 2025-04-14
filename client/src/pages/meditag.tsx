@@ -168,7 +168,7 @@ const MediTag = () => {
     <div className="h-screen flex flex-col bg-background overflow-hidden">
       <Sidebar />
       
-      <main className="flex-1 overflow-y-auto bg-background-dark md:ml-64">
+      <main className="flex-1 overflow-y-auto bg-background-dark ml-0 md:ml-64">
         <DashboardHeader title="MediTag Engine" />
         
         <div className="p-6">
