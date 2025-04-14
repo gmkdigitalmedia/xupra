@@ -76,8 +76,8 @@ const Sidebar = () => {
   // Simplified approach: create CSS classes directly with hard values instead of using template strings
   const sidebarStyles = {
     mobile: {
-      open: 'fixed top-0 left-0 z-40 h-screen w-64 bg-background-lighter shadow-lg transform transition-transform duration-300 translate-x-0',
-      closed: 'fixed top-0 left-0 z-40 h-screen w-64 bg-background-lighter shadow-lg transform transition-transform duration-300 -translate-x-full'
+      open: 'fixed top-0 left-0 z-40 h-screen w-64 bg-black shadow-lg transform transition-transform duration-300 translate-x-0',
+      closed: 'fixed top-0 left-0 z-40 h-screen w-64 bg-black shadow-lg transform transition-transform duration-300 -translate-x-full'
     },
     desktop: 'fixed top-0 left-0 z-30 h-screen w-64 bg-background-lighter hidden md:block'
   };
@@ -134,7 +134,7 @@ const Sidebar = () => {
         <>
           <div className={overlayStyle} onClick={closeMobileMenu}></div>
           <aside className={isMobileMenuOpen ? sidebarStyles.mobile.open : sidebarStyles.mobile.closed}>
-            <div className="p-4 flex items-center justify-between border-b border-gray-800">
+            <div className="p-4 flex items-center justify-between border-b border-gray-800 bg-black">
               <Logo />
               <button 
                 onClick={closeMobileMenu}
@@ -145,7 +145,7 @@ const Sidebar = () => {
               </button>
             </div>
             
-            <nav className="p-4">
+            <nav className="p-4 bg-black">
               <ul className="space-y-2">
                 {navItems.map((item) => (
                   <NavItem 
