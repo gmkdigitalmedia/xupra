@@ -1,0 +1,245 @@
+Xupra Platform: Page-by-Page Layout Description
+1. Homepage
+•	Top Section:
+o	X-shaped logo (arrow design) at the center top
+o	"XUPRA" headline in large, gradient text
+o	Tagline: "AI-Powered HCP Engagement Engine for Pharmaceutical Companies"
+o	Two prominent buttons: "Auto Login as Admin"  (This is a demo login) and "Standard Login"  (non functional for now)
+•	Features Section:
+o	Four cards in a row showing the main modules: MediTag Engine, ContentCraft AI, EngageOptic, InsightLens
+o	Each card has a high quality icon, title, and brief description
+•	Footer:
+o	Copyright information and company details
+2. Login Page
+•	Center Card:
+o	"Login to Xupra" headline
+o	Username field
+o	Password field
+o	Login button
+o	Link to "Register Organization" (for new companies)
+•	Sidebar:
+o	Brief description of the platform
+o	Background image related to medical/pharma
+3. Dashboard (After Login)
+•	Top Navigation Bar:
+o	Xupra logo on left
+o	User profile dropdown on right (username, role, organization)
+o	Language selector (English/Japanese)
+o	Notifications bell icon
+•	Sidebar Menu:
+o	Dashboard (home)
+o	MediTag Engine
+o	ContentCraft AI
+o	EngageOptic
+o	InsightLens
+o	Asset Management
+o	Settings
+o	Admin Panel (if admin role)
+•	Main Dashboard Area:
+o	Welcome message with user name
+o	Four module cards with quick access
+o	Recent activity section
+o	Performance metrics summary
+4. MediTag Engine Page
+•	Top Section:
+o	Page title and description
+o	Upload CSV button for HCP data
+o	File selection form
+•	Data Table Section:
+o	Table of HCPs with columns: Name, Specialty, Prescribing Pattern, Engagement Score, Tag
+o	Filter and search options
+o	Pagination controls
+•	Analytics Section:
+o	Distribution chart of HCP segments
+o	Specialty breakdown pie chart
+5. ContentCraft AI Page
+•	Content Generation Section:
+o	HCP selection dropdown (showing names and tags)
+o	Generate Content button
+o	AI-generated content preview box
+o	Compliance indicators (green/yellow/red flags)
+o	Save/Edit buttons
+•	Content Library Section:
+o	Table of saved content pieces
+o	Filter by HCP, date, status
+o	Preview/Edit/Delete actions for each
+•	Asset Attachment Area:
+o	Thumbnails of available assets
+o	Drag and drop interface to attach assets to content
+6. EngageOptic Page
+•	Campaign Creation Section:
+o	HCP selection dropdown
+o	Content selection dropdown
+o	Generate Campaign Plan button
+•	Recommendation Section:
+o	AI-recommended channel (Email, In-person, Webinar)
+o	Timing recommendation with calendar view
+o	Reasoning for recommendations
+•	Campaign List:
+o	Table of created campaigns
+o	Status indicators (Planned, In Progress, Completed)
+o	Performance metrics preview
+7. InsightLens Page
+•	Campaign Selection:
+o	Dropdown to select campaign for analysis
+•	Performance Dashboard:
+o	Key metrics at top (Open Rate, Response Rate, ROI)
+o	Performance trend charts
+o	Comparison with benchmarks
+•	AI Insights Section:
+o	Bulleted list of AI-generated insights
+o	Improvement recommendations
+o	Predictive metrics for future campaigns
+8. Asset Management Page
+•	Upload Section:
+o	File upload area with drag-and-drop
+o	Fields for description and tags
+•	Asset Library:
+o	Grid view of assets with thumbnails
+o	Filter by type, tag, date
+o	Preview/Details/Delete options
+•	Asset Details Modal:
+o	Larger preview of selected asset
+o	Metadata (uploaded by, date, size, etc.)
+o	Usage information (where the asset is being used)
+9. Admin Panel - User Management
+•	Organization Info:
+o	Organization name and details
+o	API connection status
+•	User Management:
+o	Table of users with columns: Username, Email, Role, Status
+o	Add User button
+o	Edit/Deactivate actions
+•	Invitation Management:
+o	Pending invitations list
+o	Resend/Cancel options
+10. Admin Panel - API Connections
+•	Connection List:
+o	Table of API connections (Veeva, Salesforce, Oncore, other Pharma sales related apps, slack.)
+o	Status indicators (Active/Inactive)
+ACTUALLY MUST FUNCTION, not just placeholders!!!!
+o	Last connected timestamp
+•	Add Connection Form:
+o	API service selection dropdown
+o	API Key/Secret fields
+o	Base URL field (if required)
+o	Test Connection button
+
+
+Core Modules of Xupra
+1. MediTag Engine
+•	Purpose: HCP data segmentation and tagging
+•	Features:
+o	ML-based classification of healthcare providers
+o	CSV data upload for bulk HCP processing
+o	Custom tagging based on prescribing patterns and engagement history
+o	Automated segment identification (High-Value, Rising Star, etc.)
+2. ContentCraft AI
+•	Purpose: AI-driven content generation for HCP engagement
+•	Features:
+o	Personalized email and message generation based on HCP segment
+o	Medical and regulatory compliance pre-screening
+o	Insight-driven content suggestions tailored to specialties
+o	Content library management with version history
+o	Asset attachment capabilities (PDFs, images, etc.)
+3. EngageOptic
+•	Purpose: Channel and timing optimization
+•	Features:
+o	AI-recommended engagement channels (email, in-person, webinar)
+o	Timing recommendations based on HCP behavior patterns
+o	Campaign planning and scheduling
+o	Multi-channel campaign coordination
+4. InsightLens
+•	Purpose: Analytics and performance prediction
+•	Features:
+o	Campaign performance dashboards
+o	Predictive analytics for open rates and engagement
+o	ROI calculations and visualizations
+o	A/B testing capabilities
+o	Improvement recommendations
+Technical Capabilities
+Authentication & User Management-TO ADD LATER.
+•	Have a demo login, where user logs into the dashboard  by just clicking a button 
+Integration Capabilities
+•	API connections to industry standards:
+o	Veeva CRM
+o	Salesforce
+o	OnCore
+o	Slack
+o	Google Workspace
+•	Data import/export functionality
+•	Will store in memory for users during this demo phase, later will add database
+Asset Management
+•	File upload system supporting multiple formats:
+o	Images (PNG, JPG, SVG, etc.)
+o	Documents (PDF, DOCX, PPTX, etc.)
+o	Videos and multimedia
+•	Asset tagging and organization
+•	Integration with AI content generation
+AI & Machine Learning
+•	OpenAI integration for content generation
+•	Anthropic Claude as backup AI service
+•	Custom ML models for HCP classification
+•	Natural language processing for compliance checking
+•	Predictive analytics for campaign performance
+User Experience
+•	Responsive design  dark theme (black background, whites, no purple.  Can use Blue where required) 
+•	Progress tracking across modules
+•	Interactive dashboards with data visualization
+•	Multi-language support (English and Japanese)
+•	Guided workflow with clear navigation paths
+Security & Compliance
+•	Data encryption and secure storage
+•	Role-based access controls
+•	Pharma compliance features for MLR approval
+•	Audit trails for sensitive operations
+This comprehensive platform combines AI-driven insights with pharmaceutical industry best practices to optimize HCP engagement strategies and improve the effectiveness of pharmaceutical sales and marketing efforts.
+
+
+
+TheAI-Powered
+HCP Engagement Platform
+for Pharmaceutical Innovation
+Xupra leverages artificial intelligence to enhance HCP engagement with personalized, compliant marketing across every touchpoint.
+Get StartedLearn More
+XupraMediTagContentCraftEngageOpticInsightLensHCP Data
+Our Platform Features
+label
+MediTag Engine
+Segment healthcare providers based on prescribing patterns and responsiveness.
+Explore
+create
+ContentCraft AI
+Generate personalized content with built-in MLR pre-screening compliance.
+Explore
+trending_up
+EngageOptic
+Optimize channels and timing for each healthcare provider segment.
+Explore
+pie_chart
+InsightLens
+Analyze campaign performance and compliance with detailed metrics.
+Explore
+/01
+MediTag Engine
+Our MediTag Engine uses advanced machine learning to analyze prescribing data and segment healthcare providers, enabling a personalized approach to each physician based on their unique characteristics.
+Start Tagging
+Early AdoptersEvidence DrivenPatient FocusedBalanced
+/02
+ContentCraft AI
+ContentCraft AI generates personalized content for each HCP, automatically ensuring Medical, Legal, and Regulatory (MLR) compliance while maintaining engagement effectiveness.
+Create Content
+/03
+EngageOptic
+EngageOptic uses predictive analytics to identify the optimal engagement channels and timing for each HCP, significantly improving response rates and overall campaign performance.
+Optimize Campaigns
+EmailVideoIn-personWebinarCall
+/04
+InsightLens
+InsightLens provides detailed campaign analytics and actionable insights, enabling continuous improvement of engagement strategies and measuring compliance adherence.
+View Analytics
+Transform Your HCP Digital Engagement Today
+Sign up for Xupra's platform today and unlock the full potential of AI-powered HCP engagement.
+Register Your Organization Now
+
+
