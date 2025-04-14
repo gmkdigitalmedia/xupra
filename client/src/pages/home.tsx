@@ -1,6 +1,7 @@
 import { useAppContext } from "@/contexts/app-context";
 import Logo from "@/components/logo";
 import FeatureCard from "@/components/feature-card";
+import InfluencerNetworkVisualization from "@/components/influencer-network-visualization";
 
 const Home = () => {
   const { login } = useAppContext();
@@ -21,26 +22,82 @@ const Home = () => {
       </header>
 
       {/* Hero Section */}
-      <section className="flex flex-col items-center justify-center text-center px-4 py-16 mt-8">
-        <h1 className="text-5xl md:text-6xl font-bold mb-4">
-          <span>The</span>
-          <span className="text-primary"> AI-Powered</span>
-        </h1>
-        <h2 className="text-4xl md:text-5xl font-bold mb-6">HCP Engagement Platform</h2>
-        <p className="text-xl text-gray-300 max-w-2xl mb-8">
-          Xupra leverages artificial intelligence to enhance HCP engagement with personalized, 
-          compliant marketing across every touchpoint.
-        </p>
-        <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
-          <button 
-            onClick={login}
-            className="bg-primary hover:bg-primary/80 text-white font-medium px-8 py-3 rounded-lg transition"
-          >
-            Get Started
-          </button>
-          <button className="border border-white hover:bg-white/10 text-white font-medium px-8 py-3 rounded-lg transition">
-            Learn More
-          </button>
+      <section className="px-4 py-8 mt-4">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+            <div className="text-center lg:text-left">
+              <h1 className="text-5xl md:text-6xl font-bold mb-4">
+                <span>The</span>
+                <span className="text-primary"> AI-Powered</span>
+              </h1>
+              <h2 className="text-4xl md:text-5xl font-bold mb-6">HCP Engagement Platform</h2>
+              <p className="text-xl text-gray-300 mb-8">
+                Xupra leverages artificial intelligence to enhance HCP engagement with personalized, 
+                compliant marketing across every touchpoint.
+              </p>
+              <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 justify-center lg:justify-start">
+                <button 
+                  onClick={login}
+                  className="bg-primary hover:bg-primary/80 text-white font-medium px-8 py-3 rounded-lg transition"
+                >
+                  Get Started
+                </button>
+                <button className="border border-white hover:bg-white/10 text-white font-medium px-8 py-3 rounded-lg transition">
+                  Learn More
+                </button>
+              </div>
+            </div>
+            
+            {/* Desktop network visualization */}
+            <div className="hidden lg:block relative">
+              <div className="bg-background-card shadow-lg rounded-xl p-3 overflow-hidden">
+                <div className="absolute top-4 left-5 z-10">
+                  <h3 className="text-lg font-semibold">HCP Influencer Network</h3>
+                  <p className="text-sm text-gray-400">Interactive intelligence for targeted engagement</p>
+                </div>
+                <div className="h-[400px] w-full relative">
+                  <InfluencerNetworkVisualization />
+                  <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-background-card to-transparent">
+                    <div className="flex justify-between items-center">
+                      <div className="flex space-x-2">
+                        <span className="px-2 py-1 bg-blue-500/20 text-blue-300 rounded-full text-xs">KOLs</span>
+                        <span className="px-2 py-1 bg-green-500/20 text-green-300 rounded-full text-xs">Prescribers</span>
+                        <span className="px-2 py-1 bg-purple-500/20 text-purple-300 rounded-full text-xs">Researchers</span>
+                      </div>
+                      <button onClick={login} className="text-xs text-primary hover:text-primary/80 font-medium">View Full Analytics</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            {/* Mobile network visualization */}
+            <div className="mt-8 lg:hidden">
+              <div className="bg-background-card shadow-lg rounded-xl overflow-hidden">
+                <div className="p-4 border-b border-gray-800">
+                  <h3 className="text-lg font-semibold">HCP Influencer Network</h3>
+                  <p className="text-sm text-gray-400">Powerful connection mapping for strategic engagement</p>
+                </div>
+                <div className="h-[250px] w-full relative">
+                  <InfluencerNetworkVisualization />
+                </div>
+                <div className="p-3 border-t border-gray-800 bg-background-lighter">
+                  <div className="flex justify-between items-center">
+                    <div className="flex flex-wrap gap-2">
+                      <span className="px-2 py-1 bg-blue-500/20 text-blue-300 rounded-full text-xs">KOLs</span>
+                      <span className="px-2 py-1 bg-green-500/20 text-green-300 rounded-full text-xs">Prescribers</span>
+                    </div>
+                    <button 
+                      onClick={login}
+                      className="text-xs bg-primary px-3 py-1.5 rounded hover:bg-primary/80 font-medium"
+                    >
+                      Explore
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
