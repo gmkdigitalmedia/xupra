@@ -239,6 +239,7 @@ export function GeographicMap() {
     coordinates: [137.0, 38.0], // Center of Japan approximately
     zoom: 5.0 // Increased zoom for better visibility of Japan
   });
+  const [legendExpanded, setLegendExpanded] = useState(false);
 
   // Handle zoom controls
   const handleZoomIn = () => {
@@ -259,6 +260,11 @@ export function GeographicMap() {
       coordinates: [137.0, 38.0],
       zoom: 5.0
     });
+  };
+  
+  // Toggle legend visibility on mobile
+  const toggleLegend = () => {
+    setLegendExpanded(!legendExpanded);
   };
 
   return (
@@ -344,9 +350,20 @@ export function GeographicMap() {
         </div>
       )}
       
+      {/* Map legend - made collapsible for mobile */}
       <div className="absolute top-2 right-2 bg-slate-900 bg-opacity-80 p-2 rounded">
-        <div className="text-xs text-white mb-1">Specialty</div>
-        <div className="grid grid-cols-1 gap-1.5">
+        <div className="text-xs text-white mb-1 flex items-center justify-between">
+          <span>Specialty</span>
+          <button 
+            className="md:hidden text-xs text-gray-400 hover:text-white"
+            onClick={toggleLegend}
+          >
+            <span className="material-icons text-sm">
+              {legendExpanded ? 'expand_less' : 'expand_more'}
+            </span>
+          </button>
+        </div>
+        <div className={`grid grid-cols-1 gap-1.5 ${legendExpanded || 'md:block hidden'}`}>
           <div className="flex items-center">
             <div className="w-3 h-3 rounded-full bg-emerald-500 mr-1.5"></div>
             <span className="text-xs text-white">KOL</span>
@@ -368,6 +385,28 @@ export function GeographicMap() {
             <span className="text-xs text-white">Endocrinology</span>
           </div>
         </div>
+      </div>
+      
+      {/* Zoom controls */}
+      <div className="absolute bottom-4 right-4 flex flex-col gap-2">
+        <button 
+          onClick={handleZoomIn}
+          className="bg-slate-900 border border-slate-700 p-1 rounded-full shadow-lg text-white hover:bg-slate-800 transition-colors"
+        >
+          <span className="material-icons text-lg">add</span>
+        </button>
+        <button 
+          onClick={handleZoomOut}
+          className="bg-slate-900 border border-slate-700 p-1 rounded-full shadow-lg text-white hover:bg-slate-800 transition-colors"
+        >
+          <span className="material-icons text-lg">remove</span>
+        </button>
+        <button 
+          onClick={handleReset}
+          className="bg-slate-900 border border-slate-700 p-1 rounded-full shadow-lg text-white hover:bg-slate-800 transition-colors"
+        >
+          <span className="material-icons text-lg">home</span>
+        </button>
       </div>
     </div>
   );

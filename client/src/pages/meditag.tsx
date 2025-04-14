@@ -806,29 +806,27 @@ const MediTag = () => {
             
             <TabsContent value="geographic">
               <Card className="bg-background-card border-gray-800 mb-6">
-                <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center">
-                      <MapPin className="h-5 w-5 mr-2" />
-                      <CardTitle>Geographic Distribution</CardTitle>
-                    </div>
-                    <div className="flex gap-2 text-sm">
-                      <Badge variant="outline" className="bg-background-lighter">
-                        <span className="h-2 w-2 rounded-full bg-amber-500 mr-1"></span>
-                        KOLs
-                      </Badge>
-                      <Badge variant="outline" className="bg-background-lighter">
-                        <span className="h-2 w-2 rounded-full bg-blue-500 mr-1"></span>
-                        High Volume
-                      </Badge>
-                      <Badge variant="outline" className="bg-background-lighter">
-                        <span className="h-2 w-2 rounded-full bg-gray-500 mr-1"></span>
-                        Other HCPs
-                      </Badge>
-                    </div>
+                <CardHeader className="flex-col md:flex-row">
+                  <div className="flex items-center mb-2 md:mb-0">
+                    <MapPin className="h-5 w-5 mr-2" />
+                    <CardTitle>Geographic Distribution</CardTitle>
+                  </div>
+                  <div className="flex flex-wrap gap-2 text-sm">
+                    <Badge variant="outline" className="bg-background-lighter">
+                      <span className="h-2 w-2 rounded-full bg-amber-500 mr-1"></span>
+                      KOLs
+                    </Badge>
+                    <Badge variant="outline" className="bg-background-lighter">
+                      <span className="h-2 w-2 rounded-full bg-blue-500 mr-1"></span>
+                      High Volume
+                    </Badge>
+                    <Badge variant="outline" className="bg-background-lighter">
+                      <span className="h-2 w-2 rounded-full bg-gray-500 mr-1"></span>
+                      Other HCPs
+                    </Badge>
                   </div>
                 </CardHeader>
-                <CardContent className="h-[400px] p-0">
+                <CardContent className="h-[300px] md:h-[400px] p-0">
                   <div className="h-full w-full">
                     {/* Geographic map from component */}
                     <GeographicMap />
