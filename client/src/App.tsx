@@ -13,6 +13,7 @@ import InsightLens from "@/pages/insightlens";
 import AssetManagement from "@/pages/asset-management";
 import AdminConnectionsPage from "@/pages/admin";
 import SlackIntegrationPage from "@/pages/slack-integration";
+import InteractCraft from "@/pages/interactcraft";
 import { useAppContext, AppProvider } from "./contexts/app-context";
 import { MobileMenuProvider } from "./contexts/mobile-menu-context";
 
@@ -28,6 +29,7 @@ function AppRoutes() {
       <Route path="/engageoptic" component={EngageOpticNew} />
       <Route path="/insightlens" component={InsightLens} />
       <Route path="/asset-management" component={AssetManagement} />
+      <Route path="/interactcraft" component={InteractCraft} />
       <Route path="/admin" component={AdminConnectionsPage} />
       <Route path="/slack-integration" component={SlackIntegrationPage} />
       <Route component={NotFound} />

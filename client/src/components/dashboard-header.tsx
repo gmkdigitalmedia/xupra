@@ -3,9 +3,15 @@ import { useMobileMenu } from '@/contexts/mobile-menu-context';
 
 interface DashboardHeaderProps {
   title: string;
+  description?: string;
+  showBackButton?: boolean;
 }
 
-const DashboardHeader: React.FC<DashboardHeaderProps> = ({ title }) => {
+const DashboardHeader: React.FC<DashboardHeaderProps> = ({ 
+  title, 
+  description, 
+  showBackButton = false 
+}) => {
   const { toggleMobileMenu, isMobileMenuOpen } = useMobileMenu();
 
   // Force update the mobile menu button when the component mounts
@@ -18,6 +24,10 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ title }) => {
     e.preventDefault();
     e.stopPropagation();
     toggleMobileMenu();
+  };
+
+  const handleGoBack = () => {
+    window.history.back();
   };
 
   return (
@@ -33,8 +43,27 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ title }) => {
             {isMobileMenuOpen ? "close" : "menu"}
           </span>
         </button>
-        <h1 className="text-xl font-bold">{title}</h1>
+        
+        <div className="flex flex-col">
+          <div className="flex items-center">
+            {showBackButton && (
+              <button 
+                onClick={handleGoBack} 
+                className="mr-2 text-gray-400 hover:text-white transition p-1"
+                aria-label="Go back"
+              >
+                <span className="material-icons">arrow_back</span>
+              </button>
+            )}
+            <h1 className="text-xl font-bold">{title}</h1>
+          </div>
+          
+          {description && (
+            <p className="text-sm text-gray-400 mt-0.5">{description}</p>
+          )}
+        </div>
       </div>
+      
       <div className="flex items-center space-x-4">
         <div className="relative">
           <button className="text-gray-400 hover:text-white transition">

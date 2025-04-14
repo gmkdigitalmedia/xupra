@@ -80,6 +80,15 @@ const Dashboard = () => {
       iconColor: "green-500"
     },
     {
+      icon: "psychology",
+      title: "InteractCraft AI",
+      description: "Expert engagement tools",
+      path: "/interactcraft",
+      gradientFrom: "blue-500",
+      gradientTo: "indigo-600",
+      iconColor: "blue-500"
+    },
+    {
       icon: "pie_chart",
       title: "InsightLens",
       description: "Analyze campaign performance",

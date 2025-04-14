@@ -3,15 +3,32 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import DashboardHeader from '../components/dashboard-header';
-import { useIsMobile } from '../hooks/use-is-mobile';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import AdvisoryBoardsTab from '../components/interactcraft/advisory-boards-tab';
-import DiscussionForumsTab from '../components/interactcraft/discussion-forums-tab';
-import DelphiSurveysTab from '../components/interactcraft/delphi-surveys-tab';
+
+// Create placeholder components for the tabs until the actual components are loaded
+const AdvisoryBoardsTab = () => (
+  <div className="p-6 text-center">
+    <h3 className="text-lg font-medium mb-2">Virtual Advisory Boards</h3>
+    <p className="text-muted-foreground">Structured live sessions with healthcare experts</p>
+  </div>
+);
+
+const DiscussionForumsTab = () => (
+  <div className="p-6 text-center">
+    <h3 className="text-lg font-medium mb-2">Discussion Forums</h3>
+    <p className="text-muted-foreground">Threaded conversations with flexible participation timing</p>
+  </div>
+);
+
+const DelphiSurveysTab = () => (
+  <div className="p-6 text-center">
+    <h3 className="text-lg font-medium mb-2">Delphi Surveys</h3>
+    <p className="text-muted-foreground">Multi-round surveys with iterative feedback and consensus tracking</p>
+  </div>
+);
 
 export default function InteractCraft() {
-  const isMobile = useIsMobile();
   const [selectedTab, setSelectedTab] = useState("advisory-boards");
 
   // Simulated active sessions

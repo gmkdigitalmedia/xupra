@@ -1,9 +1,11 @@
 import { useState } from 'react';
+import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { AvatarFallback, AvatarGroup, AvatarImage, Avatar } from "@/components/ui/avatar";
+import { AvatarFallback, AvatarImage, Avatar } from "@/components/ui/avatar";
+import { AvatarGroup } from "@/components/ui/avatar-group";
 
 // Mock data for advisory board cards
 const mockAdvisoryBoards = [

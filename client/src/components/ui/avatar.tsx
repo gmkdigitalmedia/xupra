@@ -45,4 +45,7 @@ const AvatarFallback = React.forwardRef<
 ))
 AvatarFallback.displayName = AvatarPrimitive.Fallback.displayName
 
-export { Avatar, AvatarImage, AvatarFallback }
+// Import the AvatarGroup component
+import { AvatarGroup } from "./avatar-group"
+
+export { Avatar, AvatarImage, AvatarFallback, AvatarGroup }
