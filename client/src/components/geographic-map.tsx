@@ -240,6 +240,27 @@ export function GeographicMap() {
     zoom: 5.0 // Increased zoom for better visibility of Japan
   });
 
+  // Handle zoom controls
+  const handleZoomIn = () => {
+    if (position.zoom < 8) {
+      setPosition(prev => ({ ...prev, zoom: prev.zoom * 1.2 }));
+    }
+  };
+
+  const handleZoomOut = () => {
+    if (position.zoom > 2) {
+      setPosition(prev => ({ ...prev, zoom: prev.zoom / 1.2 }));
+    }
+  };
+
+  // Handle reset view
+  const handleReset = () => {
+    setPosition({
+      coordinates: [137.0, 38.0],
+      zoom: 5.0
+    });
+  };
+
   return (
     <div className="relative w-full h-full">
       <ComposableMap
