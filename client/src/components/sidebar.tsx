@@ -1,17 +1,21 @@
 import { useLocation } from "wouter";
 import Logo from "./logo";
 import { useAppContext } from "@/contexts/app-context";
+import { useMobileMenu } from "@/contexts/mobile-menu-context";
+import { useEffect } from "react";
 
 const NavItem = ({ 
   icon, 
   label, 
   path, 
-  isActive 
+  isActive,
+  onClick
 }: { 
   icon: string; 
   label: string; 
   path: string; 
-  isActive: boolean 
+  isActive: boolean;
+  onClick?: () => void;
 }) => {
   const [, setLocation] = useLocation();
 
@@ -22,6 +26,7 @@ const NavItem = ({
         onClick={(e) => {
           e.preventDefault();
           setLocation(path);
+          if (onClick) onClick();
         }} 
         className={`flex items-center space-x-3 p-3 rounded-lg transition ${
           isActive 
@@ -39,6 +44,27 @@ const NavItem = ({
 const Sidebar = () => {
   const [location] = useLocation();
   const { logout } = useAppContext();
+  const { isMobileMenuOpen, closeMobileMenu } = useMobileMenu();
+
+  // Close mobile menu on location change
+  useEffect(() => {
+    closeMobileMenu();
+  }, [location, closeMobileMenu]);
+
+  // Close mobile menu when pressing escape key
+  useEffect(() => {
+    const handleEsc = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        closeMobileMenu();
+      }
+    };
+    
+    window.addEventListener('keydown', handleEsc);
+    
+    return () => {
+      window.removeEventListener('keydown', handleEsc);
+    };
+  }, [closeMobileMenu]);
 
   const navItems = [
     { icon: "dashboard", label: "Dashboard", path: "/dashboard" },
@@ -51,45 +77,84 @@ const Sidebar = () => {
     { icon: "settings", label: "API Connections", path: "/admin" },
   ];
 
+  // Combine classes for the sidebar based on mobile menu state
+  const sidebarClasses = `
+    fixed md:static top-0 left-0 z-10
+    w-64 md:w-64 
+    bg-background-lighter 
+    h-screen 
+    overflow-y-auto 
+    flex-shrink-0
+    shadow-lg md:shadow-none
+    transition-all duration-300 ease-in-out
+    transform ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
+  `;
+
+  // Add overlay for mobile
+  const overlayClasses = `
+    fixed inset-0 bg-black bg-opacity-50 z-0
+    transition-opacity duration-300 ease-in-out
+    md:hidden
+    ${isMobileMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}
+  `;
+
   return (
-    <aside className="w-full md:w-64 bg-background-lighter h-auto md:h-screen overflow-y-auto flex-shrink-0">
-      <div className="p-4 flex items-center space-x-2 border-b border-gray-800">
-        <Logo />
-      </div>
+    <>
+      {/* Mobile overlay */}
+      <div 
+        className={overlayClasses}
+        onClick={closeMobileMenu}
+        aria-hidden="true"
+      />
       
-      <nav className="p-4">
-        <ul className="space-y-2">
-          {navItems.map((item) => (
-            <NavItem 
-              key={item.path}
-              icon={item.icon} 
-              label={item.label} 
-              path={item.path} 
-              isActive={location === item.path} 
-            />
-          ))}
-        </ul>
-        
-        <div className="mt-8 pt-4 border-t border-gray-800">
-          <div className="flex items-center p-3 space-x-3">
-            <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
-              <span className="text-sm font-medium">JD</span>
-            </div>
-            <div>
-              <p className="text-sm font-medium">John Doe</p>
-              <p className="text-xs text-gray-400">Admin</p>
-            </div>
-          </div>
+      {/* Sidebar */}
+      <aside className={sidebarClasses}>
+        <div className="p-4 flex items-center justify-between border-b border-gray-800">
+          <Logo />
           <button 
-            onClick={logout}
-            className="mt-4 flex items-center text-gray-400 hover:text-white transition p-3 w-full"
+            onClick={closeMobileMenu}
+            className="md:hidden text-gray-400 hover:text-white"
+            aria-label="Close navigation"
           >
-            <span className="material-icons text-sm mr-2">logout</span>
-            <span>Logout</span>
+            <span className="material-icons">close</span>
           </button>
         </div>
-      </nav>
-    </aside>
+        
+        <nav className="p-4">
+          <ul className="space-y-2">
+            {navItems.map((item) => (
+              <NavItem 
+                key={item.path}
+                icon={item.icon} 
+                label={item.label} 
+                path={item.path} 
+                isActive={location === item.path}
+                onClick={closeMobileMenu}
+              />
+            ))}
+          </ul>
+          
+          <div className="mt-8 pt-4 border-t border-gray-800">
+            <div className="flex items-center p-3 space-x-3">
+              <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
+                <span className="text-sm font-medium">JD</span>
+              </div>
+              <div>
+                <p className="text-sm font-medium">John Doe</p>
+                <p className="text-xs text-gray-400">Admin</p>
+              </div>
+            </div>
+            <button 
+              onClick={logout}
+              className="mt-4 flex items-center text-gray-400 hover:text-white transition p-3 w-full"
+            >
+              <span className="material-icons text-sm mr-2">logout</span>
+              <span>Logout</span>
+            </button>
+          </div>
+        </nav>
+      </aside>
+    </>
   );
 };
 

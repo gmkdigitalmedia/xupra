@@ -14,6 +14,7 @@ import AssetManagement from "@/pages/asset-management";
 import AdminConnectionsPage from "@/pages/admin";
 import SlackIntegrationPage from "@/pages/slack-integration";
 import { useAppContext, AppProvider } from "./contexts/app-context";
+import { MobileMenuProvider } from "./contexts/mobile-menu-context";
 
 function AppRoutes() {
   const { isLoggedIn } = useAppContext();
@@ -38,8 +39,10 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <AppProvider>
-        <AppRoutes />
-        <Toaster />
+        <MobileMenuProvider>
+          <AppRoutes />
+          <Toaster />
+        </MobileMenuProvider>
       </AppProvider>
     </QueryClientProvider>
   );

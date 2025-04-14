@@ -90,10 +90,10 @@ const Dashboard = () => {
   ];
 
   return (
-    <div className="h-screen flex flex-col md:flex-row bg-background">
+    <div className="h-screen flex flex-col bg-background overflow-hidden">
       <Sidebar />
       
-      <main className="flex-1 overflow-y-auto bg-background-dark">
+      <main className="flex-1 overflow-y-auto bg-background-dark md:ml-64">
         <DashboardHeader title="Dashboard" />
         
         <div className="p-6">
