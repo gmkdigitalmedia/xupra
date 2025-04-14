@@ -1,0 +1,575 @@
+import { useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Progress } from "@/components/ui/progress";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableHead,
+  TableRow,
+  TableCell,
+} from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import { useToast } from "@/hooks/use-toast";
+import Spinner from "@/components/ui/spinner";
+import { GeographicMap } from "@/components/geographic-map";
+import { InfluenceNetwork } from "@/components/influence-network";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
+import { Hcp } from "../types";
+import Sidebar from "@/components/sidebar";
+import DashboardHeader from "@/components/dashboard-header";
+
+export default function MediTagPage() {
+  const [activeTab, setActiveTab] = useState("geographic");
+  const [searchValue, setSearchValue] = useState("");
+  const [selectedSpecs, setSelectedSpecs] = useState<string[]>([]);
+  const [showCSVUpload, setShowCSVUpload] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+  
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+  
+  const { data: hcpData = [] as Hcp[], isLoading: isLoadingHcps, error } = useQuery<Hcp[]>({
+    queryKey: ['/api/hcp'],
+    // No need to define queryFn as we're using the default fetcher
+  });
+  
+  const tagMutation = useMutation({
+    mutationFn: (data: { id: number; tag: string }) => {
+      return apiRequest(`/api/hcp/${data.id}/tag`, 'PUT', { tag: data.tag });
+    },
+    onSuccess: () => {
+      toast({
+        title: "MediTag Applied",
+        description: "The HCP has been successfully tagged.",
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/hcp'] });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: "Failed to apply tag. Please try again.",
+        variant: "destructive",
+      });
+      console.error("Tag mutation error:", error);
+    }
+  });
+  
+  const uploadMutation = useMutation({
+    mutationFn: (formData: FormData) => {
+      return apiRequest('/api/hcp/upload', 'POST', formData);
+    },
+    onSuccess: (data: any) => {
+      setIsUploading(false);
+      setShowCSVUpload(false);
+      setSelectedFile(null);
+      toast({
+        title: "Upload Successful",
+        description: `${data.count || 'Multiple'} HCP records were imported.`,
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/hcp'] });
+    },
+    onError: (error) => {
+      setIsUploading(false);
+      toast({
+        title: "Upload Failed",
+        description: "There was a problem uploading your CSV file.",
+        variant: "destructive",
+      });
+      console.error("Upload error:", error);
+    }
+  });
+  
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchValue, selectedSpecs]);
+  
+  const handleTagChange = (id: number, newTag: string) => {
+    tagMutation.mutate({ id, tag: newTag });
+  };
+  
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      setSelectedFile(e.target.files[0]);
+    }
+  };
+  
+  const handleUpload = () => {
+    if (!selectedFile) {
+      toast({
+        title: "No file selected",
+        description: "Please select a CSV file to upload.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    setIsUploading(true);
+    const formData = new FormData();
+    formData.append('file', selectedFile);
+    uploadMutation.mutate(formData);
+  };
+  
+  const filteredHcps = hcpData.filter((hcp: Hcp) => {
+    const matchesSearch = searchValue === "" || 
+                        hcp.name.toLowerCase().includes(searchValue.toLowerCase()) ||
+                        hcp.organization?.toLowerCase().includes(searchValue.toLowerCase()) ||
+                        hcp.location?.toLowerCase().includes(searchValue.toLowerCase());
+                        
+    const matchesSpecialty = selectedSpecs.length === 0 || 
+                           selectedSpecs.includes("all") || 
+                           selectedSpecs.includes(hcp.specialty);
+                           
+    return matchesSearch && matchesSpecialty;
+  });
+  
+  // Get unique specialties for the filter dropdown
+  const specialties = Array.from(new Set(hcpData.map(hcp => hcp.specialty))).filter(Boolean) as string[];
+  
+  // Pagination
+  const totalPages = Math.ceil(filteredHcps.length / itemsPerPage);
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = filteredHcps.slice(indexOfFirstItem, indexOfLastItem);
+  
+  const tags = [
+    "High Priority",
+    "Key Decision Maker",
+    "Early Adopter",
+    "High Prescriber",
+    "Research Focus",
+    "Private Practice",
+    "Academic",
+    "Potential KOL"
+  ];
+  
+  if (error) {
+    return (
+      <div className="container mx-auto p-4">
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative">
+          <strong className="font-bold">Error: </strong>
+          <span className="block sm:inline">Failed to load HCP data.</span>
+        </div>
+      </div>
+    );
+  }
+  
+  return (
+    <div className="h-screen flex flex-col md:flex-row bg-background">
+      <Sidebar />
+      
+      <main className="flex-1 overflow-y-auto bg-background-dark">
+        <DashboardHeader title="MediTag Engine" />
+        
+        <div className="p-6">
+          <div className="flex flex-col space-y-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h1 className="text-3xl font-bold tracking-tight">MediTag Engine</h1>
+                <p className="text-gray-400">
+                  Advanced HCP segmentation and precision profiling
+                </p>
+              </div>
+              <div className="flex space-x-2">
+                <Button 
+                  onClick={() => setShowCSVUpload(!showCSVUpload)} 
+                  variant="outline"
+                >
+                  {showCSVUpload ? "Cancel Upload" : "Import Data"}
+                </Button>
+              </div>
+            </div>
+
+            {showCSVUpload && (
+              <Card className="bg-background-card border-gray-800">
+                <CardHeader>
+                  <CardTitle className="text-base">Import Healthcare Professionals</CardTitle>
+                  <CardDescription>
+                    Upload CSV with HCP data. Required columns: name, specialty, location, email.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="grid w-full max-w-sm items-center gap-1.5">
+                      <Label htmlFor="file">CSV File</Label>
+                      <Input id="file" type="file" accept=".csv" onChange={handleFileChange} />
+                    </div>
+                    <Button onClick={handleUpload} disabled={!selectedFile || isUploading}>
+                      {isUploading ? <Spinner size="sm" className="mr-2" /> : null}
+                      {isUploading ? "Uploading..." : "Upload and Process"}
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            <Tabs 
+              defaultValue="geographic" 
+              value={activeTab} 
+              onValueChange={setActiveTab}
+              className="space-y-4"
+            >
+              <div className="flex justify-between items-center">
+                <TabsList className="bg-background-lighter">
+                  <TabsTrigger value="geographic">Geographic Map</TabsTrigger>
+                  <TabsTrigger value="network">Influence Network</TabsTrigger>
+                  <TabsTrigger value="data">HCP Data</TabsTrigger>
+                  <TabsTrigger value="analytics">MediTag Analytics</TabsTrigger>
+                </TabsList>
+                
+                <div className="flex space-x-2">
+                  {activeTab === "data" && (
+                    <>
+                      <div className="relative w-64">
+                        <Input
+                          placeholder="Search HCPs..."
+                          value={searchValue}
+                          onChange={(e) => setSearchValue(e.target.value)}
+                          className="pr-8"
+                        />
+                      </div>
+                      <Select 
+                        value={selectedSpecs.join(",")} 
+                        onValueChange={(value) => setSelectedSpecs(value ? value.split(",") : [])}
+                      >
+                        <SelectTrigger className="w-[180px]">
+                          <SelectValue placeholder="Filter by specialty" />
+                        </SelectTrigger>
+                        <SelectContent className="bg-background-card">
+                          <SelectItem value="all">All Specialties</SelectItem>
+                          {specialties.map((specialty) => (
+                            <SelectItem key={specialty} value={specialty}>
+                              {specialty}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </>
+                  )}
+                </div>
+              </div>
+
+              <TabsContent value="geographic" className="space-y-4">
+                <div className="h-[calc(100vh-250px)] min-h-[500px] w-full relative">
+                  {isLoadingHcps ? (
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <Spinner size="lg" />
+                    </div>
+                  ) : (
+                    <GeographicMap />
+                  )}
+                </div>
+              </TabsContent>
+
+              <TabsContent value="network" className="space-y-4">
+                <div className="h-[calc(100vh-250px)] min-h-[500px] w-full relative">
+                  {isLoadingHcps ? (
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <Spinner size="lg" />
+                    </div>
+                  ) : (
+                    <InfluenceNetwork />
+                  )}
+                </div>
+              </TabsContent>
+
+              <TabsContent value="data" className="space-y-4">
+                {isLoadingHcps ? (
+                  <div className="h-96 flex items-center justify-center">
+                    <Spinner size="lg" />
+                  </div>
+                ) : (
+                  <>
+                    <Table className="border border-gray-800 rounded-md">
+                      <TableHeader className="bg-background-lighter">
+                        <TableRow>
+                          <TableHead>Name</TableHead>
+                          <TableHead>Specialty</TableHead>
+                          <TableHead>Location</TableHead>
+                          <TableHead>Organization</TableHead>
+                          <TableHead>Influence Score</TableHead>
+                          <TableHead>MediTag</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {currentItems.map((hcp: Hcp) => (
+                          <TableRow key={hcp.id}>
+                            <TableCell className="font-medium">{hcp.name}</TableCell>
+                            <TableCell>{hcp.specialty}</TableCell>
+                            <TableCell>{hcp.location}</TableCell>
+                            <TableCell>{hcp.organization}</TableCell>
+                            <TableCell>{hcp.influenceScore || "N/A"}</TableCell>
+                            <TableCell>
+                              <Select
+                                value={hcp.tag || ""}
+                                onValueChange={(value) => handleTagChange(hcp.id, value)}
+                              >
+                                <SelectTrigger className="w-[150px]">
+                                  <SelectValue placeholder="Select tag" />
+                                </SelectTrigger>
+                                <SelectContent className="bg-background-card">
+                                  {tags.map((tag) => (
+                                    <SelectItem key={tag} value={tag}>
+                                      {tag}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                    
+                    {/* Pagination Controls */}
+                    {totalPages > 1 && (
+                      <div className="flex justify-between items-center mt-4">
+                        <div className="text-sm text-gray-400">
+                          Showing {indexOfFirstItem + 1}-{Math.min(indexOfLastItem, filteredHcps.length)} of {filteredHcps.length} HCPs
+                        </div>
+                        <div className="flex space-x-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                            disabled={currentPage === 1}
+                          >
+                            Previous
+                          </Button>
+                          <div className="flex items-center space-x-1">
+                            {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                              const pageNum = currentPage > 3 && totalPages > 5 
+                                ? currentPage - 3 + i + (currentPage > totalPages - 2 ? totalPages - currentPage - 2 : 0)
+                                : i + 1;
+                              
+                              if (pageNum <= totalPages) {
+                                return (
+                                  <Button
+                                    key={pageNum}
+                                    variant={pageNum === currentPage ? "default" : "outline"}
+                                    size="sm"
+                                    className="w-8 h-8 p-0"
+                                    onClick={() => setCurrentPage(pageNum)}
+                                  >
+                                    {pageNum}
+                                  </Button>
+                                );
+                              }
+                              return null;
+                            })}
+                            {totalPages > 5 && currentPage < totalPages - 2 && (
+                              <>
+                                <span className="text-gray-400">...</span>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="w-8 h-8 p-0"
+                                  onClick={() => setCurrentPage(totalPages)}
+                                >
+                                  {totalPages}
+                                </Button>
+                              </>
+                            )}
+                          </div>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                            disabled={currentPage === totalPages}
+                          >
+                            Next
+                          </Button>
+                        </div>
+                        <Select 
+                          value={itemsPerPage.toString()} 
+                          onValueChange={(value) => {
+                            setItemsPerPage(Number(value));
+                            setCurrentPage(1);
+                          }}
+                        >
+                          <SelectTrigger className="w-[120px]">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent className="bg-background-card">
+                            <SelectItem value="10">10 per page</SelectItem>
+                            <SelectItem value="25">25 per page</SelectItem>
+                            <SelectItem value="50">50 per page</SelectItem>
+                            <SelectItem value="100">100 per page</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    )}
+                  </>
+                )}
+              </TabsContent>
+
+              <TabsContent value="analytics" className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <Card className="bg-background-card border-gray-800">
+                  <CardHeader>
+                    <CardTitle className="text-base">MediTag Distribution</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-sm">
+                        <span>High Priority</span>
+                        <span className="text-gray-400">23 HCPs</span>
+                      </div>
+                      <Progress value={15} className="h-2" />
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-sm">
+                        <span>Key Decision Maker</span>
+                        <span className="text-gray-400">18 HCPs</span>
+                      </div>
+                      <Progress value={12} className="h-2" />
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-sm">
+                        <span>Research Focus</span>
+                        <span className="text-gray-400">42 HCPs</span>
+                      </div>
+                      <Progress value={28} className="h-2" />
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-sm">
+                        <span>High Prescriber</span>
+                        <span className="text-gray-400">35 HCPs</span>
+                      </div>
+                      <Progress value={23} className="h-2" />
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-sm">
+                        <span>Academic</span>
+                        <span className="text-gray-400">29 HCPs</span>
+                      </div>
+                      <Progress value={19} className="h-2" />
+                    </div>
+                  </CardContent>
+                </Card>
+                
+                <Card className="bg-background-card border-gray-800">
+                  <CardHeader>
+                    <CardTitle className="text-base">Specialty Distribution</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-sm">
+                        <span>Cardiology</span>
+                        <span className="text-gray-400">43 HCPs</span>
+                      </div>
+                      <Progress value={29} className="h-2" />
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-sm">
+                        <span>Oncology</span>
+                        <span className="text-gray-400">52 HCPs</span>
+                      </div>
+                      <Progress value={35} className="h-2" />
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-sm">
+                        <span>Neurology</span>
+                        <span className="text-gray-400">37 HCPs</span>
+                      </div>
+                      <Progress value={25} className="h-2" />
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-sm">
+                        <span>Endocrinology</span>
+                        <span className="text-gray-400">28 HCPs</span>
+                      </div>
+                      <Progress value={19} className="h-2" />
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-sm">
+                        <span>General Practice</span>
+                        <span className="text-gray-400">22 HCPs</span>
+                      </div>
+                      <Progress value={15} className="h-2" />
+                    </div>
+                  </CardContent>
+                </Card>
+                
+                <Card className="bg-background-card border-gray-800">
+                  <CardHeader>
+                    <CardTitle className="text-base">Regional Distribution</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-sm">
+                        <span>Kanto</span>
+                        <span className="text-gray-400">68 HCPs</span>
+                      </div>
+                      <Progress value={45} className="h-2" />
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-sm">
+                        <span>Kansai</span>
+                        <span className="text-gray-400">52 HCPs</span>
+                      </div>
+                      <Progress value={35} className="h-2" />
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-sm">
+                        <span>Chubu</span>
+                        <span className="text-gray-400">37 HCPs</span>
+                      </div>
+                      <Progress value={25} className="h-2" />
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-sm">
+                        <span>Kyushu</span>
+                        <span className="text-gray-400">31 HCPs</span>
+                      </div>
+                      <Progress value={21} className="h-2" />
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-sm">
+                        <span>Tohoku</span>
+                        <span className="text-gray-400">18 HCPs</span>
+                      </div>
+                      <Progress value={12} className="h-2" />
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+            </Tabs>
+          </div>
+        </div>
+      </main>
+    </div>
+  );
+}
