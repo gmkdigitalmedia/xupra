@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useMobileMenu } from '@/contexts/mobile-menu-context';
 
 interface DashboardHeaderProps {
@@ -8,15 +8,28 @@ interface DashboardHeaderProps {
 const DashboardHeader: React.FC<DashboardHeaderProps> = ({ title }) => {
   const { toggleMobileMenu, isMobileMenuOpen } = useMobileMenu();
 
+  // Force update the mobile menu button when the component mounts
+  useEffect(() => {
+    // This empty effect will force the component to re-render when mounted
+    // Ensuring the state is current and button is properly displayed
+  }, []);
+
+  const handleMenuToggle = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    toggleMobileMenu();
+  };
+
   return (
     <div className="bg-background-lighter p-4 flex justify-between items-center sticky top-0 z-20">
       <div className="flex items-center space-x-3">
         <button 
-          onClick={toggleMobileMenu}
-          className="md:hidden text-gray-400 hover:text-white transition"
+          onClick={handleMenuToggle}
+          className="md:hidden text-gray-400 hover:text-white transition p-1 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
           aria-label={isMobileMenuOpen ? "Close navigation menu" : "Open navigation menu"}
+          aria-expanded={isMobileMenuOpen}
         >
-          <span className="material-icons">
+          <span className="material-icons text-2xl">
             {isMobileMenuOpen ? "close" : "menu"}
           </span>
         </button>

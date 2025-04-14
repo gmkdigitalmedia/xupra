@@ -17,17 +17,25 @@ const NavItem = ({
   isActive: boolean;
   onClick?: () => void;
 }) => {
-  const [, setLocation] = useLocation();
+  const [, navigate] = useLocation();
+
+  const handleClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    // First navigate to the path
+    navigate(path);
+    // Then call the onClick handler if provided (used for closing mobile menu)
+    if (onClick) {
+      setTimeout(() => {
+        onClick();
+      }, 10);
+    }
+  };
 
   return (
     <li>
       <a 
-        href="#"
-        onClick={(e) => {
-          e.preventDefault();
-          setLocation(path);
-          if (onClick) onClick();
-        }} 
+        href={path}
+        onClick={handleClick}
         className={`flex items-center space-x-3 p-3 rounded-lg transition ${
           isActive 
             ? "bg-primary/10 text-primary" 

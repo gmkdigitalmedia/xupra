@@ -1,9 +1,10 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 
 interface MobileMenuContextProps {
   isMobileMenuOpen: boolean;
   toggleMobileMenu: () => void;
   closeMobileMenu: () => void;
+  openMobileMenu: () => void;
 }
 
 const MobileMenuContext = createContext<MobileMenuContextProps | undefined>(undefined);
@@ -11,16 +12,44 @@ const MobileMenuContext = createContext<MobileMenuContextProps | undefined>(unde
 export function MobileMenuProvider({ children }: { children: ReactNode }) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
+  // Handle window resize to close mobile menu on large screens
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 768) { // md breakpoint is 768px
+        setIsMobileMenuOpen(false);
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // Listen for route changes to close the menu
+  useEffect(() => {
+    const handleRouteChange = () => {
+      setIsMobileMenuOpen(false);
+    };
+
+    window.addEventListener('popstate', handleRouteChange);
+    return () => window.removeEventListener('popstate', handleRouteChange);
+  }, []);
+
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(prev => !prev);
+    // For debugging
+    console.log("Mobile menu toggled. New state:", !isMobileMenuOpen);
   };
 
   const closeMobileMenu = () => {
     setIsMobileMenuOpen(false);
   };
+  
+  const openMobileMenu = () => {
+    setIsMobileMenuOpen(true);
+  };
 
   return (
-    <MobileMenuContext.Provider value={{ isMobileMenuOpen, toggleMobileMenu, closeMobileMenu }}>
+    <MobileMenuContext.Provider value={{ isMobileMenuOpen, toggleMobileMenu, closeMobileMenu, openMobileMenu }}>
       {children}
     </MobileMenuContext.Provider>
   );
