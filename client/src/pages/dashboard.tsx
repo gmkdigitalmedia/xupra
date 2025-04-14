@@ -3,6 +3,7 @@ import Sidebar from "@/components/sidebar";
 import DashboardHeader from "@/components/dashboard-header";
 import StatsCard from "@/components/stats-card";
 import QuickAccessCard from "@/components/quick-access-card";
+import InfluencerNetworkVisualization from "@/components/influencer-network-visualization";
 
 const Dashboard = () => {
   const [, setLocation] = useLocation();
@@ -131,6 +132,107 @@ const Dashboard = () => {
                 iconColor={card.iconColor}
               />
             ))}
+          </div>
+          
+          {/* Influencer Network Visualization */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-8">
+            <div className="lg:col-span-7 bg-background-card rounded-xl shadow-lg overflow-hidden">
+              <div className="p-4 border-b border-gray-800">
+                <h3 className="text-lg font-semibold">Influencer Network</h3>
+                <p className="text-sm text-gray-400">Interactive visualization of HCP relationships and influence</p>
+              </div>
+              <div className="p-4 h-[400px]">
+                <InfluencerNetworkVisualization />
+              </div>
+              <div className="p-4 border-t border-gray-800 bg-background-lighter">
+                <div className="flex flex-wrap gap-4 text-sm">
+                  <div className="flex items-center">
+                    <span className="w-3 h-3 bg-blue-500 rounded-full inline-block mr-2"></span>
+                    <span>Key Opinion Leaders</span>
+                  </div>
+                  <div className="flex items-center">
+                    <span className="w-3 h-3 bg-green-500 rounded-full inline-block mr-2"></span>
+                    <span>Collaborators</span>
+                  </div>
+                  <div className="flex items-center">
+                    <span className="w-3 h-3 bg-yellow-500 rounded-full inline-block mr-2"></span>
+                    <span>Researchers</span>
+                  </div>
+                  <div className="flex items-center">
+                    <span className="w-3 h-3 bg-purple-500 rounded-full inline-block mr-2"></span>
+                    <span>Mentees</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div className="lg:col-span-5">
+              <div className="bg-background-card rounded-xl shadow-lg overflow-hidden h-full">
+                <div className="p-4 border-b border-gray-800">
+                  <h3 className="text-lg font-semibold">Network Insights</h3>
+                  <p className="text-sm text-gray-400">Key metrics and engagement opportunities</p>
+                </div>
+                <div className="p-4">
+                  <div className="mb-6">
+                    <h4 className="font-medium mb-2">Top Influencers</h4>
+                    <ul className="space-y-3">
+                      <li className="flex items-center justify-between">
+                        <div className="flex items-center">
+                          <div className="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center mr-3">SC</div>
+                          <div>
+                            <p className="font-medium">Dr. Sarah Chen</p>
+                            <p className="text-xs text-gray-400">Cardiology</p>
+                          </div>
+                        </div>
+                        <span className="font-bold text-blue-400">90</span>
+                      </li>
+                      <li className="flex items-center justify-between">
+                        <div className="flex items-center">
+                          <div className="w-8 h-8 rounded-full bg-purple-600 flex items-center justify-center mr-3">JW</div>
+                          <div>
+                            <p className="font-medium">Dr. James Wilson</p>
+                            <p className="text-xs text-gray-400">Oncology</p>
+                          </div>
+                        </div>
+                        <span className="font-bold text-blue-400">85</span>
+                      </li>
+                      <li className="flex items-center justify-between">
+                        <div className="flex items-center">
+                          <div className="w-8 h-8 rounded-full bg-pink-600 flex items-center justify-center mr-3">MR</div>
+                          <div>
+                            <p className="font-medium">Dr. Maria Rodriguez</p>
+                            <p className="text-xs text-gray-400">Neurology</p>
+                          </div>
+                        </div>
+                        <span className="font-bold text-blue-400">80</span>
+                      </li>
+                    </ul>
+                  </div>
+                  
+                  <div>
+                    <h4 className="font-medium mb-2">Network Statistics</h4>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="p-3 bg-background-lighter rounded-lg">
+                        <p className="text-xs text-gray-400">Network Density</p>
+                        <p className="text-xl font-bold">68%</p>
+                      </div>
+                      <div className="p-3 bg-background-lighter rounded-lg">
+                        <p className="text-xs text-gray-400">Average Connections</p>
+                        <p className="text-xl font-bold">4.2</p>
+                      </div>
+                      <div className="p-3 bg-background-lighter rounded-lg">
+                        <p className="text-xs text-gray-400">Centrality Score</p>
+                        <p className="text-xl font-bold">0.73</p>
+                      </div>
+                      <div className="p-3 bg-background-lighter rounded-lg">
+                        <p className="text-xs text-gray-400">KOL Ratio</p>
+                        <p className="text-xl font-bold">1:4</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
           
           {/* Recent Activity */}
