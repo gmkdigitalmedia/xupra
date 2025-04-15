@@ -134,6 +134,13 @@ const Home = () => {
               description="Analyze campaign performance and compliance with detailed metrics."
               path="/insightlens"
             />
+
+            <FeatureCard 
+              icon="forum"
+              title="InteractCraft AI"
+              description="Engage HCPs through virtual advisory boards, discussion forums, and consensus surveys."
+              path="/interactcraft"
+            />
           </div>
         </div>
       </section>
@@ -400,6 +407,98 @@ const Home = () => {
               >
                 View Analytics
               </button>
+            </div>
+          </div>
+          
+          {/* InteractCraft Section */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center mt-24 mb-6">
+            <div>
+              <div className="inline-block bg-primary/10 text-primary font-medium px-3 py-1 rounded-full mb-4">
+                /05
+              </div>
+              <h2 className="text-3xl font-bold mb-4">InteractCraft AI</h2>
+              <p className="text-gray-300 mb-6">
+                InteractCraft AI delivers innovative ways to collaborate with HCPs through virtual advisory boards,
+                moderated discussion forums, and Delphi consensus-building surveys, enabling deeper engagement.
+              </p>
+              <button 
+                onClick={() => login()}
+                className="bg-primary hover:bg-primary/80 text-white font-medium px-6 py-2 rounded-lg transition"
+              >
+                Launch Engagement
+              </button>
+              <div className="flex flex-wrap gap-3 mt-6">
+                <span className="bg-blue-500/20 text-blue-400 px-4 py-2 rounded-full text-sm">Virtual Advisory Boards</span>
+                <span className="bg-green-500/20 text-green-400 px-4 py-2 rounded-full text-sm">Discussion Forums</span>
+                <span className="bg-purple-500/20 text-purple-400 px-4 py-2 rounded-full text-sm">Delphi Surveys</span>
+              </div>
+            </div>
+            <div className="bg-background-card rounded-xl p-6 shadow-lg">
+              <div className="overflow-hidden rounded-lg">
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="font-medium">Active Engagements</h3>
+                  <span className="text-sm text-gray-400">Last 30 Days</span>
+                </div>
+                <div className="bg-background-lighter rounded-lg p-4">
+                  <div className="border-b border-gray-700 pb-3 mb-3">
+                    <div className="flex justify-between mb-1">
+                      <div className="flex items-center">
+                        <span className="material-icons text-blue-400 mr-2">groups</span>
+                        <span className="font-medium">Oncology Treatment Pathways</span>
+                      </div>
+                      <span className="bg-blue-500/20 text-blue-400 text-xs px-2 py-1 rounded">Advisory Board</span>
+                    </div>
+                    <div className="flex justify-between text-sm text-gray-400">
+                      <span>8 participants</span>
+                      <span>Scheduled: Apr 20, 2025</span>
+                    </div>
+                  </div>
+                  
+                  <div className="border-b border-gray-700 pb-3 mb-3">
+                    <div className="flex justify-between mb-1">
+                      <div className="flex items-center">
+                        <span className="material-icons text-green-400 mr-2">forum</span>
+                        <span className="font-medium">Next-Gen Oncology Therapies</span>
+                      </div>
+                      <span className="bg-green-500/20 text-green-400 text-xs px-2 py-1 rounded">Forum</span>
+                    </div>
+                    <div className="flex justify-between text-sm text-gray-400">
+                      <span>18 participants</span>
+                      <span>7 topics • 42 replies</span>
+                    </div>
+                  </div>
+                  
+                  <div className="border-b border-gray-700 pb-3 mb-3">
+                    <div className="flex justify-between mb-1">
+                      <div className="flex items-center">
+                        <span className="material-icons text-purple-400 mr-2">how_to_vote</span>
+                        <span className="font-medium">Lung Cancer Treatment Guidelines</span>
+                      </div>
+                      <span className="bg-purple-500/20 text-purple-400 text-xs px-2 py-1 rounded">Delphi Survey</span>
+                    </div>
+                    <div className="flex items-center justify-between text-sm text-gray-400">
+                      <span>Round 2 of 3</span>
+                      <div className="flex items-center">
+                        <span className="mr-2">Consensus:</span>
+                        <div className="w-20 h-1.5 bg-background-dark rounded-full">
+                          <div className="bg-purple-400 h-1.5 rounded-full" style={{ width: '72%' }}></div>
+                        </div>
+                        <span className="ml-2">72%</span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="text-center mt-4">
+                    <button 
+                      onClick={() => login()}
+                      className="text-primary hover:text-primary/80 text-sm font-medium inline-flex items-center"
+                    >
+                      View All Engagements
+                      <span className="material-icons text-sm ml-1">arrow_forward</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
