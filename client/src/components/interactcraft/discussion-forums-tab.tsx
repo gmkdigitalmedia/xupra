@@ -163,7 +163,16 @@ export default function DiscussionForumsTab() {
             </Button>
           </div>
           
-          <Button>
+          <Button
+            onClick={() => {
+              // This button will use the parent component's dialog
+              // We'll access it through a custom event
+              const customEvent = new CustomEvent('create-item', { 
+                detail: { type: 'discussion-forum' } 
+              });
+              document.dispatchEvent(customEvent);
+            }}
+          >
             <span className="material-icons text-sm mr-1">add</span>
             New Forum
           </Button>

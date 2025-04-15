@@ -235,7 +235,16 @@ export default function DelphiSurveysTab() {
             </Button>
           </div>
           
-          <Button>
+          <Button
+            onClick={() => {
+              // This button will use the parent component's dialog
+              // We'll access it through a custom event
+              const customEvent = new CustomEvent('create-item', { 
+                detail: { type: 'delphi-survey' } 
+              });
+              document.dispatchEvent(customEvent);
+            }}
+          >
             <span className="material-icons text-sm mr-1">add</span>
             New Survey
           </Button>

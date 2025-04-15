@@ -38,8 +38,16 @@ export default function InteractCraft() {
   const [newItemFormat, setNewItemFormat] = useState("video");
   const [isCreating, setIsCreating] = useState(false);
   
+  // Handle create new item dialog
+  const handleOpenCreateDialog = (type: string) => {
+    setNewItemType(type);
+    setNewItemTitle("");
+    setNewItemDescription("");
+    setNewItemFormat("video");
+    setIsCreateDialogOpen(true);
+  };
+
   // Set up event listener for create-item events from tab components
-  // This uses useEffect to properly manage the event listener lifecycle  
   useEffect(() => {
     const handleCreateItemEvent = (event: CustomEvent) => {
       if (event.detail && event.detail.type) {
@@ -54,22 +62,13 @@ export default function InteractCraft() {
     return () => {
       document.removeEventListener('create-item', handleCreateItemEvent as EventListener);
     };
-  }, []);
+  }, []);  // Empty dependency array - only run once on mount
 
   // Simulated active sessions
   const activeSessions = {
     advisoryBoards: 3,
     discussionForums: 7,
     delphiSurveys: 2
-  };
-
-  // Handle create new item dialog
-  const handleOpenCreateDialog = (type: string) => {
-    setNewItemType(type);
-    setNewItemTitle("");
-    setNewItemDescription("");
-    setNewItemFormat("video");
-    setIsCreateDialogOpen(true);
   };
 
   const handleCreateItem = () => {
