@@ -69,6 +69,7 @@ const Sidebar = () => {
     { icon: "trending_up", label: "EngageOptic", path: "/engageoptic" },
     { icon: "pie_chart", label: "InsightLens", path: "/insightlens" },
     { icon: "psychology", label: "InteractCraft AI", path: "/interactcraft" },
+    { icon: "auto_graph", label: "DecisionDriver AI", path: "/decisiondriver" },
     { icon: "folder", label: "Asset Management", path: "/asset-management" },
     { icon: "chat", label: "Slack Integration", path: "/slack-integration" },
     { icon: "settings", label: "API Connections", path: "/admin" },
