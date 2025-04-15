@@ -12,6 +12,79 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 const DecisionDriver = () => {
   const [reportType, setReportType] = useState("campaign");
   const [timeFrame, setTimeFrame] = useState("last30");
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [generatedReport, setGeneratedReport] = useState<{
+    id: number;
+    type: string;
+    timeFrame: string;
+    date: string;
+    status: string;
+  } | null>(null);
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+  
+  // Function to handle report generation with optional preset report type
+  const handleGenerateReport = (presetType?: string, presetTimeFrame?: string) => {
+    setIsGenerating(true);
+    
+    // Use preset values or form values
+    const reportTypeToUse = presetType || reportType;
+    const timeFrameToUse = presetTimeFrame || timeFrame;
+    
+    // Simulate API call with setTimeout
+    setTimeout(() => {
+      setIsGenerating(false);
+      setGeneratedReport({
+        id: Math.floor(Math.random() * 10000),
+        type: reportTypeToUse,
+        timeFrame: timeFrameToUse,
+        date: new Date().toLocaleDateString(),
+        status: 'Complete'
+      });
+      setShowSuccessMessage(true);
+      
+      // Hide success message after 3 seconds
+      setTimeout(() => {
+        setShowSuccessMessage(false);
+      }, 3000);
+    }, 1500);
+  };
+  
+  // Function to handle template save
+  const handleSaveTemplate = () => {
+    alert('Template saved successfully!');
+  };
+  
+  // Function to handle one-click report generation
+  const handleOneClickReport = (reportName: string) => {
+    // Determine report type and time frame based on report name
+    let presetType: string;
+    let presetTimeFrame: string;
+    
+    switch (reportName) {
+      case 'monthly':
+        presetType = 'campaign';
+        presetTimeFrame = 'last30';
+        break;
+      case 'hcp':
+        presetType = 'hcp';
+        presetTimeFrame = 'last90';
+        break;
+      case 'roi':
+        presetType = 'roi';
+        presetTimeFrame = 'thisyear';
+        break;
+      case 'executive':
+        presetType = 'engagement';
+        presetTimeFrame = 'last30';
+        break;
+      default:
+        presetType = 'campaign';
+        presetTimeFrame = 'last30';
+    }
+    
+    // Generate report with preset values
+    handleGenerateReport(presetType, presetTimeFrame);
+  };
 
   return (
     <div className="flex h-screen overflow-hidden">
@@ -195,11 +268,33 @@ const DecisionDriver = () => {
                   </div>
                 </div>
                 
+                {showSuccessMessage && (
+                  <div className="mb-4 p-3 bg-green-500/10 border border-green-500/20 rounded-md text-green-600 flex items-center">
+                    <span className="material-icons mr-2">check_circle</span>
+                    <div>
+                      <p className="font-medium text-sm">Report generated successfully!</p>
+                      <p className="text-xs">Report ID: {generatedReport?.id} - {generatedReport?.type} analysis for {generatedReport?.timeFrame}</p>
+                    </div>
+                  </div>
+                )}
+                
                 <div className="flex justify-end space-x-2">
-                  <Button variant="outline">Save Template</Button>
-                  <Button>
-                    <span className="material-icons mr-2 text-sm">auto_awesome</span>
-                    Generate Report
+                  <Button variant="outline" onClick={handleSaveTemplate}>Save Template</Button>
+                  <Button 
+                    onClick={() => handleGenerateReport()} 
+                    disabled={isGenerating}
+                  >
+                    {isGenerating ? (
+                      <>
+                        <span className="material-icons animate-spin mr-2 text-sm">refresh</span>
+                        Generating...
+                      </>
+                    ) : (
+                      <>
+                        <span className="material-icons mr-2 text-sm">auto_awesome</span>
+                        Generate Report
+                      </>
+                    )}
                   </Button>
                 </div>
               </CardContent>
@@ -212,7 +307,11 @@ const DecisionDriver = () => {
                   <CardDescription>Generate instant reports with predefined templates</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                  <button className="w-full border border-border hover:bg-background-lighter transition rounded-md p-3 text-left">
+                  <button 
+                    className="w-full border border-border hover:bg-background-lighter transition rounded-md p-3 text-left"
+                    onClick={() => handleOneClickReport('monthly')}
+                    disabled={isGenerating}
+                  >
                     <div className="flex items-center">
                       <span className="material-icons text-blue-400 mr-2">description</span>
                       <div>
@@ -221,7 +320,11 @@ const DecisionDriver = () => {
                       </div>
                     </div>
                   </button>
-                  <button className="w-full border border-border hover:bg-background-lighter transition rounded-md p-3 text-left">
+                  <button 
+                    className="w-full border border-border hover:bg-background-lighter transition rounded-md p-3 text-left"
+                    onClick={() => handleOneClickReport('hcp')}
+                    disabled={isGenerating}
+                  >
                     <div className="flex items-center">
                       <span className="material-icons text-green-400 mr-2">insights</span>
                       <div>
@@ -230,7 +333,11 @@ const DecisionDriver = () => {
                       </div>
                     </div>
                   </button>
-                  <button className="w-full border border-border hover:bg-background-lighter transition rounded-md p-3 text-left">
+                  <button 
+                    className="w-full border border-border hover:bg-background-lighter transition rounded-md p-3 text-left"
+                    onClick={() => handleOneClickReport('roi')}
+                    disabled={isGenerating}
+                  >
                     <div className="flex items-center">
                       <span className="material-icons text-purple-400 mr-2">trending_up</span>
                       <div>
@@ -239,7 +346,11 @@ const DecisionDriver = () => {
                       </div>
                     </div>
                   </button>
-                  <button className="w-full border border-primary/30 bg-primary/5 hover:bg-primary/10 transition rounded-md p-3 text-left">
+                  <button 
+                    className="w-full border border-primary/30 bg-primary/5 hover:bg-primary/10 transition rounded-md p-3 text-left"
+                    onClick={() => handleOneClickReport('executive')}
+                    disabled={isGenerating}
+                  >
                     <div className="flex items-center">
                       <span className="material-icons text-primary mr-2">auto_awesome</span>
                       <div>
@@ -249,7 +360,14 @@ const DecisionDriver = () => {
                     </div>
                   </button>
                   <div className="text-center mt-2">
-                    <Button variant="link" size="sm" className="text-xs">View All Templates</Button>
+                    <Button 
+                      variant="link" 
+                      size="sm" 
+                      className="text-xs"
+                      onClick={() => alert('More templates will be available in a future update.')}
+                    >
+                      View All Templates
+                    </Button>
                   </div>
                 </CardContent>
               </Card>
@@ -266,7 +384,18 @@ const DecisionDriver = () => {
                       <div>
                         <h3 className="text-sm font-medium">Email Engagement Improved</h3>
                         <p className="text-xs text-muted-foreground mb-2">Open rates increased by 12% in the last 30 days for oncology specialists.</p>
-                        <Button variant="link" size="sm" className="text-xs text-green-400 h-auto p-0">View Detailed Analysis</Button>
+                        <Button 
+                          variant="link" 
+                          size="sm" 
+                          className="text-xs text-green-400 h-auto p-0"
+                          onClick={() => {
+                            setReportType('engagement');
+                            setTimeFrame('last30');
+                            handleGenerateReport('engagement', 'last30');
+                          }}
+                        >
+                          View Detailed Analysis
+                        </Button>
                       </div>
                     </div>
                   </div>
@@ -276,7 +405,18 @@ const DecisionDriver = () => {
                       <div>
                         <h3 className="text-sm font-medium">Content Gap Detected</h3>
                         <p className="text-xs text-muted-foreground mb-2">Cardiology HCPs requesting more educational materials on new treatments.</p>
-                        <Button variant="link" size="sm" className="text-xs text-amber-400 h-auto p-0">View Recommendation</Button>
+                        <Button 
+                          variant="link" 
+                          size="sm" 
+                          className="text-xs text-amber-400 h-auto p-0"
+                          onClick={() => {
+                            setReportType('content');
+                            setTimeFrame('last90');
+                            handleGenerateReport('content', 'last90');
+                          }}
+                        >
+                          View Recommendation
+                        </Button>
                       </div>
                     </div>
                   </div>
@@ -286,7 +426,18 @@ const DecisionDriver = () => {
                       <div>
                         <h3 className="text-sm font-medium">Correlation Discovered</h3>
                         <p className="text-xs text-muted-foreground mb-2">HCPs who participated in advisory boards show 3x higher prescription rates.</p>
-                        <Button variant="link" size="sm" className="text-xs text-blue-400 h-auto p-0">Explore Connection</Button>
+                        <Button 
+                          variant="link" 
+                          size="sm" 
+                          className="text-xs text-blue-400 h-auto p-0"
+                          onClick={() => {
+                            setReportType('hcp');
+                            setTimeFrame('thisyear');
+                            handleGenerateReport('hcp', 'thisyear');
+                          }}
+                        >
+                          Explore Connection
+                        </Button>
                       </div>
                     </div>
                   </div>
