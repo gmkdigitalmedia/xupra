@@ -1,90 +1,69 @@
-import React from "react";
-import { cn } from "@/lib/utils";
+import * as React from "react";
 
 interface ProgressCircleProps {
   value: number;
-  max?: number;
-  size?: "sm" | "md" | "lg";
-  label?: string;
-  color?: string;
-  thickness?: number;
-  strokeWidth?: number; // Alias for thickness
+  size?: number;
+  strokeWidth?: number;
   className?: string;
-  showLabel?: boolean;
 }
 
-export const ProgressCircle = ({
-  value,
-  max = 100,
-  size = "md",
-  label,
-  color = "bg-primary",
-  thickness = 4,
-  strokeWidth,
-  className,
-  showLabel = true,
-}: ProgressCircleProps) => {
-  // Use strokeWidth if provided, otherwise use thickness
-  const strokeThickness = strokeWidth || thickness;
-  const percentage = Math.min(100, Math.max(0, (value / max) * 100));
-  const radius = 40;
+export const ProgressCircle: React.FC<ProgressCircleProps> = ({
+  value = 0,
+  size = 100,
+  strokeWidth = 8,
+  className = "",
+}) => {
+  // Ensure value is between 0 and 100
+  const percentage = Math.min(100, Math.max(0, value));
+  
+  // Calculate circle properties
+  const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
   const strokeDashoffset = circumference - (percentage / 100) * circumference;
-
-  const sizeClasses = {
-    sm: "w-12 h-12",
-    md: "w-16 h-16",
-    lg: "w-24 h-24",
-  };
-
-  const textSizeClasses = {
-    sm: "text-xs",
-    md: "text-sm",
-    lg: "text-base",
-  };
-
+  
   return (
-    <div className={cn("relative inline-flex items-center justify-center", className)}>
+    <div className={`relative w-${size} h-${size} ${className}`} style={{ width: size, height: size }}>
+      {/* Background circle */}
       <svg
-        className={cn("transform -rotate-90", sizeClasses[size])}
-        viewBox="0 0 100 100"
+        width={size}
+        height={size}
+        viewBox={`0 0 ${size} ${size}`}
+        className="absolute"
       >
-        {/* Background circle */}
         <circle
-          className="text-muted stroke-current opacity-20"
-          cx="50"
-          cy="50"
+          cx={size / 2}
+          cy={size / 2}
           r={radius}
-          strokeWidth={strokeThickness}
           fill="none"
-        />
-        
-        {/* Progress circle */}
-        <circle
-          className={cn("stroke-current", color.startsWith("bg-") ? color.replace("bg-", "text-") : color)}
-          cx="50"
-          cy="50"
-          r={radius}
-          strokeWidth={strokeThickness}
-          strokeDasharray={circumference}
-          strokeDashoffset={strokeDashoffset}
-          strokeLinecap="round"
-          fill="none"
+          stroke="rgba(var(--primary), 0.2)"
+          strokeWidth={strokeWidth}
         />
       </svg>
       
-      {showLabel && (
-        <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <span className={cn("font-semibold", textSizeClasses[size])}>
-            {label || `${Math.round(percentage)}%`}
-          </span>
-        </div>
-      )}
+      {/* Progress circle */}
+      <svg
+        width={size}
+        height={size}
+        viewBox={`0 0 ${size} ${size}`}
+        className="absolute transform -rotate-90"
+      >
+        <circle
+          cx={size / 2}
+          cy={size / 2}
+          r={radius}
+          fill="none"
+          stroke="hsl(var(--primary))"
+          strokeWidth={strokeWidth}
+          strokeDasharray={circumference}
+          strokeDashoffset={strokeDashoffset}
+          strokeLinecap="round"
+        />
+      </svg>
+      
+      {/* Percentage text */}
+      <div className="absolute inset-0 flex items-center justify-center">
+        <span className="text-xl font-semibold">{percentage}%</span>
+      </div>
     </div>
   );
 };
-
-// Usage examples:
-// <ProgressCircle value={75} />
-// <ProgressCircle value={42} max={100} size="lg" color="bg-blue-500" />
-// <ProgressCircle value={3} max={10} label="3/10" thickness={6} />
