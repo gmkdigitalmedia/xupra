@@ -1,42 +1,103 @@
-import { useState } from 'react';
+import { useState, lazy, Suspense } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { toast } from "@/hooks/use-toast";
 import DashboardHeader from '../components/dashboard-header';
 import Sidebar from '@/components/sidebar';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
-// Create placeholder components for the tabs until the actual components are loaded
-const AdvisoryBoardsTab = () => (
-  <div className="p-6 text-center">
-    <h3 className="text-lg font-medium mb-2">Virtual Advisory Boards</h3>
-    <p className="text-muted-foreground">Structured live sessions with healthcare experts</p>
-  </div>
-);
+// Lazy load the tab components to improve initial load time
+const AdvisoryBoardsTab = lazy(() => import('@/components/interactcraft/advisory-boards-tab'));
+const DiscussionForumsTab = lazy(() => import('@/components/interactcraft/discussion-forums-tab'));
+const DelphiSurveysTab = lazy(() => import('@/components/interactcraft/delphi-surveys-tab'));
 
-const DiscussionForumsTab = () => (
-  <div className="p-6 text-center">
-    <h3 className="text-lg font-medium mb-2">Discussion Forums</h3>
-    <p className="text-muted-foreground">Threaded conversations with flexible participation timing</p>
-  </div>
-);
-
-const DelphiSurveysTab = () => (
-  <div className="p-6 text-center">
-    <h3 className="text-lg font-medium mb-2">Delphi Surveys</h3>
-    <p className="text-muted-foreground">Multi-round surveys with iterative feedback and consensus tracking</p>
+// Loading fallback for the tabs
+const TabLoading = ({ title, description }: { title: string, description: string }) => (
+  <div className="p-6 flex justify-center items-center h-64">
+    <div className="text-center">
+      <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary mb-4"></div>
+      <h3 className="text-lg font-medium mb-2">{title}</h3>
+      <p className="text-muted-foreground">{description}</p>
+    </div>
   </div>
 );
 
 export default function InteractCraft() {
   const [selectedTab, setSelectedTab] = useState("advisory-boards");
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [newItemType, setNewItemType] = useState<string>("advisory-board");
+  const [newItemTitle, setNewItemTitle] = useState("");
+  const [newItemDescription, setNewItemDescription] = useState("");
+  const [newItemFormat, setNewItemFormat] = useState("video");
+  const [isCreating, setIsCreating] = useState(false);
 
   // Simulated active sessions
   const activeSessions = {
     advisoryBoards: 3,
     discussionForums: 7,
     delphiSurveys: 2
+  };
+
+  // Handle create new item dialog
+  const handleOpenCreateDialog = (type: string) => {
+    setNewItemType(type);
+    setNewItemTitle("");
+    setNewItemDescription("");
+    setNewItemFormat("video");
+    setIsCreateDialogOpen(true);
+  };
+
+  const handleCreateItem = () => {
+    // Validate input
+    if (!newItemTitle.trim()) {
+      toast({
+        title: "Validation Error",
+        description: "Please enter a title for your new item.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsCreating(true);
+
+    // Simulate API call with timeout
+    setTimeout(() => {
+      // Show success message
+      toast({
+        title: "Success!",
+        description: `Your new ${getItemTypeName(newItemType)} has been created.`,
+        variant: "default"
+      });
+
+      // Reset form and close dialog
+      setIsCreating(false);
+      setIsCreateDialogOpen(false);
+      
+      // Update the selected tab to match the created item type
+      if (newItemType === "advisory-board") {
+        setSelectedTab("advisory-boards");
+      } else if (newItemType === "discussion-forum") {
+        setSelectedTab("discussion-forums");
+      } else if (newItemType === "delphi-survey") {
+        setSelectedTab("delphi-surveys");
+      }
+    }, 1500);
+  };
+
+  const getItemTypeName = (type: string): string => {
+    switch (type) {
+      case "advisory-board": return "Advisory Board";
+      case "discussion-forum": return "Discussion Forum";
+      case "delphi-survey": return "Delphi Survey";
+      default: return "Item";
+    }
   };
 
   return (
@@ -125,7 +186,18 @@ export default function InteractCraft() {
                         <span className="material-icons mr-1 text-sm">filter_list</span>
                         Filter
                       </Button>
-                      <Button size="sm">
+                      <Button 
+                        size="sm"
+                        onClick={() => {
+                          // Set the type based on the currently selected tab
+                          const type = selectedTab === "advisory-boards" 
+                            ? "advisory-board" 
+                            : selectedTab === "discussion-forums" 
+                              ? "discussion-forum" 
+                              : "delphi-survey";
+                          handleOpenCreateDialog(type);
+                        }}
+                      >
                         <span className="material-icons mr-1 text-sm">add</span>
                         New
                       </Button>
@@ -163,15 +235,21 @@ export default function InteractCraft() {
                     
                     <div className="mt-4">
                       <TabsContent value="advisory-boards">
-                        <AdvisoryBoardsTab />
+                        <Suspense fallback={<TabLoading title="Advisory Boards" description="Structured live sessions with healthcare experts" />}>
+                          <AdvisoryBoardsTab />
+                        </Suspense>
                       </TabsContent>
                       
                       <TabsContent value="discussion-forums">
-                        <DiscussionForumsTab />
+                        <Suspense fallback={<TabLoading title="Discussion Forums" description="Threaded conversations with flexible participation timing" />}>
+                          <DiscussionForumsTab />
+                        </Suspense>
                       </TabsContent>
                       
                       <TabsContent value="delphi-surveys">
-                        <DelphiSurveysTab />
+                        <Suspense fallback={<TabLoading title="Delphi Surveys" description="Multi-round surveys with iterative feedback and consensus tracking" />}>
+                          <DelphiSurveysTab />
+                        </Suspense>
                       </TabsContent>
                     </div>
                   </Tabs>
