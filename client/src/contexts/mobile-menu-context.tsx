@@ -35,9 +35,13 @@ export function MobileMenuProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const toggleMobileMenu = () => {
-    setIsMobileMenuOpen(prev => !prev);
-    // For debugging
-    console.log("Mobile menu toggled. New state:", !isMobileMenuOpen);
+    // Using the functional form of setState to ensure we're always working with the latest state
+    setIsMobileMenuOpen(prev => {
+      const newState = !prev;
+      // For debugging
+      console.log("Mobile menu toggled. New state:", newState);
+      return newState;
+    });
   };
 
   const closeMobileMenu = () => {

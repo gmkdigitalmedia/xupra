@@ -12,13 +12,13 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
   description, 
   showBackButton = false 
 }) => {
-  const { toggleMobileMenu, isMobileMenuOpen } = useMobileMenu();
+  const { toggleMobileMenu, isMobileMenuOpen, closeMobileMenu } = useMobileMenu();
 
-  // Force update the mobile menu button when the component mounts
+  // Reset the mobile menu state when the component mounts
   useEffect(() => {
-    // This empty effect will force the component to re-render when mounted
-    // Ensuring the state is current and button is properly displayed
-  }, []);
+    // Ensure the mobile menu is closed when navigating to a new page
+    closeMobileMenu();
+  }, [closeMobileMenu]);
 
   const handleMenuToggle = (e: React.MouseEvent) => {
     e.preventDefault();
