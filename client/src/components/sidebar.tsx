@@ -75,18 +75,18 @@ const Sidebar = () => {
     { icon: "settings", label: "API Connections", path: "/admin" },
   ];
 
-  // Simplified approach: create CSS classes directly with hard values instead of using template strings
+  // Sidebar CSS classes with proper z-index values
   const sidebarStyles = {
     mobile: {
-      open: 'fixed top-0 left-0 z-40 h-screen w-64 bg-black shadow-lg transform transition-transform duration-300 translate-x-0',
-      closed: 'fixed top-0 left-0 z-40 h-screen w-64 bg-black shadow-lg transform transition-transform duration-300 -translate-x-full'
+      open: 'fixed top-0 left-0 z-50 h-screen w-64 bg-black shadow-lg transform transition-transform duration-300 translate-x-0',
+      closed: 'fixed top-0 left-0 z-50 h-screen w-64 bg-black shadow-lg transform transition-transform duration-300 -translate-x-full'
     },
-    desktop: 'fixed top-0 left-0 z-30 h-screen w-64 bg-background-lighter hidden md:block'
+    desktop: 'fixed top-0 left-0 z-30 h-screen w-64 bg-black hidden md:block'
   };
 
-  // Simplified overlay with direct styles
+  // Overlay with higher z-index to ensure it's visible
   const overlayStyle = isMobileMenuOpen 
-    ? 'fixed inset-0 bg-black bg-opacity-50 z-30 md:hidden' 
+    ? 'fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden' 
     : 'hidden';
 
   return (

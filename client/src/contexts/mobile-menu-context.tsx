@@ -21,18 +21,14 @@ export function MobileMenuProvider({ children }: { children: ReactNode }) {
     };
 
     window.addEventListener('resize', handleResize);
+    // Initial check in case the window starts large
+    handleResize();
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // Listen for route changes to close the menu
-  useEffect(() => {
-    const handleRouteChange = () => {
-      setIsMobileMenuOpen(false);
-    };
-
-    window.addEventListener('popstate', handleRouteChange);
-    return () => window.removeEventListener('popstate', handleRouteChange);
-  }, []);
+  // Listen for route changes to close the menu - but removing this
+  // as it was causing issues with the menu not showing when toggled
+  // We'll handle menu closing in specific components as needed
 
   const toggleMobileMenu = () => {
     // Using the functional form of setState to ensure we're always working with the latest state

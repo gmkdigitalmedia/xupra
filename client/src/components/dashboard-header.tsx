@@ -14,11 +14,12 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
 }) => {
   const { toggleMobileMenu, isMobileMenuOpen, closeMobileMenu } = useMobileMenu();
 
-  // Reset the mobile menu state when the component mounts
+  // We were closing the menu on mount, but this was causing issues
+  // Instead, let's make sure the menu toggle works properly
   useEffect(() => {
-    // Ensure the mobile menu is closed when navigating to a new page
-    closeMobileMenu();
-  }, [closeMobileMenu]);
+    // We don't need to close the menu on mount anymore
+    // This was preventing the menu from showing when toggled
+  }, []);
 
   const handleMenuToggle = (e: React.MouseEvent) => {
     e.preventDefault();
