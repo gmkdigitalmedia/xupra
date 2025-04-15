@@ -141,6 +141,13 @@ const Home = () => {
               description="Engage HCPs through virtual advisory boards, discussion forums, and consensus surveys."
               path="/interactcraft"
             />
+            
+            <FeatureCard 
+              icon="auto_graph"
+              title="DecisionDriver AI"
+              description="Transform engagement data into strategic decisions with AI-powered insights and recommendations."
+              path="/decisiondriver"
+            />
           </div>
         </div>
       </section>
@@ -496,6 +503,106 @@ const Home = () => {
                       View All Engagements
                       <span className="material-icons text-sm ml-1">arrow_forward</span>
                     </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* DecisionDriver Section */}
+      <section className="py-16 px-4">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center mb-24">
+            <div className="order-2 lg:order-1 bg-background-card rounded-xl p-6 shadow-lg">
+              <div className="overflow-hidden rounded-lg">
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="font-medium">AI-Powered Insights</h3>
+                  <span className="text-sm text-gray-400">Q1 2025 Analytics</span>
+                </div>
+                <div className="bg-background-lighter rounded-lg p-4">
+                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-4">
+                    <div className="bg-background-dark rounded-lg p-4 flex flex-col items-center">
+                      <div className="relative w-16 h-16 mb-2">
+                        <div className="absolute inset-0 rounded-full bg-cyan-500/20"></div>
+                        <div className="absolute inset-0 rounded-full border-4 border-cyan-500" style={{ clipPath: 'polygon(0 0, 100% 0, 100% 78%, 0 78%)' }}></div>
+                        <div className="absolute inset-0 flex items-center justify-center text-lg font-bold">78%</div>
+                      </div>
+                      <h4 className="text-sm font-medium">Engagement Rate</h4>
+                    </div>
+                    <div className="bg-background-dark rounded-lg p-4 flex flex-col items-center">
+                      <div className="relative w-16 h-16 mb-2">
+                        <div className="absolute inset-0 rounded-full bg-sky-500/20"></div>
+                        <div className="absolute inset-0 rounded-full border-4 border-sky-500" style={{ clipPath: 'polygon(0 0, 100% 0, 100% 92%, 0 92%)' }}></div>
+                        <div className="absolute inset-0 flex items-center justify-center text-lg font-bold">92%</div>
+                      </div>
+                      <h4 className="text-sm font-medium">Decision Accuracy</h4>
+                    </div>
+                    <div className="bg-background-dark rounded-lg p-4 flex flex-col items-center">
+                      <div className="relative w-16 h-16 mb-2">
+                        <div className="absolute inset-0 rounded-full bg-blue-500/20"></div>
+                        <div className="absolute inset-0 rounded-full border-4 border-blue-500" style={{ clipPath: 'polygon(0 0, 100% 0, 100% 65%, 0 65%)' }}></div>
+                        <div className="absolute inset-0 flex items-center justify-center text-lg font-bold">65%</div>
+                      </div>
+                      <h4 className="text-sm font-medium">ROI Improvement</h4>
+                    </div>
+                  </div>
+                  
+                  <div className="bg-background-dark rounded-lg p-4">
+                    <h4 className="text-sm font-medium mb-3">Key Strategic Recommendations</h4>
+                    <ul className="space-y-2 text-sm">
+                      <li className="flex items-start">
+                        <span className="material-icons text-cyan-500 mr-2 text-sm">trending_up</span>
+                        <span>Increase oncology specialist engagement through virtual advisory boards</span>
+                      </li>
+                      <li className="flex items-start">
+                        <span className="material-icons text-sky-500 mr-2 text-sm">insights</span>
+                        <span>Shift 30% of traditional content to interactive micro-learning formats</span>
+                      </li>
+                      <li className="flex items-start">
+                        <span className="material-icons text-blue-500 mr-2 text-sm">auto_graph</span>
+                        <span>Reallocate budget from print to digital channels for 2.4x efficiency</span>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="order-1 lg:order-2">
+              <div className="inline-block bg-primary/10 text-primary font-medium px-3 py-1 rounded-full mb-4">
+                /06
+              </div>
+              <h2 className="text-3xl font-bold mb-4">DecisionDriver AI</h2>
+              <p className="text-gray-300 mb-6">
+                DecisionDriver AI transforms your engagement data into strategic decisions with powerful 
+                AI-driven analysis, real-time recommendations, and one-click reporting, increasing 
+                your team's decision-making efficiency by 65%.
+              </p>
+              <button 
+                onClick={() => login()}
+                className="bg-primary hover:bg-primary/80 text-white font-medium px-6 py-2 rounded-lg transition mb-4"
+              >
+                Explore Insights
+              </button>
+              <div className="bg-background-card rounded-lg p-4 mt-6">
+                <h4 className="text-sm font-medium mb-2">What DecisionDriver AI Delivers:</h4>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="flex items-center">
+                    <span className="material-icons text-cyan-500 mr-2">auto_awesome</span>
+                    <span className="text-sm">AI-Powered Analysis</span>
+                  </div>
+                  <div className="flex items-center">
+                    <span className="material-icons text-sky-500 mr-2">bolt</span>
+                    <span className="text-sm">Real-Time Insights</span>
+                  </div>
+                  <div className="flex items-center">
+                    <span className="material-icons text-blue-500 mr-2">dashboard</span>
+                    <span className="text-sm">One-Click Reporting</span>
+                  </div>
+                  <div className="flex items-center">
+                    <span className="material-icons text-indigo-500 mr-2">emoji_objects</span>
+                    <span className="text-sm">Strategic Recommendations</span>
                   </div>
                 </div>
               </div>

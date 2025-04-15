@@ -1,87 +1,87 @@
-import * as React from "react";
+import React from "react";
 import { cn } from "@/lib/utils";
 
 interface ProgressCircleProps {
   value: number;
-  size?: "sm" | "md" | "lg" | "xl";
-  strokeWidth?: number;
+  max?: number;
+  size?: "sm" | "md" | "lg";
+  label?: string;
+  color?: string;
+  thickness?: number;
+  strokeWidth?: number; // Alias for thickness
   className?: string;
+  showLabel?: boolean;
 }
 
-export function ProgressCircle({
+export const ProgressCircle = ({
   value,
+  max = 100,
   size = "md",
-  strokeWidth = 4,
+  label,
+  color = "bg-primary",
+  thickness = 4,
   className,
-}: ProgressCircleProps) {
-  const normalizedValue = Math.min(Math.max(value, 0), 100);
-  
-  // Calculate size based on prop
-  const sizeMap = {
-    sm: 40,
-    md: 60,
-    lg: 80,
-    xl: 120,
-  };
-  
-  const pixelSize = sizeMap[size];
-  const center = pixelSize / 2;
-  const radius = center - strokeWidth;
+  showLabel = true,
+}: ProgressCircleProps) => {
+  const percentage = Math.min(100, Math.max(0, (value / max) * 100));
+  const radius = 40;
   const circumference = 2 * Math.PI * radius;
-  const strokeDashoffset = circumference - (normalizedValue / 100) * circumference;
+  const strokeDashoffset = circumference - (percentage / 100) * circumference;
 
-  // Determine color based on value
-  const getColor = () => {
-    if (normalizedValue >= 75) return "text-green-400";
-    if (normalizedValue >= 50) return "text-blue-400";
-    if (normalizedValue >= 25) return "text-amber-400";
-    return "text-red-400";
+  const sizeClasses = {
+    sm: "w-12 h-12",
+    md: "w-16 h-16",
+    lg: "w-24 h-24",
   };
-  
-  // Font size based on circle size
-  const getFontSize = () => {
-    if (size === "xl") return "text-xl";
-    if (size === "lg") return "text-lg";
-    if (size === "sm") return "text-xs";
-    return "text-sm";
+
+  const textSizeClasses = {
+    sm: "text-xs",
+    md: "text-sm",
+    lg: "text-base",
   };
 
   return (
-    <div className={cn("relative", className)}>
+    <div className={cn("relative inline-flex items-center justify-center", className)}>
       <svg
-        width={pixelSize}
-        height={pixelSize}
-        viewBox={`0 0 ${pixelSize} ${pixelSize}`}
-        className="transform -rotate-90"
+        className={cn("transform -rotate-90", sizeClasses[size])}
+        viewBox="0 0 100 100"
       >
         {/* Background circle */}
         <circle
-          cx={center}
-          cy={center}
+          className="text-muted stroke-current opacity-20"
+          cx="50"
+          cy="50"
           r={radius}
-          className="fill-none stroke-muted/30"
-          strokeWidth={strokeWidth}
+          strokeWidth={thickness}
+          fill="none"
         />
         
         {/* Progress circle */}
         <circle
-          cx={center}
-          cy={center}
+          className={cn("stroke-current", color.startsWith("bg-") ? color.replace("bg-", "text-") : color)}
+          cx="50"
+          cy="50"
           r={radius}
-          className={`fill-none ${getColor()}`}
-          strokeWidth={strokeWidth}
+          strokeWidth={thickness}
           strokeDasharray={circumference}
           strokeDashoffset={strokeDashoffset}
           strokeLinecap="round"
+          fill="none"
         />
       </svg>
       
-      {/* Value text */}
-      <div 
-        className={`absolute inset-0 flex items-center justify-center font-semibold ${getFontSize()}`}
-      >
-        {normalizedValue}%
-      </div>
+      {showLabel && (
+        <div className="absolute inset-0 flex flex-col items-center justify-center">
+          <span className={cn("font-semibold", textSizeClasses[size])}>
+            {label || `${Math.round(percentage)}%`}
+          </span>
+        </div>
+      )}
     </div>
   );
-}
+};
+
+// Usage examples:
+// <ProgressCircle value={75} />
+// <ProgressCircle value={42} max={100} size="lg" color="bg-blue-500" />
+// <ProgressCircle value={3} max={10} label="3/10" thickness={6} />
