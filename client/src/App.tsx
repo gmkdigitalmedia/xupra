@@ -14,6 +14,7 @@ import AssetManagement from "@/pages/asset-management";
 import AdminConnectionsPage from "@/pages/admin";
 import SlackIntegrationPage from "@/pages/slack-integration";
 import InteractCraft from "@/pages/interactcraft";
+import DecisionDriver from "@/pages/decisiondriver";
 import { useAppContext, AppProvider } from "./contexts/app-context";
 import { MobileMenuProvider } from "./contexts/mobile-menu-context";
 
@@ -30,6 +31,7 @@ function AppRoutes() {
       <Route path="/insightlens" component={InsightLens} />
       <Route path="/asset-management" component={AssetManagement} />
       <Route path="/interactcraft" component={InteractCraft} />
+      <Route path="/decisiondriver" component={DecisionDriver} />
       <Route path="/admin" component={AdminConnectionsPage} />
       <Route path="/slack-integration" component={SlackIntegrationPage} />
       <Route component={NotFound} />
