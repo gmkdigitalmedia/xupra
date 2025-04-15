@@ -73,6 +73,7 @@ const Sidebar = () => {
     { icon: "folder", label: "Asset Management", path: "/asset-management" },
     { icon: "chat", label: "Slack Integration", path: "/slack-integration" },
     { icon: "settings", label: "API Connections", path: "/admin" },
+    { icon: "info", label: "About", path: "/about" },
   ];
 
   // Sidebar CSS classes with proper z-index values

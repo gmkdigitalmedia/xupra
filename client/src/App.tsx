@@ -15,6 +15,7 @@ import AdminConnectionsPage from "@/pages/admin";
 import SlackIntegrationPage from "@/pages/slack-integration";
 import InteractCraft from "@/pages/interactcraft";
 import DecisionDriver from "@/pages/decisiondriver";
+import AboutPage from "@/pages/about";
 import { useAppContext, AppProvider } from "./contexts/app-context";
 import { MobileMenuProvider } from "./contexts/mobile-menu-context";
 
@@ -34,6 +35,7 @@ function AppRoutes() {
       <Route path="/decisiondriver" component={DecisionDriver} />
       <Route path="/admin" component={AdminConnectionsPage} />
       <Route path="/slack-integration" component={SlackIntegrationPage} />
+      <Route path="/about" component={AboutPage} />
       <Route component={NotFound} />
     </Switch>
   );
