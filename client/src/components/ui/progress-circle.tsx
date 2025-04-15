@@ -20,9 +20,12 @@ export const ProgressCircle = ({
   label,
   color = "bg-primary",
   thickness = 4,
+  strokeWidth,
   className,
   showLabel = true,
 }: ProgressCircleProps) => {
+  // Use strokeWidth if provided, otherwise use thickness
+  const strokeThickness = strokeWidth || thickness;
   const percentage = Math.min(100, Math.max(0, (value / max) * 100));
   const radius = 40;
   const circumference = 2 * Math.PI * radius;
@@ -52,7 +55,7 @@ export const ProgressCircle = ({
           cx="50"
           cy="50"
           r={radius}
-          strokeWidth={thickness}
+          strokeWidth={strokeThickness}
           fill="none"
         />
         
@@ -62,7 +65,7 @@ export const ProgressCircle = ({
           cx="50"
           cy="50"
           r={radius}
-          strokeWidth={thickness}
+          strokeWidth={strokeThickness}
           strokeDasharray={circumference}
           strokeDashoffset={strokeDashoffset}
           strokeLinecap="round"

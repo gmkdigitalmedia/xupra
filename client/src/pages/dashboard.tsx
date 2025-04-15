@@ -96,6 +96,15 @@ const Dashboard = () => {
       gradientFrom: "orange-500",
       gradientTo: "red-500",
       iconColor: "orange-500"
+    },
+    {
+      icon: "auto_graph",
+      title: "DecisionDriver AI",
+      description: "Transform data into decisions",
+      path: "/decisiondriver",
+      gradientFrom: "cyan-500",
+      gradientTo: "sky-500",
+      iconColor: "cyan-500"
     }
   ];
 
