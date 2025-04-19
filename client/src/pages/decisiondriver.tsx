@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { ProgressCircle } from "@/components/ui/progress-circle";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { toast } from "@/hooks/use-toast";
 
 const DecisionDriver = () => {
   const [reportType, setReportType] = useState("campaign");
@@ -18,45 +19,57 @@ const DecisionDriver = () => {
     type: string;
     timeFrame: string;
     date: string;
-    status: string;
   } | null>(null);
-  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
-  
-  // Function to handle report generation with optional preset report type
-  const handleGenerateReport = (presetType?: string, presetTimeFrame?: string) => {
+
+  const handleGenerateReport = (type = reportType, time = timeFrame) => {
+    // Update the UI state to show generating
     setIsGenerating(true);
     
-    // Use preset values or form values
-    const reportTypeToUse = presetType || reportType;
-    const timeFrameToUse = presetTimeFrame || timeFrame;
-    
-    // Simulate API call with setTimeout
+    // Simulate API call with timeout
     setTimeout(() => {
-      setIsGenerating(false);
-      setGeneratedReport({
-        id: Math.floor(Math.random() * 10000),
-        type: reportTypeToUse,
-        timeFrame: timeFrameToUse,
-        date: new Date().toLocaleDateString(),
-        status: 'Complete'
-      });
-      setShowSuccessMessage(true);
+      // Create a report object
+      const report = {
+        id: Date.now(),
+        type,
+        timeFrame: time,
+        date: new Date().toLocaleDateString()
+      };
       
-      // Hide success message after 3 seconds
-      setTimeout(() => {
-        setShowSuccessMessage(false);
-      }, 3000);
-    }, 1500);
+      // Update state and stop loading
+      setGeneratedReport(report);
+      setIsGenerating(false);
+      
+      // Show success notification
+      toast({
+        title: "Report Generated",
+        description: `Your ${getReportName(type)} report has been created and is ready to download.`,
+      });
+    }, 2000);
   };
   
-  // Function to handle template save
-  const handleSaveTemplate = () => {
-    alert('Template saved successfully!');
+  const getReportName = (type: string) => {
+    switch (type) {
+      case 'campaign': return 'Campaign Performance';
+      case 'hcp': return 'HCP Engagement';
+      case 'roi': return 'ROI Analysis';
+      case 'market': return 'Market Trends';
+      case 'engagement': return 'Engagement Insights';
+      default: return 'Custom Report';
+    }
   };
   
-  // Function to handle one-click report generation
-  const handleOneClickReport = (reportName: string) => {
-    // Determine report type and time frame based on report name
+  const getTimeFrameName = (timeFrame: string) => {
+    switch (timeFrame) {
+      case 'last7': return 'Last 7 Days';
+      case 'last30': return 'Last 30 Days';
+      case 'last90': return 'Last 90 Days';
+      case 'thisyear': return 'This Year';
+      case 'custom': return 'Custom Range';
+      default: return 'Custom';
+    }
+  };
+  
+  const handleQuickReportGeneration = (reportName: string) => {
     let presetType: string;
     let presetTimeFrame: string;
     
@@ -89,7 +102,8 @@ const DecisionDriver = () => {
   return (
     <div className="flex h-screen overflow-hidden">
       <Sidebar />
-      <div className="flex-1 overflow-auto">
+      {/* Main content area - add md:ml-64 to push content away from sidebar on medium screens and up */}
+      <div className="flex-1 overflow-auto md:ml-64">
         <div className="container py-6 space-y-6">
           <DashboardHeader 
             title="DecisionDriver AI" 
@@ -118,10 +132,10 @@ const DecisionDriver = () => {
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="campaign">Campaign Performance</SelectItem>
-                        <SelectItem value="engagement">Engagement Analysis</SelectItem>
-                        <SelectItem value="hcp">HCP Insights</SelectItem>
-                        <SelectItem value="content">Content Effectiveness</SelectItem>
+                        <SelectItem value="hcp">HCP Engagement</SelectItem>
                         <SelectItem value="roi">ROI Analysis</SelectItem>
+                        <SelectItem value="market">Market Trends</SelectItem>
+                        <SelectItem value="engagement">Engagement Insights</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -141,502 +155,333 @@ const DecisionDriver = () => {
                     </Select>
                   </div>
                 </div>
-
-                <div className="border rounded-md p-4 mb-4 bg-muted/30">
-                  <h3 className="text-sm font-medium mb-3">Data Sources</h3>
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                    <div className="flex items-center space-x-2">
-                      <input type="checkbox" id="campaigns" className="rounded" defaultChecked />
-                      <label htmlFor="campaigns" className="text-sm">Campaign Data</label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <input type="checkbox" id="hcp" className="rounded" defaultChecked />
-                      <label htmlFor="hcp" className="text-sm">HCP Profiles</label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <input type="checkbox" id="interactions" className="rounded" defaultChecked />
-                      <label htmlFor="interactions" className="text-sm">Interactions</label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <input type="checkbox" id="content" className="rounded" defaultChecked />
-                      <label htmlFor="content" className="text-sm">Content Performance</label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <input type="checkbox" id="advisoryboards" className="rounded" />
-                      <label htmlFor="advisoryboards" className="text-sm">Advisory Boards</label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <input type="checkbox" id="surveys" className="rounded" />
-                      <label htmlFor="surveys" className="text-sm">Survey Results</label>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="mb-4">
-                  <h3 className="text-sm font-medium mb-3">Report Customization</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="border rounded-md p-3">
-                      <h4 className="text-xs font-medium text-muted-foreground mb-2">Sections to Include</h4>
-                      <div className="space-y-2">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center space-x-2">
-                            <input type="checkbox" id="executive" className="rounded" defaultChecked />
-                            <label htmlFor="executive" className="text-sm">Executive Summary</label>
-                          </div>
-                          <TooltipProvider>
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <span className="material-icons text-muted-foreground text-sm">info</span>
-                              </TooltipTrigger>
-                              <TooltipContent>
-                                <p className="text-xs w-60">AI-generated summary of key insights and findings for executive review</p>
-                              </TooltipContent>
-                            </Tooltip>
-                          </TooltipProvider>
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center space-x-2">
-                            <input type="checkbox" id="performance" className="rounded" defaultChecked />
-                            <label htmlFor="performance" className="text-sm">Performance Metrics</label>
-                          </div>
-                          <TooltipProvider>
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <span className="material-icons text-muted-foreground text-sm">info</span>
-                              </TooltipTrigger>
-                              <TooltipContent>
-                                <p className="text-xs w-60">Detailed metrics showing key performance indicators</p>
-                              </TooltipContent>
-                            </Tooltip>
-                          </TooltipProvider>
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center space-x-2">
-                            <input type="checkbox" id="trends" className="rounded" defaultChecked />
-                            <label htmlFor="trends" className="text-sm">Trend Analysis</label>
-                          </div>
-                          <TooltipProvider>
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <span className="material-icons text-muted-foreground text-sm">info</span>
-                              </TooltipTrigger>
-                              <TooltipContent>
-                                <p className="text-xs w-60">AI analysis of patterns and trends over the selected time period</p>
-                              </TooltipContent>
-                            </Tooltip>
-                          </TooltipProvider>
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center space-x-2">
-                            <input type="checkbox" id="recommendations" className="rounded" defaultChecked />
-                            <label htmlFor="recommendations" className="text-sm">Recommendations</label>
-                          </div>
-                          <TooltipProvider>
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <span className="material-icons text-muted-foreground text-sm">info</span>
-                              </TooltipTrigger>
-                              <TooltipContent>
-                                <p className="text-xs w-60">AI-generated strategic recommendations based on data analysis</p>
-                              </TooltipContent>
-                            </Tooltip>
-                          </TooltipProvider>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="border rounded-md p-3">
-                      <h4 className="text-xs font-medium text-muted-foreground mb-2">Output Format</h4>
-                      <div className="space-y-2">
-                        <div className="flex items-center space-x-3">
-                          <input type="radio" id="dashboard" name="format" className="rounded" defaultChecked />
-                          <label htmlFor="dashboard" className="text-sm">Dashboard View</label>
-                        </div>
-                        <div className="flex items-center space-x-3">
-                          <input type="radio" id="pdf" name="format" className="rounded" />
-                          <label htmlFor="pdf" className="text-sm">PDF Report</label>
-                        </div>
-                        <div className="flex items-center space-x-3">
-                          <input type="radio" id="presentation" name="format" className="rounded" />
-                          <label htmlFor="presentation" className="text-sm">Presentation Slides</label>
-                        </div>
-                        <div className="flex items-center space-x-3">
-                          <input type="radio" id="csv" name="format" className="rounded" />
-                          <label htmlFor="csv" className="text-sm">Raw Data (CSV)</label>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
                 
-                {showSuccessMessage && (
-                  <div className="mb-4 p-3 bg-green-500/10 border border-green-500/20 rounded-md text-green-600 flex items-center">
-                    <span className="material-icons mr-2">check_circle</span>
-                    <div>
-                      <p className="font-medium text-sm">Report generated successfully!</p>
-                      <p className="text-xs">Report ID: {generatedReport?.id} - {generatedReport?.type} analysis for {generatedReport?.timeFrame}</p>
+                <Button 
+                  className="w-full"
+                  disabled={isGenerating}
+                  onClick={() => handleGenerateReport()}
+                >
+                  {isGenerating ? (
+                    <>
+                      <span className="material-icons animate-spin mr-2">autorenew</span>
+                      Generating Report...
+                    </>
+                  ) : (
+                    <>
+                      <span className="material-icons mr-2">analytics</span>
+                      Generate Report
+                    </>
+                  )}
+                </Button>
+                
+                {generatedReport && (
+                  <div className="mt-4 p-4 border rounded-lg bg-background-lighter">
+                    <div className="flex justify-between items-center mb-2">
+                      <h3 className="font-medium">Generated Report</h3>
+                      <Badge variant="outline">{generatedReport.date}</Badge>
+                    </div>
+                    <p className="text-sm text-muted-foreground mb-3">
+                      {getReportName(generatedReport.type)} ({getTimeFrameName(generatedReport.timeFrame)})
+                    </p>
+                    <div className="flex gap-2">
+                      <Button variant="outline" size="sm" className="flex-1">
+                        <span className="material-icons text-sm mr-1">visibility</span>
+                        View
+                      </Button>
+                      <Button variant="outline" size="sm" className="flex-1">
+                        <span className="material-icons text-sm mr-1">file_download</span>
+                        Download
+                      </Button>
+                      <Button variant="outline" size="sm" className="flex-1">
+                        <span className="material-icons text-sm mr-1">share</span>
+                        Share
+                      </Button>
                     </div>
                   </div>
                 )}
-                
-                <div className="flex justify-end space-x-2">
-                  <Button variant="outline" onClick={handleSaveTemplate}>Save Template</Button>
-                  <Button 
-                    onClick={() => handleGenerateReport()} 
-                    disabled={isGenerating}
-                  >
-                    {isGenerating ? (
-                      <>
-                        <span className="material-icons animate-spin mr-2 text-sm">refresh</span>
-                        Generating...
-                      </>
-                    ) : (
-                      <>
-                        <span className="material-icons mr-2 text-sm">auto_awesome</span>
-                        Generate Report
-                      </>
-                    )}
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Key Metrics</CardTitle>
+                <CardDescription>Performance overview</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div>
+                    <div className="flex justify-between mb-1">
+                      <span className="text-sm font-medium">Campaign Effectiveness</span>
+                      <span className="text-sm text-muted-foreground">82%</span>
+                    </div>
+                    <div className="h-2 bg-primary/10 rounded-full">
+                      <div className="h-2 bg-primary rounded-full" style={{ width: '82%' }}></div>
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <div className="flex justify-between mb-1">
+                      <span className="text-sm font-medium">HCP Engagement</span>
+                      <span className="text-sm text-muted-foreground">68%</span>
+                    </div>
+                    <div className="h-2 bg-primary/10 rounded-full">
+                      <div className="h-2 bg-primary rounded-full" style={{ width: '68%' }}></div>
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <div className="flex justify-between mb-1">
+                      <span className="text-sm font-medium">ROI Score</span>
+                      <span className="text-sm text-muted-foreground">75%</span>
+                    </div>
+                    <div className="h-2 bg-primary/10 rounded-full">
+                      <div className="h-2 bg-primary rounded-full" style={{ width: '75%' }}></div>
+                    </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-4 mt-6">
+                    <div className="flex flex-col items-center">
+                      <ProgressCircle value={92} size={80} strokeWidth={8} />
+                      <span className="text-sm font-medium mt-2">Data Quality</span>
+                      <span className="text-xs text-muted-foreground">92%</span>
+                    </div>
+                    <div className="flex flex-col items-center">
+                      <ProgressCircle value={78} size={80} strokeWidth={8} />
+                      <span className="text-sm font-medium mt-2">AI Confidence</span>
+                      <span className="text-xs text-muted-foreground">78%</span>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+          
+          <h2 className="text-xl font-bold mt-4">Quick Insights</h2>
+          
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <Card className="bg-gradient-to-br from-blue-500/10 to-cyan-500/10 cursor-pointer hover:shadow-md transition-shadow" onClick={() => handleQuickReportGeneration('monthly')}>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-base">Monthly Performance</CardTitle>
+                <CardDescription className="text-xs">Campaign overview for last 30 days</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="flex justify-between items-center">
+                  <span className="material-icons text-primary text-3xl">insert_chart</span>
+                  <Button size="sm" variant="secondary" disabled={isGenerating}>
+                    {isGenerating ? 'Generating...' : 'Generate'}
                   </Button>
                 </div>
               </CardContent>
             </Card>
-
-            <div className="space-y-4">
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-md">One-Click Reports</CardTitle>
-                  <CardDescription>Generate instant reports with predefined templates</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <button 
-                    className="w-full border border-border hover:bg-background-lighter transition rounded-md p-3 text-left"
-                    onClick={() => handleOneClickReport('monthly')}
-                    disabled={isGenerating}
-                  >
-                    <div className="flex items-center">
-                      <span className="material-icons text-blue-400 mr-2">description</span>
-                      <div>
-                        <h3 className="text-sm font-medium">Monthly Performance</h3>
-                        <p className="text-xs text-muted-foreground">Campaign metrics with trends</p>
-                      </div>
-                    </div>
-                  </button>
-                  <button 
-                    className="w-full border border-border hover:bg-background-lighter transition rounded-md p-3 text-left"
-                    onClick={() => handleOneClickReport('hcp')}
-                    disabled={isGenerating}
-                  >
-                    <div className="flex items-center">
-                      <span className="material-icons text-green-400 mr-2">insights</span>
-                      <div>
-                        <h3 className="text-sm font-medium">HCP Engagement</h3>
-                        <p className="text-xs text-muted-foreground">Response rates by segment</p>
-                      </div>
-                    </div>
-                  </button>
-                  <button 
-                    className="w-full border border-border hover:bg-background-lighter transition rounded-md p-3 text-left"
-                    onClick={() => handleOneClickReport('roi')}
-                    disabled={isGenerating}
-                  >
-                    <div className="flex items-center">
-                      <span className="material-icons text-purple-400 mr-2">trending_up</span>
-                      <div>
-                        <h3 className="text-sm font-medium">ROI Analysis</h3>
-                        <p className="text-xs text-muted-foreground">Cost vs. outcomes breakdown</p>
-                      </div>
-                    </div>
-                  </button>
-                  <button 
-                    className="w-full border border-primary/30 bg-primary/5 hover:bg-primary/10 transition rounded-md p-3 text-left"
-                    onClick={() => handleOneClickReport('executive')}
-                    disabled={isGenerating}
-                  >
-                    <div className="flex items-center">
-                      <span className="material-icons text-primary mr-2">auto_awesome</span>
-                      <div>
-                        <h3 className="text-sm font-medium">Executive Briefing</h3>
-                        <p className="text-xs text-muted-foreground">AI-generated strategic overview</p>
-                      </div>
-                    </div>
-                  </button>
-                  <div className="text-center mt-2">
-                    <Button 
-                      variant="link" 
-                      size="sm" 
-                      className="text-xs"
-                      onClick={() => alert('More templates will be available in a future update.')}
-                    >
-                      View All Templates
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-md">Latest Insights</CardTitle>
-                  <CardDescription>AI-detected trends from your data</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <div className="border border-green-500/20 bg-green-500/5 rounded-md p-3">
-                    <div className="flex items-start space-x-2">
-                      <span className="material-icons text-green-400">arrow_upward</span>
-                      <div>
-                        <h3 className="text-sm font-medium">Email Engagement Improved</h3>
-                        <p className="text-xs text-muted-foreground mb-2">Open rates increased by 12% in the last 30 days for oncology specialists.</p>
-                        <Button 
-                          variant="link" 
-                          size="sm" 
-                          className="text-xs text-green-400 h-auto p-0"
-                          onClick={() => {
-                            setReportType('engagement');
-                            setTimeFrame('last30');
-                            handleGenerateReport('engagement', 'last30');
-                          }}
-                        >
-                          View Detailed Analysis
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="border border-amber-500/20 bg-amber-500/5 rounded-md p-3">
-                    <div className="flex items-start space-x-2">
-                      <span className="material-icons text-amber-400">priority_high</span>
-                      <div>
-                        <h3 className="text-sm font-medium">Content Gap Detected</h3>
-                        <p className="text-xs text-muted-foreground mb-2">Cardiology HCPs requesting more educational materials on new treatments.</p>
-                        <Button 
-                          variant="link" 
-                          size="sm" 
-                          className="text-xs text-amber-400 h-auto p-0"
-                          onClick={() => {
-                            setReportType('content');
-                            setTimeFrame('last90');
-                            handleGenerateReport('content', 'last90');
-                          }}
-                        >
-                          View Recommendation
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="border border-blue-500/20 bg-blue-500/5 rounded-md p-3">
-                    <div className="flex items-start space-x-2">
-                      <span className="material-icons text-blue-400">insights</span>
-                      <div>
-                        <h3 className="text-sm font-medium">Correlation Discovered</h3>
-                        <p className="text-xs text-muted-foreground mb-2">HCPs who participated in advisory boards show 3x higher prescription rates.</p>
-                        <Button 
-                          variant="link" 
-                          size="sm" 
-                          className="text-xs text-blue-400 h-auto p-0"
-                          onClick={() => {
-                            setReportType('hcp');
-                            setTimeFrame('thisyear');
-                            handleGenerateReport('hcp', 'thisyear');
-                          }}
-                        >
-                          Explore Connection
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
+            
+            <Card className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 cursor-pointer hover:shadow-md transition-shadow" onClick={() => handleQuickReportGeneration('hcp')}>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-base">HCP Engagement</CardTitle>
+                <CardDescription className="text-xs">Detailed 90-day HCP analysis</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="flex justify-between items-center">
+                  <span className="material-icons text-primary text-3xl">groups</span>
+                  <Button size="sm" variant="secondary" disabled={isGenerating}>
+                    {isGenerating ? 'Generating...' : 'Generate'}
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card className="bg-gradient-to-br from-amber-500/10 to-orange-500/10 cursor-pointer hover:shadow-md transition-shadow" onClick={() => handleQuickReportGeneration('roi')}>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-base">ROI Analysis</CardTitle>
+                <CardDescription className="text-xs">Financial impact assessment</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="flex justify-between items-center">
+                  <span className="material-icons text-primary text-3xl">paid</span>
+                  <Button size="sm" variant="secondary" disabled={isGenerating}>
+                    {isGenerating ? 'Generating...' : 'Generate'}
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card className="bg-gradient-to-br from-emerald-500/10 to-teal-500/10 cursor-pointer hover:shadow-md transition-shadow" onClick={() => handleQuickReportGeneration('executive')}>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-base">Executive Summary</CardTitle>
+                <CardDescription className="text-xs">High-level overview for leadership</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="flex justify-between items-center">
+                  <span className="material-icons text-primary text-3xl">assistant</span>
+                  <Button size="sm" variant="secondary" disabled={isGenerating}>
+                    {isGenerating ? 'Generating...' : 'Generate'}
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
           </div>
-
-          <Tabs defaultValue="reporthistory" className="w-full">
-            <TabsList className="mb-4">
-              <TabsTrigger value="reporthistory">Report History</TabsTrigger>
-              <TabsTrigger value="metrics">Key Metrics</TabsTrigger>
-              <TabsTrigger value="engagement">Engagement Index</TabsTrigger>
-            </TabsList>
-            <TabsContent value="reporthistory">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <Card>
-                  <CardHeader className="pb-2">
-                    <div className="flex justify-between items-center">
-                      <CardTitle className="text-sm">Monthly Performance Report</CardTitle>
-                      <Badge variant="outline">PDF</Badge>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Strategic Recommendations</CardTitle>
+                <CardDescription>AI-powered insights based on your data</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  <div className="flex items-start gap-3 p-3 rounded-lg border bg-background-lighter">
+                    <div className="mt-0.5 bg-primary/20 p-2 rounded-full">
+                      <span className="material-icons text-primary text-sm">lightbulb</span>
                     </div>
-                    <CardDescription className="text-xs">Generated May 1, 2025</CardDescription>
-                  </CardHeader>
-                  <CardContent className="text-xs text-muted-foreground">
-                    <p>Oncology campaign performance with ROI analysis and recommendations for Q2 strategy.</p>
-                  </CardContent>
-                  <CardFooter className="flex justify-between pt-0">
-                    <Button variant="link" size="sm" className="text-xs h-8 px-0">
-                      <span className="material-icons mr-1 text-sm">download</span>
-                      Download
-                    </Button>
-                    <Button variant="link" size="sm" className="text-xs h-8 px-0">
-                      <span className="material-icons mr-1 text-sm">share</span>
-                      Share
-                    </Button>
-                  </CardFooter>
-                </Card>
-                
-                <Card>
-                  <CardHeader className="pb-2">
-                    <div className="flex justify-between items-center">
-                      <CardTitle className="text-sm">HCP Engagement Analysis</CardTitle>
-                      <Badge variant="outline">Dashboard</Badge>
-                    </div>
-                    <CardDescription className="text-xs">Generated Apr 15, 2025</CardDescription>
-                  </CardHeader>
-                  <CardContent className="text-xs text-muted-foreground">
-                    <p>Segmentation analysis of content performance across 3 audience profiles.</p>
-                  </CardContent>
-                  <CardFooter className="flex justify-between pt-0">
-                    <Button variant="link" size="sm" className="text-xs h-8 px-0">
-                      <span className="material-icons mr-1 text-sm">visibility</span>
-                      View
-                    </Button>
-                    <Button variant="link" size="sm" className="text-xs h-8 px-0">
-                      <span className="material-icons mr-1 text-sm">share</span>
-                      Share
-                    </Button>
-                  </CardFooter>
-                </Card>
-                
-                <Card>
-                  <CardHeader className="pb-2">
-                    <div className="flex justify-between items-center">
-                      <CardTitle className="text-sm">Quarterly ROI Report</CardTitle>
-                      <Badge variant="outline">Slides</Badge>
-                    </div>
-                    <CardDescription className="text-xs">Generated Apr 1, 2025</CardDescription>
-                  </CardHeader>
-                  <CardContent className="text-xs text-muted-foreground">
-                    <p>Executive summary of Q1 campaign performance with cost-benefit analysis.</p>
-                  </CardContent>
-                  <CardFooter className="flex justify-between pt-0">
-                    <Button variant="link" size="sm" className="text-xs h-8 px-0">
-                      <span className="material-icons mr-1 text-sm">download</span>
-                      Download
-                    </Button>
-                    <Button variant="link" size="sm" className="text-xs h-8 px-0">
-                      <span className="material-icons mr-1 text-sm">edit</span>
-                      Duplicate
-                    </Button>
-                  </CardFooter>
-                </Card>
-              </div>
-            </TabsContent>
-            
-            <TabsContent value="metrics">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                <Card>
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-sm">Engagement Rate</CardTitle>
-                    <CardDescription>Campaign interactions</CardDescription>
-                  </CardHeader>
-                  <CardContent className="pt-2">
-                    <div className="flex items-center justify-center">
-                      <ProgressCircle value={78} size={120} strokeWidth={10} />
-                    </div>
-                    <div className="flex justify-between mt-4 text-sm">
-                      <div>
-                        <p className="text-muted-foreground">Previous</p>
-                        <p className="font-medium">64%</p>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-muted-foreground">Change</p>
-                        <p className="font-medium text-green-500">+14%</p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-                
-                <Card>
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-sm">Content Performance</CardTitle>
-                    <CardDescription>Effectiveness score</CardDescription>
-                  </CardHeader>
-                  <CardContent className="pt-2">
-                    <div className="flex items-center justify-center">
-                      <ProgressCircle value={84} size={120} strokeWidth={10} />
-                    </div>
-                    <div className="flex justify-between mt-4 text-sm">
-                      <div>
-                        <p className="text-muted-foreground">Previous</p>
-                        <p className="font-medium">79%</p>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-muted-foreground">Change</p>
-                        <p className="font-medium text-green-500">+5%</p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-                
-                <Card>
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-sm">Campaign ROI</CardTitle>
-                    <CardDescription>Return on investment</CardDescription>
-                  </CardHeader>
-                  <CardContent className="pt-2">
-                    <div className="flex items-center justify-center">
-                      <ProgressCircle value={92} size={120} strokeWidth={10} />
-                    </div>
-                    <div className="flex justify-between mt-4 text-sm">
-                      <div>
-                        <p className="text-muted-foreground">Previous</p>
-                        <p className="font-medium">87%</p>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-muted-foreground">Change</p>
-                        <p className="font-medium text-green-500">+5%</p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-                
-                <Card>
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-sm">HCP Sentiment</CardTitle>
-                    <CardDescription>Positive feedback</CardDescription>
-                  </CardHeader>
-                  <CardContent className="pt-2">
-                    <div className="flex items-center justify-center">
-                      <ProgressCircle value={63} size={120} strokeWidth={10} />
-                    </div>
-                    <div className="flex justify-between mt-4 text-sm">
-                      <div>
-                        <p className="text-muted-foreground">Previous</p>
-                        <p className="font-medium">58%</p>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-muted-foreground">Change</p>
-                        <p className="font-medium text-green-500">+5%</p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-            </TabsContent>
-            
-            <TabsContent value="engagement">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Engagement Distribution</CardTitle>
-                  <CardDescription>Analysis by healthcare specialty and content type</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="h-[400px] flex items-center justify-center border-2 border-dashed border-muted-foreground/20 rounded-lg">
-                    <div className="text-center">
-                      <span className="material-icons text-primary text-4xl mb-2">assessment</span>
-                      <h3 className="text-lg font-medium mb-1">Visualization placeholder</h3>
-                      <p className="text-sm text-muted-foreground">
-                        Engagement breakdown would display here with interactive charts
+                    <div>
+                      <h4 className="text-sm font-medium">Optimize Content Strategy</h4>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        HCPs are engaging 43% more with clinical case studies than general product information. 
+                        Consider reallocating resources to create more case-based content.
                       </p>
                     </div>
                   </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-          </Tabs>
+                  
+                  <div className="flex items-start gap-3 p-3 rounded-lg border bg-background-lighter">
+                    <div className="mt-0.5 bg-primary/20 p-2 rounded-full">
+                      <span className="material-icons text-primary text-sm">schedule</span>
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-medium">Engagement Timing</h4>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Data indicates Tuesday and Thursday mornings (8-10 AM) show 27% higher HCP response rates. 
+                        Consider scheduling important communications during these windows.
+                      </p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-start gap-3 p-3 rounded-lg border bg-background-lighter">
+                    <div className="mt-0.5 bg-primary/20 p-2 rounded-full">
+                      <span className="material-icons text-primary text-sm">public</span>
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-medium">Regional Focus</h4>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Engagement is 35% below target in the Kansai region. 
+                        Consider a targeted campaign addressing specific needs in this area.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Recent Reports</CardTitle>
+                <CardDescription>Access your latest insights</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between p-2 hover:bg-background-lighter rounded-md transition-colors">
+                    <div className="flex items-center gap-3">
+                      <div className="bg-primary/10 p-2 rounded-full">
+                        <span className="material-icons text-primary text-sm">description</span>
+                      </div>
+                      <div>
+                        <h4 className="text-sm font-medium">Q1 Campaign Performance</h4>
+                        <p className="text-xs text-muted-foreground">Generated April 15, 2025</p>
+                      </div>
+                    </div>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button variant="ghost" size="sm" className="h-7 w-7 p-0">
+                            <span className="material-icons text-sm">download</span>
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Download Report</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </div>
+                  
+                  <div className="flex items-center justify-between p-2 hover:bg-background-lighter rounded-md transition-colors">
+                    <div className="flex items-center gap-3">
+                      <div className="bg-primary/10 p-2 rounded-full">
+                        <span className="material-icons text-primary text-sm">description</span>
+                      </div>
+                      <div>
+                        <h4 className="text-sm font-medium">HCP Engagement Analysis</h4>
+                        <p className="text-xs text-muted-foreground">Generated April 10, 2025</p>
+                      </div>
+                    </div>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button variant="ghost" size="sm" className="h-7 w-7 p-0">
+                            <span className="material-icons text-sm">download</span>
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Download Report</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </div>
+                  
+                  <div className="flex items-center justify-between p-2 hover:bg-background-lighter rounded-md transition-colors">
+                    <div className="flex items-center gap-3">
+                      <div className="bg-primary/10 p-2 rounded-full">
+                        <span className="material-icons text-primary text-sm">description</span>
+                      </div>
+                      <div>
+                        <h4 className="text-sm font-medium">ROI Assessment</h4>
+                        <p className="text-xs text-muted-foreground">Generated April 5, 2025</p>
+                      </div>
+                    </div>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button variant="ghost" size="sm" className="h-7 w-7 p-0">
+                            <span className="material-icons text-sm">download</span>
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Download Report</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </div>
+                  
+                  <div className="flex items-center justify-between p-2 hover:bg-background-lighter rounded-md transition-colors">
+                    <div className="flex items-center gap-3">
+                      <div className="bg-primary/10 p-2 rounded-full">
+                        <span className="material-icons text-primary text-sm">description</span>
+                      </div>
+                      <div>
+                        <h4 className="text-sm font-medium">Executive Summary</h4>
+                        <p className="text-xs text-muted-foreground">Generated March 30, 2025</p>
+                      </div>
+                    </div>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button variant="ghost" size="sm" className="h-7 w-7 p-0">
+                            <span className="material-icons text-sm">download</span>
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Download Report</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </div>
+                </div>
+              </CardContent>
+              <CardFooter>
+                <Button variant="outline" className="w-full">
+                  <span className="material-icons mr-2 text-sm">history</span>
+                  View All Reports
+                </Button>
+              </CardFooter>
+            </Card>
+          </div>
         </div>
       </div>
     </div>
