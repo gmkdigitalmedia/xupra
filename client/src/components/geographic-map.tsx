@@ -240,6 +240,54 @@ export function GeographicMap() {
     zoom: 5.0 // Increased zoom for better visibility of Japan
   });
   const [legendExpanded, setLegendExpanded] = useState(false);
+  const [touchStartDistance, setTouchStartDistance] = useState<number | null>(null);
+  const [touchStartZoom, setTouchStartZoom] = useState<number | null>(null);
+  
+  // Calculate distance between two touch points
+  const getTouchDistance = (touches: React.TouchList): number => {
+    const dx = touches[0].clientX - touches[1].clientX;
+    const dy = touches[0].clientY - touches[1].clientY;
+    return Math.sqrt(dx * dx + dy * dy);
+  };
+
+  // Handle touch events for pinch zoom
+  const handleTouchStart = (event: React.TouchEvent) => {
+    if (event.touches.length === 2) {
+      // Two-finger touch detected - prepare for pinch zoom
+      const distance = getTouchDistance(event.touches);
+      setTouchStartDistance(distance);
+      setTouchStartZoom(position.zoom);
+    } else if (event.target === event.currentTarget) {
+      // If user touches the map background (not a marker), close any open HCP info
+      setHoveredHcp(null);
+    }
+  };
+
+  const handleTouchMove = (event: React.TouchEvent) => {
+    if (event.touches.length === 2 && touchStartDistance && touchStartZoom) {
+      // Handle pinch zoom
+      const currentDistance = getTouchDistance(event.touches);
+      const scale = currentDistance / touchStartDistance;
+      let newZoom = touchStartZoom * scale;
+      
+      // Enforce zoom limits
+      newZoom = Math.max(2, Math.min(8, newZoom));
+      
+      setPosition(prev => ({
+        ...prev,
+        zoom: newZoom
+      }));
+      
+      // Prevent default to avoid page scrolling
+      event.preventDefault();
+    }
+  };
+
+  const handleTouchEnd = () => {
+    // Reset touch tracking state
+    setTouchStartDistance(null);
+    setTouchStartZoom(null);
+  };
 
   // Handle zoom controls
   const handleZoomIn = () => {
@@ -268,20 +316,28 @@ export function GeographicMap() {
   };
 
   return (
-    <div className="relative w-full h-full">
+    <div 
+      className="relative w-full h-full"
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
+    >
       <ComposableMap
         projection="geoMercator"
         projectionConfig={{ 
           scale: 2000, // Further increased scale for better visibility of Japan
           center: [137.0, 38.0] // Centered on Japan's mainland
         }}
-        className="bg-gray-900 rounded-md"
+        className="bg-gray-900 rounded-md touch-none"
       >
         <ZoomableGroup
           center={position.coordinates}
           zoom={position.zoom}
           onMoveEnd={(position: any) => setPosition(position as { coordinates: [number, number], zoom: number })}
           translateExtent={[[120, 20], [150, 50]]} // Limit panning to Japan region
+          // These properties enable mobile drag support
+          onMoveStart={() => {}}
+          onMove={() => {}}
         >
           {/* Japan map with prefectures */}
           {/* Using world atlas with filtered Japan display */}
@@ -307,6 +363,7 @@ export function GeographicMap() {
               coordinates={hcp.coordinates}
               onMouseEnter={() => setHoveredHcp(hcp)}
               onMouseLeave={() => setHoveredHcp(null)}
+              onClick={() => setHoveredHcp(hcp)}
             >
               <circle
                 r={getMarkerSize(hcp) * 1.3} // Increased size
