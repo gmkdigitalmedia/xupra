@@ -95,10 +95,10 @@ const AssetManagement = () => {
   ];
 
   return (
-    <div className="h-screen flex flex-col md:flex-row bg-background">
+    <div className="h-screen flex overflow-hidden bg-background">
       <Sidebar />
       
-      <main className="flex-1 overflow-y-auto bg-background-dark">
+      <main className="flex-1 overflow-y-auto bg-background-dark md:ml-64">
         <DashboardHeader title="Asset Management" />
         
         <div className="p-6">
