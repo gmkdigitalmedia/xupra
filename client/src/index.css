@@ -59,4 +59,13 @@
   .rsm-svg {
     touch-action: none;
   }
+  
+  /* Cursor styles for dragging */
+  .rsm-zoomable-group {
+    cursor: grab;
+  }
+  
+  .rsm-zoomable-group:active {
+    cursor: grabbing;
+  }
 }

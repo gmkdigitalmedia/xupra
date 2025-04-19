@@ -335,9 +335,11 @@ export function GeographicMap() {
           zoom={position.zoom}
           onMoveEnd={(position: any) => setPosition(position as { coordinates: [number, number], zoom: number })}
           translateExtent={[[120, 20], [150, 50]]} // Limit panning to Japan region
-          // These properties enable mobile drag support
+          // Enable click and drag on desktop/mouse
           onMoveStart={() => {}}
           onMove={() => {}}
+          // Make it properly draggable with mouse
+          style={{ cursor: 'grab' }} // Show grab cursor to indicate draggable
         >
           {/* Japan map with prefectures */}
           {/* Using world atlas with filtered Japan display */}
