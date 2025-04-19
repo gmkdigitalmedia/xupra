@@ -76,13 +76,15 @@ const Sidebar = () => {
     { icon: "info", label: "About", path: "/about" },
   ];
 
+  const sidebarWidth = 'w-64'; // Define sidebar width in one place for consistency
+  
   // Sidebar CSS classes with proper z-index values
   const sidebarStyles = {
     mobile: {
-      open: 'fixed top-0 left-0 z-50 h-screen w-64 bg-black shadow-lg transform transition-transform duration-300 translate-x-0',
-      closed: 'fixed top-0 left-0 z-50 h-screen w-64 bg-black shadow-lg transform transition-transform duration-300 -translate-x-full'
+      open: `fixed top-0 left-0 z-50 h-screen ${sidebarWidth} bg-black shadow-lg transform transition-transform duration-300 translate-x-0`,
+      closed: `fixed top-0 left-0 z-50 h-screen ${sidebarWidth} bg-black shadow-lg transform transition-transform duration-300 -translate-x-full`
     },
-    desktop: 'fixed top-0 left-0 z-30 h-screen w-64 bg-black hidden md:block'
+    desktop: `fixed top-0 left-0 z-30 h-screen ${sidebarWidth} bg-black hidden md:block`
   };
 
   // Overlay with higher z-index to ensure it's visible

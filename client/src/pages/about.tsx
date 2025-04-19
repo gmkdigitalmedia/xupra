@@ -1,9 +1,9 @@
 import React from 'react';
-import Sidebar from '@/components/sidebar';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import DashboardHeader from '@/components/dashboard-header';
 import { Badge } from '@/components/ui/badge';
+import MainLayout from '@/components/main-layout';
 
 export default function AboutPage() {
   const founders = [
@@ -67,15 +67,13 @@ export default function AboutPage() {
   ];
 
   return (
-    <div className="flex h-screen overflow-hidden">
-      <Sidebar />
-      <div className="flex-1 overflow-auto">
-        <div className="w-full p-4 md:p-8">
-          <DashboardHeader 
-            title="About Xupra" 
-            description="AI-powered healthcare professional engagement platform"
-            showBackButton 
-          />
+    <MainLayout>
+      <div className="w-full p-4 md:p-8">
+        <DashboardHeader 
+          title="About Xupra" 
+          description="AI-powered healthcare professional engagement platform"
+          showBackButton 
+        />
 
           {/* Mission Statement */}
           <div className="mt-6 relative">
@@ -209,7 +207,6 @@ export default function AboutPage() {
             <p>© {new Date().getFullYear()} Xupra. All rights reserved.</p>
           </div>
         </div>
-      </div>
-    </div>
+    </MainLayout>
   );
 }
