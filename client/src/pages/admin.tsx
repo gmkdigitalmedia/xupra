@@ -391,9 +391,9 @@ function AdminConnectionsPage() {
   };
 
   return (
-    <div className="flex flex-col md:flex-row min-h-screen">
+    <div className="flex h-screen overflow-hidden">
       <Sidebar />
-      <div className="flex-1 p-4">
+      <div className="flex-1 overflow-auto md:ml-64 p-4">
         <DashboardHeader title="API Connections" />
 
         <div className="flex justify-between items-center mb-6">
