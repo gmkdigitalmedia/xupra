@@ -16,6 +16,7 @@ import SlackIntegrationPage from "@/pages/slack-integration";
 import InteractCraft from "@/pages/interactcraft";
 import DecisionDriver from "@/pages/decisiondriver";
 import AboutPage from "@/pages/about";
+import MainLayout from "@/components/main-layout";
 import { useAppContext, AppProvider } from "./contexts/app-context";
 import { MobileMenuProvider } from "./contexts/mobile-menu-context";
 
