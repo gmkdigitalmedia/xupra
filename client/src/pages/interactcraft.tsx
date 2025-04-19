@@ -131,10 +131,10 @@ export default function InteractCraft() {
   };
 
   return (
-    <div className="flex h-screen overflow-hidden">
+    <div className="h-screen flex overflow-hidden bg-background">
       <Sidebar />
-      {/* Main content area - add md:ml-64 to push content away from sidebar on medium screens and up */}
-      <div className="flex-1 overflow-auto md:ml-64">
+      {/* Main content area with proper margin on medium screens and up */}
+      <div className="flex-1 overflow-y-auto bg-background-dark md:ml-64">
         <div className="w-full p-4 md:p-8">
           <DashboardHeader 
             title="InteractCraft AI" 
