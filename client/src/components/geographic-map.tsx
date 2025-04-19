@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import {
   ComposableMap,
   Geographies,
@@ -242,6 +242,10 @@ export function GeographicMap() {
   const [legendExpanded, setLegendExpanded] = useState(false);
   const [touchStartDistance, setTouchStartDistance] = useState<number | null>(null);
   const [touchStartZoom, setTouchStartZoom] = useState<number | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStart, setDragStart] = useState<{ x: number, y: number } | null>(null);
+  const [dragStartPosition, setDragStartPosition] = useState<[number, number] | null>(null);
+  const mapRef = useRef<HTMLDivElement>(null);
   
   // Calculate distance between two touch points
   const getTouchDistance = (touches: React.TouchList): number => {
@@ -288,6 +292,90 @@ export function GeographicMap() {
     setTouchStartDistance(null);
     setTouchStartZoom(null);
   };
+  
+  // Mouse drag handling for desktop
+  const handleMouseDown = (e: React.MouseEvent) => {
+    // Only handle left mouse button
+    if (e.button !== 0) return;
+    
+    // Don't drag if clicking on a marker, button, or info popup
+    const target = e.target as HTMLElement;
+    if (
+      target.tagName === 'CIRCLE' || 
+      target.tagName === 'BUTTON' ||
+      target.closest('.marker') || 
+      target.closest('button') ||
+      target.closest('.popup-content')
+    ) {
+      return;
+    }
+    
+    // Start dragging
+    setIsDragging(true);
+    setDragStart({ 
+      x: e.clientX, 
+      y: e.clientY 
+    });
+    setDragStartPosition([...position.coordinates]);
+    
+    // Change cursor style
+    if (mapRef.current) {
+      mapRef.current.style.cursor = 'grabbing';
+    }
+    
+    // Prevent text selection during drag
+    e.preventDefault();
+  };
+  
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging || !dragStart || !dragStartPosition) return;
+    
+    // How much the mouse has moved
+    const dx = e.clientX - dragStart.x;
+    const dy = e.clientY - dragStart.y;
+    
+    // Calculate new position - adjust these divisors to control drag sensitivity
+    // Negative values because map moves opposite of cursor
+    // Using a smaller divisor makes the map more sensitive to mouse movement
+    const newLng = dragStartPosition[0] - dx / 50;
+    const newLat = dragStartPosition[1] + dy / 50;
+    
+    // Update map position
+    setPosition(prev => ({
+      ...prev,
+      coordinates: [newLng, newLat]
+    }));
+    
+    // Prevent unwanted side effects
+    e.preventDefault();
+  };
+  
+  const handleMouseUp = () => {
+    if (isDragging) {
+      setIsDragging(false);
+      setDragStart(null);
+      setDragStartPosition(null);
+      
+      // Reset cursor
+      if (mapRef.current) {
+        mapRef.current.style.cursor = 'grab';
+      }
+    }
+  };
+  
+  // Clean up event listeners when component unmounts
+  useEffect(() => {
+    const handleGlobalMouseUp = () => {
+      handleMouseUp();
+    };
+    
+    // Add global mouse up to handle cases where mouse is released outside the component
+    document.addEventListener('mouseup', handleGlobalMouseUp);
+    
+    return () => {
+      document.removeEventListener('mouseup', handleGlobalMouseUp);
+    };
+  }, [isDragging]);
 
   // Handle zoom controls
   const handleZoomIn = () => {
@@ -318,9 +406,14 @@ export function GeographicMap() {
   return (
     <div 
       className="relative w-full h-full"
+      ref={mapRef}
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
+      onMouseDown={handleMouseDown}
+      onMouseMove={handleMouseMove}
+      onMouseUp={handleMouseUp}
+      onMouseLeave={handleMouseUp}
     >
       <ComposableMap
         projection="geoMercator"
@@ -333,13 +426,8 @@ export function GeographicMap() {
         <ZoomableGroup
           center={position.coordinates}
           zoom={position.zoom}
-          onMoveEnd={(position: any) => setPosition(position as { coordinates: [number, number], zoom: number })}
           translateExtent={[[120, 20], [150, 50]]} // Limit panning to Japan region
-          // Enable click and drag on desktop/mouse
-          onMoveStart={() => {}}
-          onMove={() => {}}
-          // Make it properly draggable with mouse
-          style={{ cursor: 'grab' }} // Show grab cursor to indicate draggable
+          // Disabled built-in drag in favor of our custom implementation
         >
           {/* Japan map with prefectures */}
           {/* Using world atlas with filtered Japan display */}
@@ -381,7 +469,7 @@ export function GeographicMap() {
       </ComposableMap>
       
       {hoveredHcp && (
-        <div className="absolute bottom-4 left-4 bg-slate-900 border border-slate-700 p-3 rounded-lg shadow-lg max-w-xs">
+        <div className="absolute bottom-4 left-4 bg-slate-900 border border-slate-700 p-3 rounded-lg shadow-lg max-w-xs popup-content">
           <div className="flex justify-between items-start">
             <div className="text-white font-medium">{hoveredHcp.name}</div>
             <button 
