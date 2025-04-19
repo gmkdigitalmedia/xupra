@@ -7,8 +7,7 @@ import Home from "@/pages/home";
 import Dashboard from "@/pages/dashboard";
 import MediTag from "@/pages/meditag";
 import ContentCraft from "@/pages/contentcraft";
-import EngageOptic from "@/pages/engageoptic";
-import EngageOpticNew from "@/pages/engageoptic-new";
+
 import InsightLens from "@/pages/insightlens";
 import AssetManagement from "@/pages/asset-management";
 import AdminConnectionsPage from "@/pages/admin";
@@ -29,7 +28,6 @@ function AppRoutes() {
       <Route path="/dashboard" component={Dashboard} />
       <Route path="/meditag" component={MediTag} />
       <Route path="/contentcraft" component={ContentCraft} />
-      <Route path="/engageoptic" component={EngageOpticNew} />
       <Route path="/insightlens" component={InsightLens} />
       <Route path="/asset-management" component={AssetManagement} />
       <Route path="/interactcraft" component={InteractCraft} />

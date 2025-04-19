@@ -66,7 +66,6 @@ const Sidebar = () => {
     { icon: "dashboard", label: "Dashboard", path: "/dashboard" },
     { icon: "label", label: "MediTag Engine", path: "/meditag" },
     { icon: "create", label: "ContentCraft AI", path: "/contentcraft" },
-    { icon: "trending_up", label: "EngageOptic", path: "/engageoptic" },
     { icon: "pie_chart", label: "InsightLens", path: "/insightlens" },
     { icon: "psychology", label: "InteractCraft AI", path: "/interactcraft" },
     { icon: "auto_graph", label: "DecisionDriver AI", path: "/decisiondriver" },

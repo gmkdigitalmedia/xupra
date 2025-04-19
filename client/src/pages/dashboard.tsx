@@ -70,15 +70,7 @@ const Dashboard = () => {
       gradientTo: "pink-500",
       iconColor: "purple-500"
     },
-    {
-      icon: "trending_up",
-      title: "EngageOptic",
-      description: "Optimize engagement channels",
-      path: "/engageoptic",
-      gradientFrom: "green-500",
-      gradientTo: "teal-500",
-      iconColor: "green-500"
-    },
+
     {
       icon: "psychology",
       title: "InteractCraft AI",
