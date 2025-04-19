@@ -186,7 +186,6 @@ const MediTag = () => {
             <TabsList className="mb-6">
               <TabsTrigger value="database">HCP Database</TabsTrigger>
               <TabsTrigger value="analytics">Segmentation Analytics</TabsTrigger>
-              <TabsTrigger value="geographic">Geographic Mapping</TabsTrigger>
               <TabsTrigger value="influence">Influence Network</TabsTrigger>
             </TabsList>
             
