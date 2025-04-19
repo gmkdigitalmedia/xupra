@@ -366,11 +366,12 @@ export function GeographicMap() {
               onClick={() => setHoveredHcp(hcp)}
             >
               <circle
-                r={getMarkerSize(hcp) * 1.3} // Increased size
+                r={getMarkerSize(hcp) * 1.3} // Increased size for better touch targets
                 fill={getMarkerColor(hcp)}
                 stroke="#ffffff" // White for better visibility
                 strokeWidth={1.0}
                 opacity={0.9}
+                style={{ cursor: 'pointer' }} // Show pointer cursor on hover
               />
             </Marker>
           ))}
@@ -379,7 +380,16 @@ export function GeographicMap() {
       
       {hoveredHcp && (
         <div className="absolute bottom-4 left-4 bg-slate-900 border border-slate-700 p-3 rounded-lg shadow-lg max-w-xs">
-          <div className="text-white font-medium">{hoveredHcp.name}</div>
+          <div className="flex justify-between items-start">
+            <div className="text-white font-medium">{hoveredHcp.name}</div>
+            <button 
+              onClick={() => setHoveredHcp(null)} 
+              className="text-gray-400 hover:text-white focus:outline-none"
+              aria-label="Close"
+            >
+              <span className="material-icons text-sm">close</span>
+            </button>
+          </div>
           {hoveredHcp.hospital && (
             <div className="text-xs text-slate-300 mt-1">{hoveredHcp.hospital}</div>
           )}
