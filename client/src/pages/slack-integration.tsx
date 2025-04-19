@@ -5,9 +5,9 @@ import { SlackIntegration } from "@/components/slack-integration";
 
 export default function SlackIntegrationPage() {
   return (
-    <div className="flex flex-col md:flex-row min-h-screen">
+    <div className="h-screen flex overflow-hidden bg-background">
       <Sidebar />
-      <div className="flex-1 p-4">
+      <div className="flex-1 overflow-y-auto bg-background-dark md:ml-64 p-4">
         <DashboardHeader title="Slack Integration" />
         
         <div className="mb-6">
