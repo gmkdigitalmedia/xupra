@@ -9,7 +9,6 @@ import { Label } from "@/components/ui/label";
 import { useQuery } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Star, MapPin, Network, UserCheck, Users, Activity, Calendar, BarChart4 } from "lucide-react";
-import { GeographicMap } from "@/components/geographic-map";
 import { InfluenceNetwork } from "@/components/influence-network";
 
 // Mock data for visualization examples (to be replaced by real data later)
@@ -803,136 +802,7 @@ const MediTag = () => {
               </div>
             </TabsContent>
             
-            <TabsContent value="geographic">
-              <Card className="bg-background-card border-gray-800 mb-6">
-                <CardHeader className="flex-col md:flex-row">
-                  <div className="flex items-center mb-2 md:mb-0">
-                    <MapPin className="h-5 w-5 mr-2" />
-                    <CardTitle>Geographic Distribution</CardTitle>
-                  </div>
-                  <div className="flex flex-wrap gap-2 text-sm">
-                    <Badge variant="outline" className="bg-background-lighter">
-                      <span className="h-2 w-2 rounded-full bg-amber-500 mr-1"></span>
-                      KOLs
-                    </Badge>
-                    <Badge variant="outline" className="bg-background-lighter">
-                      <span className="h-2 w-2 rounded-full bg-blue-500 mr-1"></span>
-                      High Volume
-                    </Badge>
-                    <Badge variant="outline" className="bg-background-lighter">
-                      <span className="h-2 w-2 rounded-full bg-gray-500 mr-1"></span>
-                      Other HCPs
-                    </Badge>
-                  </div>
-                </CardHeader>
-                <CardContent className="h-[300px] md:h-[400px] p-0">
-                  <div className="h-full w-full">
-                    {/* Geographic map from component */}
-                    <GeographicMap />
-                  </div>
-                </CardContent>
-              </Card>
-              
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <Card className="bg-background-card border-gray-800">
-                  <CardHeader>
-                    <CardTitle className="text-base">Urban vs. Rural Distribution</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      <div className="space-y-2">
-                        <div className="flex justify-between text-sm">
-                          <span>Urban</span>
-                          <span className="text-gray-400">782 HCPs</span>
-                        </div>
-                        <div className="h-2 bg-background-lighter rounded-full overflow-hidden">
-                          <div 
-                            className="h-full bg-primary" 
-                            style={{ width: '62%' }}
-                          ></div>
-                        </div>
-                      </div>
-                      
-                      <div className="space-y-2">
-                        <div className="flex justify-between text-sm">
-                          <span>Suburban</span>
-                          <span className="text-gray-400">371 HCPs</span>
-                        </div>
-                        <div className="h-2 bg-background-lighter rounded-full overflow-hidden">
-                          <div 
-                            className="h-full bg-blue-500" 
-                            style={{ width: '30%' }}
-                          ></div>
-                        </div>
-                      </div>
-                      
-                      <div className="space-y-2">
-                        <div className="flex justify-between text-sm">
-                          <span>Rural</span>
-                          <span className="text-gray-400">105 HCPs</span>
-                        </div>
-                        <div className="h-2 bg-background-lighter rounded-full overflow-hidden">
-                          <div 
-                            className="h-full bg-emerald-500" 
-                            style={{ width: '8%' }}
-                          ></div>
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-                
-                <Card className="bg-background-card border-gray-800 md:col-span-2">
-                  <CardHeader>
-                    <CardTitle className="text-base">Hospital Affiliation Density</CardTitle>
-                  </CardHeader>
-                  <CardContent className="p-0">
-                    <table className="min-w-full">
-                      <thead>
-                        <tr className="bg-background-lighter text-left text-xs">
-                          <th className="py-2 px-4">Hospital Name</th>
-                          <th className="py-2 px-4">Location</th>
-                          <th className="py-2 px-4">Affiliated HCPs</th>
-                          <th className="py-2 px-4">KOL %</th>
-                        </tr>
-                      </thead>
-                      <tbody className="text-sm">
-                        <tr className="border-b border-gray-800">
-                          <td className="py-2 px-4">Massachusetts General Hospital</td>
-                          <td className="py-2 px-4">Boston, MA</td>
-                          <td className="py-2 px-4">47</td>
-                          <td className="py-2 px-4">32%</td>
-                        </tr>
-                        <tr className="border-b border-gray-800">
-                          <td className="py-2 px-4">Mayo Clinic</td>
-                          <td className="py-2 px-4">Rochester, MN</td>
-                          <td className="py-2 px-4">42</td>
-                          <td className="py-2 px-4">45%</td>
-                        </tr>
-                        <tr className="border-b border-gray-800">
-                          <td className="py-2 px-4">Cleveland Clinic</td>
-                          <td className="py-2 px-4">Cleveland, OH</td>
-                          <td className="py-2 px-4">38</td>
-                          <td className="py-2 px-4">40%</td>
-                        </tr>
-                        <tr className="border-b border-gray-800">
-                          <td className="py-2 px-4">Johns Hopkins Hospital</td>
-                          <td className="py-2 px-4">Baltimore, MD</td>
-                          <td className="py-2 px-4">36</td>
-                          <td className="py-2 px-4">38%</td>
-                        </tr>
-                        <tr>
-                          <td className="py-2 px-4">UCLA Medical Center</td>
-                          <td className="py-2 px-4">Los Angeles, CA</td>
-                          <td className="py-2 px-4">31</td>
-                          <td className="py-2 px-4">29%</td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </CardContent>
-                </Card>
-              </div>
-            </TabsContent>
+
             
             <TabsContent value="influence">
               <Card className="bg-background-card border-gray-800 mb-6">
